@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"name": "✨ liquidation-bot",
+			"path": "."
+		},
+		{
+			"name": "⚙️@liquidation-bot/indexer",
+			"path": "apps/indexer"
+		},
+	],
+	"settings": {
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": "explicit",
+		},
+		"editor.formatOnPaste": true,
+		"editor.formatOnType": true,
+		"editor.formatOnSave": true,
+		"editor.formatOnSaveMode": "file",
+		"[typescript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"[javascript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"[typescriptreact]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"git.openRepositoryInParentFolders": "always",
+		"typescript.tsdk": "node_modules/typescript/lib"
+	}
+}

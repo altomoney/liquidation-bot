@@ -1,0 +1,28 @@
+{
+  "name": "@liquidation-bot/indexer",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ponder dev",
+    "start": "ponder start",
+    "db": "ponder db",
+    "codegen": "ponder codegen",
+    "lint": "eslint .",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "ponder": "0.15.2",
+    "hono": "4.10.6",
+    "viem": "2.39.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "eslint": "8.57.0",
+    "eslint-config-ponder": "0.15.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=18.14"
+  }
+}

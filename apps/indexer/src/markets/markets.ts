@@ -1,0 +1,433 @@
+import { ponder } from "ponder:registry";
+import { irm, market, position } from "ponder:schema";
+
+import { Address, zeroAddress } from "viem";
+import { AdaptiveCurveIrmAbi } from "../../abis/AdaptiveCurveIrmAbi";
+import { AltoBorrowMarketAbi } from "../../abis/AltoBorrowMarketAbi";
+import { FixedRateIrmAbi } from "../../abis/FixedRateIrmAbi";
+import { IrmAbi } from "../../abis/IrmAbi";
+import { replaceBigInts } from "../utils";
+import { AdaptiveCurveIrm } from "../utils/irm/AdaptiveCurveIrm";
+import { FixedRateIrm } from "../utils/irm/FixedRateIrm";
+import { FixedPointMath } from "../utils/math/FixedPointMath";
+import { irmTypeToString, marketTypeToString } from "./utils";
+
+export const setup: (
+  type: "AltoBorrowMarket" | "AltoMintMarket"
+) => Parameters<typeof ponder.on<"AltoBorrowMarket:setup">>[1] =
+  (type) =>
+  async ({ context, event }) => {
+    // TODO this will be adapted once we have registry contract
+    const addresses = context.contracts[type].address;
+
+    for (const address of addresses) {
+      const loanToken = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "borrowToken",
+        address: address,
+      });
+      const collateralToken = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "collateralToken",
+        address: address,
+      });
+      const oracle = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "oracle",
+        address: address,
+      });
+      const irm = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "irm",
+        address: address,
+      });
+
+      // struct LiquidationConfiguration {
+      //     0  uint256 maxLiquidationLtv;
+      //     1  uint256 dynamicBonusFeeStart;
+      //     2  uint256 ltvForCompleteLiquidation;
+      //     3  uint256 dynamicBonusFeeDecaySteepness;
+      //     4  uint256 liquidationBaseFee;
+      //     5  uint256 minPenaltyPercentage;
+      //     6  uint256 protocolFeePercentage;
+      //     7  bool isEnabledPriorityLiquidation;
+      //     8  uint256 disablePriorityLiquidationAbovePositionLtv;
+      //     9  uint32 priorityLiquidationGracePeriod;
+      //     10 uint32 taggerLiquidationGracePeriod;
+      //     11 uint32 liquidationWindowTag;
+      // }
+      const liquidationConfiguration = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "liquidationConfiguration",
+        address: address,
+      });
+
+      const marketType = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "MARKET_TYPE",
+        address: address,
+      });
+
+      const ltv = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "maxLtv",
+        address: address,
+      });
+
+      const feeRecipient = await context.client.readContract({
+        abi: AltoBorrowMarketAbi,
+        functionName: "feeRecipient",
+        address: address,
+      });
+
+      await context.db.insert(market).values({
+        // primary key
+        chainId: context.chain.id,
+        address: address,
+        type: marketTypeToString(marketType),
+        loanToken: loanToken,
+        collateralToken: collateralToken,
+        feeRecipient: feeRecipient,
+        oracle: oracle,
+        irm: irm,
+        ltv: ltv,
+        lltv: liquidationConfiguration[0],
+        tLltv: liquidationConfiguration[2],
+        dynamicBonusFeeDecaySteepness: liquidationConfiguration[3],
+        dynamicBonusFeeStart: liquidationConfiguration[1],
+        liquidationBaseFee: liquidationConfiguration[4],
+        minPenaltyPercentage: liquidationConfiguration[5],
+        protocolFeePercentage: liquidationConfiguration[6],
+      });
+
+      await updateNewIrm(irm, address, context);
+    }
+  };
+
+export const accrueInterest: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:AccrueInterest">
+>[1] = async ({ context, event }) => {
+  await context.db
+    .update(market, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set((row) => ({
+      totalSupplyAssets:
+        row.type === "borrow"
+          ? row.totalSupplyAssets + event.args.interest
+          : row.totalSupplyAssets,
+      totalBorrowAssets: row.totalBorrowAssets + event.args.interest,
+    }));
+};
+
+export const addSupply: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:AddSupply">
+>[1] = async ({ context, event }) => {
+  await Promise.all([
+    // Row must exist because `Supply` cannot preceed `CreateMarket`.
+    context.db
+      .update(market, { chainId: context.chain.id, address: event.log.address })
+      .set((row) => ({
+        totalSupplyAssets: row.totalSupplyAssets + event.args.assets,
+        totalSupplyShares: row.totalSupplyShares + event.args.shares,
+      })),
+    // Row may or may not exist because `Supply` could be `user`'s first action.
+    context.db
+      .insert(position)
+      .values({
+        // primary key
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: event.args.onBehalf,
+        // `Position` struct (unspecified fields default to 0n)
+        supplyShares: event.args.shares,
+      })
+      .onConflictDoUpdate((row) => ({
+        supplyShares: row.supplyShares + event.args.shares,
+      })),
+  ]);
+};
+
+export const removeSupply: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:RemoveSupply">
+>[1] = async ({ context, event }) => {
+  await Promise.all([
+    // Row must exist because `Withdraw` cannot preceed `CreateMarket`.
+    context.db
+      .update(market, { chainId: context.chain.id, address: event.log.address })
+      .set((row) => ({
+        totalSupplyAssets: row.totalSupplyAssets - event.args.assets,
+        totalSupplyShares: row.totalSupplyShares - event.args.shares,
+      })),
+    // Row must exist because `Withdraw` cannot preceed `Supply`.
+    context.db
+      .update(position, {
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: event.args.onBehalf,
+      })
+      .set((row) => ({ supplyShares: row.supplyShares - event.args.shares })),
+  ]);
+};
+
+export const addCollateral: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:AddCollateral">
+>[1] = async ({ context, event }) => {
+  // Row may or may not exist because `SupplyCollateral` could be `user`'s first action.
+  await context.db
+    .insert(position)
+    .values({
+      // primary key
+      chainId: context.chain.id,
+      marketId: event.log.address,
+      user: event.args.onBehalf,
+      // `Position` struct (unspecified fields default to 0n)
+      collateral: event.args.amount,
+    })
+    .onConflictDoUpdate((row) => ({
+      collateral: row.collateral + event.args.amount,
+    }));
+};
+
+export const removeCollateral: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:RemoveCollateral">
+>[1] = async ({ context, event }) => {
+  // Row must exist because `WithdrawCollateral` cannot preceed `SupplyCollateral`.
+  await context.db
+    .update(position, {
+      chainId: context.chain.id,
+      marketId: event.log.address,
+      user: event.args.onBehalf,
+    })
+    .set((row) => ({ collateral: row.collateral - event.args.amount }));
+};
+
+export const borrow: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:Borrow">
+>[1] = async ({ context, event }) => {
+  await Promise.all([
+    // Row must exist because `Borrow` cannot preceed `CreateMarket`.
+    context.db
+      .update(market, { chainId: context.chain.id, address: event.log.address })
+      .set((row) => ({
+        totalBorrowAssets:
+          row.totalBorrowAssets + event.args.assets + event.args.feeAmount,
+        totalBorrowShares: row.totalBorrowShares + event.args.shares,
+        totalSupplyShares:
+          row.type === "borrow"
+            ? row.totalSupplyShares + event.args.feeSupplyShares
+            : row.totalSupplyShares,
+        totalSupplyAssets:
+          row.type === "borrow"
+            ? row.totalSupplyAssets + event.args.feeAmount
+            : row.totalSupplyAssets,
+      })),
+    // Row must exist because `Borrow` cannot preceed `SupplyCollateral`.
+    context.db
+      .update(position, {
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: event.args.onBehalf,
+      })
+      .set((row) => ({ borrowShares: row.borrowShares + event.args.shares })),
+    await context.db
+      .insert(position)
+      .values({
+        // primary key
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: (await context.db.find(market, {
+          address: event.log.address,
+          chainId: context.chain.id,
+        }))!.feeRecipient,
+        // `Position` struct (unspecified fields default to 0n)
+        supplyShares: event.args.feeSupplyShares,
+      })
+      .onConflictDoUpdate((row) => ({
+        supplyShares: row.supplyShares + event.args.feeSupplyShares,
+      })),
+  ]);
+};
+
+export const repay: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:Repay">
+>[1] = async ({ context, event }) => {
+  await Promise.all([
+    // Row must exist because `Repay` cannot preceed `CreateMarket`.
+    context.db
+      .update(market, { chainId: context.chain.id, address: event.log.address })
+      .set((row) => ({
+        totalBorrowAssets: row.totalBorrowAssets - event.args.assets,
+        totalBorrowShares: row.totalBorrowShares - event.args.shares,
+      })),
+    // Row must exist because `Repay` cannot preceed `SupplyCollateral`.
+    context.db
+      .update(position, {
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: event.args.onBehalf,
+      })
+      .set((row) => ({ borrowShares: row.borrowShares - event.args.shares })),
+  ]);
+};
+
+export const liquidation: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:Liquidation">
+>[1] = async ({ context, event }) => {
+  await Promise.all([
+    // Row must exist because `Liquidate` cannot preceed `CreateMarket`.
+    context.db
+      .update(market, { chainId: context.chain.id, address: event.log.address })
+      .set((row) => ({
+        totalSupplyAssets:
+          row.totalSupplyAssets - event.args.badDebtClearedAssets,
+        totalSupplyShares:
+          row.totalSupplyShares - event.args.badDebtClearedShares,
+        totalBorrowAssets: FixedPointMath.zeroFloorSub(
+          row.totalBorrowAssets,
+          event.args.repaidBorrow + event.args.badDebtClearedAssets
+        ),
+        totalBorrowShares:
+          row.totalBorrowShares -
+          event.args.repaidBorrowShares -
+          event.args.badDebtClearedShares,
+      })),
+    // Row must exist because `Liquidate` cannot preceed `SupplyCollateral`.
+    context.db
+      .update(position, {
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: event.args.user,
+      })
+      .set((row) => ({
+        collateral: row.collateral - event.args.liquidatedCollateral,
+        borrowShares:
+          row.borrowShares -
+          event.args.repaidBorrowShares -
+          event.args.badDebtClearedShares,
+      })),
+  ]);
+};
+
+export const setIrm: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:SetIrm">
+>[1] = async ({ context, event }) => {
+  await updateNewIrm(event.args.newAddr, event.log.address, context);
+};
+
+const updateNewIrm = async (
+  irmAddress: Address,
+  marketAddress: Address,
+  context: Parameters<
+    Parameters<typeof ponder.on<"AltoBorrowMarket:setup">>[1]
+  >[0]["context"]
+) => {
+  if (irmAddress === zeroAddress) {
+    await context.db
+      .update(market, {
+        chainId: context.chain.id,
+        address: marketAddress,
+      })
+      .set((row) => ({
+        irm: null,
+      }));
+
+    await context.db.delete(irm, {
+      chainId: context.chain.id,
+      address: irmAddress,
+    });
+
+    return;
+  }
+
+  const irmTypeIndex = await context.client.readContract({
+    abi: IrmAbi,
+    functionName: "IRM_TYPE",
+    address: irmAddress,
+  });
+
+  const irmType = irmTypeToString(irmTypeIndex);
+
+  if (irmType === "fixed") {
+    const irmState = await context.client.readContract({
+      abi: FixedRateIrmAbi,
+      functionName: "irState",
+      address: irmAddress,
+    });
+
+    await context.db
+      .update(market, {
+        chainId: context.chain.id,
+        address: marketAddress,
+      })
+      .set((row) => ({
+        irm: irmAddress,
+      }));
+    await context.db
+      .insert(irm)
+      .values({
+        chainId: context.chain.id,
+        marketAddress: marketAddress,
+        address: irmAddress,
+        type: irmType,
+        config: null,
+        state: replaceBigInts(FixedRateIrm.stateFromRawState(irmState)),
+      })
+      .onConflictDoUpdate((row) => ({
+        marketAddress: marketAddress,
+        state: replaceBigInts(FixedRateIrm.stateFromRawState(irmState)),
+      }));
+    return;
+  }
+
+  if (irmType === "adaptive") {
+    const irmConfig = await context.client.readContract({
+      abi: AdaptiveCurveIrmAbi,
+      functionName: "irmConfig",
+      address: irmAddress,
+    });
+    const irmState = await context.client.readContract({
+      abi: AdaptiveCurveIrmAbi,
+      functionName: "irState",
+      address: irmAddress,
+    });
+    await context.db
+      .update(market, {
+        chainId: context.chain.id,
+        address: marketAddress,
+      })
+      .set((row) => ({
+        irm: irmAddress,
+      }));
+    await context.db
+      .insert(irm)
+      .values({
+        chainId: context.chain.id,
+        marketAddress: marketAddress,
+        address: irmAddress,
+        type: irmType,
+        config: replaceBigInts(AdaptiveCurveIrm.configFromRawConfig(irmConfig)),
+        state: replaceBigInts(AdaptiveCurveIrm.stateFromRawState(irmState)),
+      })
+      .onConflictDoUpdate((row) => ({
+        marketAddress: marketAddress,
+        state: replaceBigInts(AdaptiveCurveIrm.stateFromRawState(irmState)),
+        config: replaceBigInts(AdaptiveCurveIrm.configFromRawConfig(irmConfig)),
+      }));
+    return;
+  }
+
+  throw new Error(`Invalid IRM type: ${irmType}`);
+};
+
+export const setDebtCeiling: Parameters<
+  typeof ponder.on<"AltoMintMarket:SetDebtCeiling">
+>[1] = async ({ context, event }) => {
+  await context.db
+    .update(market, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set((row) => ({ totalSupplyAssets: event.args.newDebtCeiling }));
+};
