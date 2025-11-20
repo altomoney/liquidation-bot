@@ -1,0 +1,21 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "liquidation-bot",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"postStartCommand": [
+        "/bin/bash",
+        ".devcontainer/post_install.sh"
+    ],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"aaron-bond.better-comments",
+				"esbenp.prettier-vscode",
+				"Graphite.gti-vscode"
+			]
+		}
+	}
+}
