@@ -10,18 +10,9 @@ import {
   AdaptiveCurveIrmState,
 } from "../utils/irm/AdaptiveCurveIrm";
 import { FixedRateIrm, FixedRateIrmState } from "../utils/irm/FixedRateIrm";
-import { IIrm, IrmDb } from "../utils/irm/types";
+import { IIrm } from "../utils/irm/types";
 import { Market } from "../utils/market/Market";
-import { MarketDb, PositionDb } from "../utils/market/types";
-
-type ILiquidatablePosition = PositionDb & {
-  seizableCollateral: bigint;
-};
-
-type IMarket = MarketDb & {
-  price: bigint;
-  irmConfig: IrmDb | null;
-};
+import { ILiquidatablePosition, IMarket, IndexerApiResponse } from "./types";
 
 export async function getLiquidatablePositions({
   db,
@@ -35,7 +26,7 @@ export async function getLiquidatablePositions({
   publicClient: PublicClient;
   marketAddresses: Hex[];
   isPriorityLiquidator: boolean;
-}) {
+}): Promise<{ results: IndexerApiResponse[]; warnings: string[] }> {
   const marketRows = await db.query.market.findMany({
     where: (row) =>
       and(eq(row.chainId, chainId), inArray(row.address, marketAddresses)),

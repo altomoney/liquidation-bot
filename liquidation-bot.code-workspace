@@ -5,8 +5,12 @@
 			"path": "."
 		},
 		{
-			"name": "⚙️@liquidation-bot/indexer",
+			"name": "⚙️ @liquidation-bot/indexer",
 			"path": "apps/indexer"
+		},
+		{
+			"name": "💧 @liquidation-bot/executor",
+			"path": "apps/executor"
 		},
 	],
 	"settings": {

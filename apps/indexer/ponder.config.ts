@@ -6,9 +6,9 @@ import { AltoBorrowMarketAbi } from "./abis/AltoBorrowMarketAbi";
 import { AltoMintMarketAbi } from "./abis/AltoMintMarketAbi";
 import { FixedRateIrmAbi } from "./abis/FixedRateIrmAbi";
 
-const MINT_MARKETS: Address[] = ["0xcc20007C1b16BC96cC139F5976D3bA7efbeB7cBa"];
+const MINT_MARKETS: Address[] = ["0x0ad372969FFb9409b270E7e38e93B128CE065141"];
 const BORROW_MARKETS: Address[] = [
-  "0xacFD299b624f8462DCA3B840B78C54941E9f6686",
+  "0x06E7Fa2e4C0e1B33D1B036E161df78d3e0e1c53E",
 ];
 const ALL_MARKETS: Address[] = [...MINT_MARKETS, ...BORROW_MARKETS];
 
@@ -24,13 +24,13 @@ export default createConfig({
       chain: "sepolia",
       abi: AltoBorrowMarketAbi,
       address: BORROW_MARKETS,
-      startBlock: 9655294,
+      startBlock: 9676111,
     },
     AltoMintMarket: {
       chain: "sepolia",
       abi: AltoMintMarketAbi,
       address: MINT_MARKETS,
-      startBlock: 9655293,
+      startBlock: 9676108,
     },
     FixedRateIrm: {
       abi: FixedRateIrmAbi,
@@ -44,7 +44,7 @@ export default createConfig({
         ),
         parameter: "newAddr",
       }),
-      startBlock: 9655293,
+      startBlock: 9676108,
     },
     AdaptiveCurveIrm: {
       abi: AdaptiveCurveIrmAbi,
@@ -58,7 +58,7 @@ export default createConfig({
         ),
         parameter: "newAddr",
       }),
-      startBlock: 9655293,
+      startBlock: 9676108,
     },
   },
 });
