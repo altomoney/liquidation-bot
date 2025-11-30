@@ -1,16 +1,23 @@
 import { ponder } from "ponder:registry";
-import { irm, market, position } from "ponder:schema";
+import { irm, liquidationEngine, market, position } from "ponder:schema";
 
 import { Address, zeroAddress } from "viem";
 import { AdaptiveCurveIrmAbi } from "../../abis/AdaptiveCurveIrmAbi";
 import { AltoBorrowMarketAbi } from "../../abis/AltoBorrowMarketAbi";
+import { DlbDcfPriorityLiquidationEngineAbi } from "../../abis/DlbDcfPriorityLiquidationEngineAbi";
 import { FixedRateIrmAbi } from "../../abis/FixedRateIrmAbi";
+import { IAltoLiquidationEngineAbi } from "../../abis/IAltoLiquidationEngineAbi";
 import { IrmAbi } from "../../abis/IrmAbi";
 import { replaceBigInts } from "../utils";
 import { AdaptiveCurveIrm } from "../utils/irm/AdaptiveCurveIrm";
 import { FixedRateIrm } from "../utils/irm/FixedRateIrm";
+import { DlbDcfPriorityLiquidationEngine } from "../utils/liquidation-engine/DlbDcfPriorityLiquidationEngine";
 import { FixedPointMath } from "../utils/math/FixedPointMath";
-import { irmTypeToString, marketTypeToString } from "./utils";
+import {
+  irmTypeToString,
+  liquidationEngineTypeToString,
+  marketTypeToString,
+} from "./utils";
 
 export const setup: (
   type: "AltoBorrowMarket" | "AltoMintMarket"
@@ -42,23 +49,9 @@ export const setup: (
         address: address,
       });
 
-      // struct LiquidationConfiguration {
-      //     0  uint256 maxLiquidationLtv;
-      //     1  uint256 dynamicBonusFeeStart;
-      //     2  uint256 ltvForCompleteLiquidation;
-      //     3  uint256 dynamicBonusFeeDecaySteepness;
-      //     4  uint256 liquidationBaseFee;
-      //     5  uint256 minPenaltyPercentage;
-      //     6  uint256 protocolFeePercentage;
-      //     7  bool isEnabledPriorityLiquidation;
-      //     8  uint256 disablePriorityLiquidationAbovePositionLtv;
-      //     9  uint32 priorityLiquidationGracePeriod;
-      //     10 uint32 taggerLiquidationGracePeriod;
-      //     11 uint32 liquidationWindowTag;
-      // }
-      const liquidationConfiguration = await context.client.readContract({
+      const liquidationEngine = await context.client.readContract({
         abi: AltoBorrowMarketAbi,
-        functionName: "liquidationConfiguration",
+        functionName: "liquidationEngine",
         address: address,
       });
 
@@ -91,16 +84,12 @@ export const setup: (
         oracle: oracle,
         irm: irm,
         ltv: ltv,
-        lltv: liquidationConfiguration[0],
-        tLltv: liquidationConfiguration[2],
-        dynamicBonusFeeDecaySteepness: liquidationConfiguration[3],
-        dynamicBonusFeeStart: liquidationConfiguration[1],
-        liquidationBaseFee: liquidationConfiguration[4],
-        minPenaltyPercentage: liquidationConfiguration[5],
-        protocolFeePercentage: liquidationConfiguration[6],
+        liquidationEngine: liquidationEngine,
       });
 
       await updateNewIrm(irm, address, context);
+
+      await updateNewLiquidationEngine(liquidationEngine, address, context);
     }
   };
 
@@ -430,4 +419,96 @@ export const setDebtCeiling: Parameters<
       address: event.log.address,
     })
     .set((row) => ({ totalSupplyAssets: event.args.newDebtCeiling }));
+};
+
+export const setLiquidationEngine: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:SetLiquidationEngine">
+>[1] = async ({ context, event }) => {
+  await updateNewLiquidationEngine(
+    event.args.newLiquidationEngine,
+    event.log.address,
+    context
+  );
+};
+
+const updateNewLiquidationEngine = async (
+  liquidationEngineAddress: Address,
+  marketAddress: Address,
+  context: Parameters<
+    Parameters<typeof ponder.on<"AltoBorrowMarket:setup">>[1]
+  >[0]["context"]
+) => {
+  const marketDb = await context.db.find(market, {
+    chainId: context.chain.id,
+    address: marketAddress,
+  });
+
+  if (marketDb) {
+    // delete previous liquidation engine
+    await context.db.delete(liquidationEngine, {
+      chainId: context.chain.id,
+      address: marketDb.liquidationEngine,
+    });
+
+    // set new liquidation engine
+    await context.db
+      .update(market, {
+        chainId: context.chain.id,
+        address: marketAddress,
+      })
+      .set((row) => ({
+        liquidationEngine: liquidationEngineAddress,
+      }));
+  }
+
+  const liquidationEngineTypeIndex = await context.client.readContract({
+    abi: IAltoLiquidationEngineAbi,
+    functionName: "LIQUIDATION_ENGINE_TYPE",
+    address: liquidationEngineAddress,
+  });
+
+  const liquidationEngineType = liquidationEngineTypeToString(
+    liquidationEngineTypeIndex
+  );
+
+  if (liquidationEngineType === "DlbDcfPriorityLiquidationEngine") {
+    const liquidationConfiguration = await context.client.readContract({
+      abi: DlbDcfPriorityLiquidationEngineAbi,
+      functionName: "liquidationConfiguration",
+      address: liquidationEngineAddress,
+    });
+
+    await context.db
+      .update(market, {
+        chainId: context.chain.id,
+        address: marketAddress,
+      })
+      .set((row) => ({
+        liquidationEngine: liquidationEngineAddress,
+      }));
+    await context.db
+      .insert(liquidationEngine)
+      .values({
+        chainId: context.chain.id,
+        marketAddress: marketAddress,
+        address: liquidationEngineAddress,
+        type: liquidationEngineType,
+        config: replaceBigInts(
+          DlbDcfPriorityLiquidationEngine.configFromRawConfig(
+            liquidationConfiguration
+          )
+        ),
+      })
+      .onConflictDoUpdate((row) => ({
+        marketAddress: marketAddress,
+        config: replaceBigInts(
+          DlbDcfPriorityLiquidationEngine.configFromRawConfig(
+            liquidationConfiguration
+          )
+        ),
+      }));
+    return;
+  }
+
+  throw new Error(`Invalid Liquidation Engine type: ${liquidationEngineType}`);
 };

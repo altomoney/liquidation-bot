@@ -26,14 +26,8 @@ export const market = onchainTable(
     feeRecipient: t.hex().notNull(),
     oracle: t.hex().notNull(),
     irm: t.hex(),
+    liquidationEngine: t.hex().notNull(),
     ltv: t.bigint().notNull(),
-    lltv: t.bigint().notNull(),
-    tLltv: t.bigint().notNull(),
-    dynamicBonusFeeDecaySteepness: t.bigint().notNull(),
-    dynamicBonusFeeStart: t.bigint().notNull(),
-    liquidationBaseFee: t.bigint().notNull(),
-    minPenaltyPercentage: t.bigint().notNull(),
-    protocolFeePercentage: t.bigint().notNull(),
     type: marketType().notNull(),
 
     totalSupplyAssets: t.bigint().notNull().default(0n),
@@ -52,6 +46,14 @@ export const marketRelations = relations(market, ({ many, one }) => ({
   irm: one(irm, {
     fields: [market.chainId, market.address, market.irm],
     references: [irm.chainId, irm.marketAddress, irm.address],
+  }),
+  liquidationEngine: one(liquidationEngine, {
+    fields: [market.chainId, market.address, market.liquidationEngine],
+    references: [
+      liquidationEngine.chainId,
+      liquidationEngine.marketAddress,
+      liquidationEngine.address,
+    ],
   }),
 }));
 
@@ -107,3 +109,36 @@ export const irmRelations = relations(irm, ({ one }) => ({
     references: [market.chainId, market.irm],
   }),
 }));
+
+// Liquidation Engines
+export const liquidationEngineType = onchainEnum("liquidationEngineType", [
+  "DlbDcfPriorityLiquidationEngine",
+]);
+
+export const liquidationEngine = onchainTable(
+  "liquidationEngine",
+  (t) => ({
+    chainId: t.integer().notNull(),
+    address: t.hex().notNull(),
+    marketAddress: t.hex().notNull(),
+    type: liquidationEngineType().notNull(),
+    config: t.json(),
+  }),
+  (table) => ({
+    pk: primaryKey({ columns: [table.chainId, table.address] }),
+  })
+);
+
+export const liquidationEngineRelations = relations(
+  liquidationEngine,
+  ({ one }) => ({
+    market: one(market, {
+      fields: [
+        liquidationEngine.chainId,
+        liquidationEngine.marketAddress,
+        liquidationEngine.address,
+      ],
+      references: [market.chainId, market.address, market.liquidationEngine],
+    }),
+  })
+);

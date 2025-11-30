@@ -4,11 +4,12 @@ import { Address, parseAbiItem } from "viem";
 import { AdaptiveCurveIrmAbi } from "./abis/AdaptiveCurveIrmAbi";
 import { AltoBorrowMarketAbi } from "./abis/AltoBorrowMarketAbi";
 import { AltoMintMarketAbi } from "./abis/AltoMintMarketAbi";
+import { DlbDcfPriorityLiquidationEngineAbi } from "./abis/DlbDcfPriorityLiquidationEngineAbi";
 import { FixedRateIrmAbi } from "./abis/FixedRateIrmAbi";
 
-const MINT_MARKETS: Address[] = ["0x0ad372969FFb9409b270E7e38e93B128CE065141"];
+const MINT_MARKETS: Address[] = ["0xD67062b0bc443c656C2A07A0B1cceEACF114DA06"];
 const BORROW_MARKETS: Address[] = [
-  "0x06E7Fa2e4C0e1B33D1B036E161df78d3e0e1c53E",
+  "0x4d40ddc251Db7F9b24efF017dd26f2294F8d573b",
 ];
 const ALL_MARKETS: Address[] = [...MINT_MARKETS, ...BORROW_MARKETS];
 
@@ -24,13 +25,13 @@ export default createConfig({
       chain: "sepolia",
       abi: AltoBorrowMarketAbi,
       address: BORROW_MARKETS,
-      startBlock: 9676111,
+      startBlock: 9740175,
     },
     AltoMintMarket: {
       chain: "sepolia",
       abi: AltoMintMarketAbi,
       address: MINT_MARKETS,
-      startBlock: 9676108,
+      startBlock: 9740174,
     },
     FixedRateIrm: {
       abi: FixedRateIrmAbi,
@@ -44,7 +45,7 @@ export default createConfig({
         ),
         parameter: "newAddr",
       }),
-      startBlock: 9676108,
+      startBlock: 9740174,
     },
     AdaptiveCurveIrm: {
       abi: AdaptiveCurveIrmAbi,
@@ -58,7 +59,21 @@ export default createConfig({
         ),
         parameter: "newAddr",
       }),
-      startBlock: 9676108,
+      startBlock: 9740174,
+    },
+    DlbDcfPriorityLiquidationEngine: {
+      abi: DlbDcfPriorityLiquidationEngineAbi,
+      chain: "sepolia",
+      address: factory({
+        // Address of the factory contract.
+        address: ALL_MARKETS,
+        // Event from the factory contract ABI which contains the child address.
+        event: parseAbiItem(
+          "event SetLiquidationEngine(address indexed oldLiquidationEngine, address indexed newLiquidationEngine)"
+        ),
+        parameter: "newLiquidationEngine",
+      }),
+      startBlock: 9740174,
     },
   },
 });

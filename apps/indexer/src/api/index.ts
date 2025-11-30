@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { client, graphql } from "ponder";
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { Hex } from "viem";
+import { Address, Hex } from "viem";
 import { replaceBigInts } from "../utils";
 import { getLiquidatablePositions } from "./liquidatable-positions";
 
@@ -18,11 +18,15 @@ app.use("/graphql", graphql({ db, schema }));
  */
 app.post("/chain/:chainId/liquidatable-positions", async (c) => {
   const { chainId: chainIdRaw } = c.req.param();
-  const { marketAddresses: marketAddressesRaw, isPriorityLiquidator } =
-    (await c.req.json()) as unknown as {
-      marketAddresses: Hex[];
-      isPriorityLiquidator: boolean;
-    };
+  const {
+    marketAddresses: marketAddressesRaw,
+    isPriorityLiquidator,
+    liquidatorAddress,
+  } = (await c.req.json()) as unknown as {
+    marketAddresses: Hex[];
+    isPriorityLiquidator: boolean;
+    liquidatorAddress: Address;
+  };
 
   if (!Array.isArray(marketAddressesRaw)) {
     return c.json(
@@ -55,6 +59,7 @@ app.post("/chain/:chainId/liquidatable-positions", async (c) => {
     publicClient,
     marketAddresses,
     isPriorityLiquidator,
+    liquidatorAddress,
   });
   return c.json(replaceBigInts(response));
 });

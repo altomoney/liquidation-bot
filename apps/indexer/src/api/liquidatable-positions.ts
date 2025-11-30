@@ -11,6 +11,12 @@ import {
 } from "../utils/irm/AdaptiveCurveIrm";
 import { FixedRateIrm, FixedRateIrmState } from "../utils/irm/FixedRateIrm";
 import { IIrm } from "../utils/irm/types";
+import {
+  DlbDcfPriorityLiquidationEngine,
+  LiquidationConfiguration,
+} from "../utils/liquidation-engine/DlbDcfPriorityLiquidationEngine";
+import { ILiquidationEngine } from "../utils/liquidation-engine/types";
+import { logToFile } from "../utils/log";
 import { Market } from "../utils/market/Market";
 import { ILiquidatablePosition, IMarket, IndexerApiResponse } from "./types";
 
@@ -20,12 +26,14 @@ export async function getLiquidatablePositions({
   publicClient,
   marketAddresses,
   isPriorityLiquidator,
+  liquidatorAddress,
 }: {
   db: ReadonlyDrizzle<typeof schema>;
   chainId: number;
   publicClient: PublicClient;
   marketAddresses: Hex[];
   isPriorityLiquidator: boolean;
+  liquidatorAddress: Address;
 }): Promise<{ results: IndexerApiResponse[]; warnings: string[] }> {
   const marketRows = await db.query.market.findMany({
     where: (row) =>
@@ -34,6 +42,7 @@ export async function getLiquidatablePositions({
       // ! Note: following is omitted because it created imprecise results when fetching positions (couple of integer digits)
       // positions: { where: (row) => gt(row.borrowShares, 0n) },
       irm: true,
+      liquidationEngine: true,
     },
   });
 
@@ -123,14 +132,32 @@ export async function getLiquidatablePositions({
 
     const market = new Market(dbMarket, price, irm).accrueInterest(now);
 
+    let liquidationEngine: ILiquidationEngine | undefined;
+    if (dbMarket.liquidationEngine.type === "DlbDcfPriorityLiquidationEngine") {
+      const state = replaceBigIntStringsToBigInts(
+        dbMarket.liquidationEngine.config as LiquidationConfiguration
+      );
+      logToFile("state: " + JSON.stringify(dbMarket.liquidationEngine.config));
+      liquidationEngine = new DlbDcfPriorityLiquidationEngine(
+        market,
+        state,
+        isPriorityLiquidator
+      );
+    } else {
+      throw new Error(
+        `Invalid Liquidation Engine type: ${dbMarket.liquidationEngine.type}`
+      );
+    }
+
     const positionsLiq: ILiquidatablePosition[] = dbPositions
       .map((dbPosition) => {
         return {
           ...dbPosition,
           seizableCollateral:
-            market.seizableCollateralOfPosition(
+            liquidationEngine.seizableCollateralOfPosition(
               dbPosition,
-              isPriorityLiquidator
+              liquidatorAddress,
+              undefined
             ) ?? 0n,
         };
       })
@@ -147,6 +174,7 @@ export async function getLiquidatablePositions({
           ...dbMarket,
           price,
           irmConfig: dbMarket.irm,
+          liquidationEngineConfig: dbMarket.liquidationEngine,
         },
         positionsLiq,
       });

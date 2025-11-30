@@ -267,6 +267,30 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
+    name: "governanceLiquidate",
+    inputs: [
+      {
+        name: "borrower",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "initialize",
     inputs: [
       {
@@ -315,71 +339,9 @@ export const AltoBorrowMarketAbi = [
                 internalType: "address",
               },
               {
-                name: "liquidationConfiguration",
-                type: "tuple",
-                internalType: "struct LiquidationConfiguration",
-                components: [
-                  {
-                    name: "maxLiquidationLtv",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "dynamicBonusFeeStart",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "ltvForCompleteLiquidation",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "dynamicBonusFeeDecaySteepness",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "liquidationBaseFee",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "minPenaltyPercentage",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "protocolFeePercentage",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "isEnabledPriorityLiquidation",
-                    type: "bool",
-                    internalType: "bool",
-                  },
-                  {
-                    name: "disablePriorityLiquidationAbovePositionLtv",
-                    type: "uint256",
-                    internalType: "uint256",
-                  },
-                  {
-                    name: "priorityLiquidationGracePeriod",
-                    type: "uint32",
-                    internalType: "uint32",
-                  },
-                  {
-                    name: "taggerLiquidationGracePeriod",
-                    type: "uint32",
-                    internalType: "uint32",
-                  },
-                  {
-                    name: "liquidationWindowTag",
-                    type: "uint32",
-                    internalType: "uint32",
-                  },
-                ],
+                name: "liquidationEngine",
+                type: "address",
+                internalType: "address",
               },
             ],
           },
@@ -387,6 +349,11 @@ export const AltoBorrowMarketAbi = [
             name: "initialBorrowOpeningFee",
             type: "uint256",
             internalType: "uint256",
+          },
+          {
+            name: "supplyCapAssets",
+            type: "uint128",
+            internalType: "uint128",
           },
         ],
       },
@@ -433,35 +400,6 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
-    name: "liquidablePositions",
-    inputs: [
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [
-      {
-        name: "tagged",
-        type: "bool",
-        internalType: "bool",
-      },
-      {
-        name: "tagger",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "timestamp",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "liquidate",
     inputs: [
       {
@@ -470,7 +408,12 @@ export const AltoBorrowMarketAbi = [
         internalType: "address",
       },
       {
-        name: "data",
+        name: "callbackData",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "liquidationData",
         type: "bytes",
         internalType: "bytes",
       },
@@ -496,68 +439,13 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
-    name: "liquidationConfiguration",
+    name: "liquidationEngine",
     inputs: [],
     outputs: [
       {
-        name: "maxLiquidationLtv",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "dynamicBonusFeeStart",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "ltvForCompleteLiquidation",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "dynamicBonusFeeDecaySteepness",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "liquidationBaseFee",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "minPenaltyPercentage",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "protocolFeePercentage",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "isEnabledPriorityLiquidation",
-        type: "bool",
-        internalType: "bool",
-      },
-      {
-        name: "disablePriorityLiquidationAbovePositionLtv",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "priorityLiquidationGracePeriod",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "taggerLiquidationGracePeriod",
-        type: "uint32",
-        internalType: "uint32",
-      },
-      {
-        name: "liquidationWindowTag",
-        type: "uint32",
-        internalType: "uint32",
+        name: "",
+        type: "address",
+        internalType: "address",
       },
     ],
     stateMutability: "view",
@@ -719,25 +607,6 @@ export const AltoBorrowMarketAbi = [
         name: "collateralAssets",
         type: "uint128",
         internalType: "uint128",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "priorityLiquidators",
-    inputs: [
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "bool",
-        internalType: "bool",
       },
     ],
     stateMutability: "view",
@@ -1002,80 +871,23 @@ export const AltoBorrowMarketAbi = [
         type: "address",
         internalType: "address",
       },
+      {
+        name: "_skipAccrueInterest",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
-    name: "setLiquidationConfiguration",
+    name: "setLiquidationEngine",
     inputs: [
       {
-        name: "_liquidationConfiguration",
-        type: "tuple",
-        internalType: "struct LiquidationConfiguration",
-        components: [
-          {
-            name: "maxLiquidationLtv",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "dynamicBonusFeeStart",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "ltvForCompleteLiquidation",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "dynamicBonusFeeDecaySteepness",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "liquidationBaseFee",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "minPenaltyPercentage",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "protocolFeePercentage",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "isEnabledPriorityLiquidation",
-            type: "bool",
-            internalType: "bool",
-          },
-          {
-            name: "disablePriorityLiquidationAbovePositionLtv",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "priorityLiquidationGracePeriod",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "taggerLiquidationGracePeriod",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "liquidationWindowTag",
-            type: "uint32",
-            internalType: "uint32",
-          },
-        ],
+        name: "_liquidationEngine",
+        type: "address",
+        internalType: "address",
       },
     ],
     outputs: [],
@@ -1132,17 +944,12 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
-    name: "setPriorityLiquidator",
+    name: "setSupplyCap",
     inputs: [
       {
-        name: "liquidator",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "status",
-        type: "bool",
-        internalType: "bool",
+        name: "_newSupplyCapAssets",
+        type: "uint128",
+        internalType: "uint128",
       },
     ],
     outputs: [],
@@ -1150,21 +957,16 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
-    name: "tagLiquidablePosition",
-    inputs: [
+    name: "supplyCapAssets",
+    inputs: [],
+    outputs: [
       {
-        name: "user",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "liquidator",
-        type: "address",
-        internalType: "address",
+        name: "",
+        type: "uint128",
+        internalType: "uint128",
       },
     ],
-    outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -1205,6 +1007,19 @@ export const AltoBorrowMarketAbi = [
   {
     type: "function",
     name: "transferOwnership",
+    inputs: [
+      {
+        name: "newOwner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "transferOwnershipSkip2Step",
     inputs: [
       {
         name: "newOwner",
@@ -1377,6 +1192,43 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "event",
+    name: "GovernanceLiquidation",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "liquidator",
+        type: "address",
+        indexed: false,
+        internalType: "address",
+      },
+      {
+        name: "liquidatedCollateral",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "badDebtClearedAssets",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "badDebtClearedShares",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
     name: "IncrementNonce",
     inputs: [
       {
@@ -1424,18 +1276,6 @@ export const AltoBorrowMarketAbi = [
         internalType: "address",
       },
       {
-        name: "collateralToken",
-        type: "address",
-        indexed: false,
-        internalType: "address",
-      },
-      {
-        name: "borrowToken",
-        type: "address",
-        indexed: false,
-        internalType: "address",
-      },
-      {
         name: "liquidator",
         type: "address",
         indexed: false,
@@ -1449,12 +1289,6 @@ export const AltoBorrowMarketAbi = [
       },
       {
         name: "protocolFee",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "liquidatorFee",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1564,50 +1398,6 @@ export const AltoBorrowMarketAbi = [
         type: "bytes32",
         indexed: false,
         internalType: "bytes32",
-      },
-      {
-        name: "status",
-        type: "bool",
-        indexed: false,
-        internalType: "bool",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "PositionTagged",
-    inputs: [
-      {
-        name: "user",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "tagger",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "timestamp",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "PriorityLiquidatorUpdated",
-    inputs: [
-      {
-        name: "liquidator",
-        type: "address",
-        indexed: true,
-        internalType: "address",
       },
       {
         name: "status",
@@ -1826,143 +1616,19 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "event",
-    name: "SetLiquidationConfiguration",
+    name: "SetLiquidationEngine",
     inputs: [
       {
-        name: "oldLiquidationConfiguration",
-        type: "tuple",
-        indexed: false,
-        internalType: "struct LiquidationConfiguration",
-        components: [
-          {
-            name: "maxLiquidationLtv",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "dynamicBonusFeeStart",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "ltvForCompleteLiquidation",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "dynamicBonusFeeDecaySteepness",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "liquidationBaseFee",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "minPenaltyPercentage",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "protocolFeePercentage",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "isEnabledPriorityLiquidation",
-            type: "bool",
-            internalType: "bool",
-          },
-          {
-            name: "disablePriorityLiquidationAbovePositionLtv",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "priorityLiquidationGracePeriod",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "taggerLiquidationGracePeriod",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "liquidationWindowTag",
-            type: "uint32",
-            internalType: "uint32",
-          },
-        ],
+        name: "oldLiquidationEngine",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
       {
-        name: "newLiquidationConfiguration",
-        type: "tuple",
-        indexed: false,
-        internalType: "struct LiquidationConfiguration",
-        components: [
-          {
-            name: "maxLiquidationLtv",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "dynamicBonusFeeStart",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "ltvForCompleteLiquidation",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "dynamicBonusFeeDecaySteepness",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "liquidationBaseFee",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "minPenaltyPercentage",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "protocolFeePercentage",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "isEnabledPriorityLiquidation",
-            type: "bool",
-            internalType: "bool",
-          },
-          {
-            name: "disablePriorityLiquidationAbovePositionLtv",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "priorityLiquidationGracePeriod",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "taggerLiquidationGracePeriod",
-            type: "uint32",
-            internalType: "uint32",
-          },
-          {
-            name: "liquidationWindowTag",
-            type: "uint32",
-            internalType: "uint32",
-          },
-        ],
+        name: "newLiquidationEngine",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
     ],
     anonymous: false,
@@ -2001,6 +1667,25 @@ export const AltoBorrowMarketAbi = [
         type: "address",
         indexed: true,
         internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SetSupplyCap",
+    inputs: [
+      {
+        name: "oldSupplyCapAssets",
+        type: "uint128",
+        indexed: false,
+        internalType: "uint128",
+      },
+      {
+        name: "newSupplyCapAssets",
+        type: "uint128",
+        indexed: false,
+        internalType: "uint128",
       },
     ],
     anonymous: false,
@@ -2051,32 +1736,17 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "error",
-    name: "AltoBaseMarketLiquidatingSolventPosition",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "AltoBaseMarketLiquidationAlreadyTagged",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "AltoBaseMarketLiquidationUnauthorized",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "AltoBaseMarketPriorityLiquidationDisabled",
-    inputs: [],
-  },
-  {
-    type: "error",
     name: "AltoBaseMarketUnauthorized",
     inputs: [],
   },
   {
     type: "error",
     name: "AltoBorrowMarketInvalidInput",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "AltoBorrowMarketSupplyCapExceeded",
     inputs: [],
   },
   {
@@ -2167,6 +1837,11 @@ export const AltoBorrowMarketAbi = [
         internalType: "address",
       },
     ],
+  },
+  {
+    type: "error",
+    name: "ReentrancyGuardReentrantCall",
+    inputs: [],
   },
   {
     type: "error",

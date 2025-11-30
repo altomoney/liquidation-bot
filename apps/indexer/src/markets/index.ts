@@ -9,6 +9,8 @@ import {
   removeSupply,
   repay,
   setDebtCeiling,
+  setIrm,
+  setLiquidationEngine,
   setup,
 } from "./markets";
 
@@ -76,13 +78,24 @@ ponder.on("AltoMintMarket:Liquidation", async ({ event, context }) => {
   await liquidation({ context, event });
 });
 
+ponder.on("AltoBorrowMarket:SetIrm", async ({ event, context }) => {
+  await setIrm({ context, event });
+});
+
+ponder.on("AltoMintMarket:SetIrm", async ({ event, context }) => {
+  await setIrm({ context, event });
+});
+
 ponder.on(
-  "AltoBorrowMarket:SetLiquidationConfiguration",
+  "AltoBorrowMarket:SetLiquidationEngine",
   async ({ event, context }) => {
-    // TODO implement this as well
-    console.log(event.args.newLiquidationConfiguration);
+    await setLiquidationEngine({ context, event });
   }
 );
+
+ponder.on("AltoMintMarket:SetLiquidationEngine", async ({ event, context }) => {
+  await setLiquidationEngine({ context, event });
+});
 
 ponder.on("AltoMintMarket:SetDebtCeiling", async ({ event, context }) => {
   await setDebtCeiling({ context, event });

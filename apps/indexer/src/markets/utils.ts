@@ -19,3 +19,15 @@ export function irmTypeToString(irmTypeId: number) {
     throw new Error(`Invalid IRM type: ${irmTypeId}`);
   }
 }
+
+export function liquidationEngineTypeToString(
+  liquidationEngineTypeId: number
+): "DlbDcfPriorityLiquidationEngine" {
+  if (liquidationEngineTypeId === 0) {
+    return "DlbDcfPriorityLiquidationEngine";
+  } else {
+    throw new Error(
+      `Invalid Liquidation Engine type: ${liquidationEngineTypeId}`
+    );
+  }
+}

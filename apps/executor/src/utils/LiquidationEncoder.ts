@@ -33,7 +33,12 @@ export class LiquidationEncoder<
                 internalType: "address",
               },
               {
-                name: "data",
+                name: "callbackData",
+                type: "bytes",
+                internalType: "bytes",
+              },
+              {
+                name: "liquidationData",
                 type: "bytes",
                 internalType: "bytes",
               },
@@ -65,6 +70,7 @@ export class LiquidationEncoder<
             [{ type: "bytes[]" }, { type: "bytes" }],
             [callbackCalls, "0x"]
           ),
+          "0x",
         ],
       }),
       {
