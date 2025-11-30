@@ -4,7 +4,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { watchBlocks } from "viem/actions";
 
 import { LiquidationBot, type LiquidationBotInputs } from "./bot";
-import { UniswapSmartOrderRouterVenue } from "./liquidityVenues";
+import { UsmVenue } from "./liquidityVenues";
 import type { LiquidityVenue } from "./liquidityVenues/liquidityVenue";
 import { ChainlinkPricer, DefiLlamaPricer } from "./pricers";
 import type { Pricer } from "./pricers/pricer";
@@ -23,7 +23,13 @@ export const launchBot = (config: ChainConfig) => {
   const liquidityVenues: LiquidityVenue[] = [];
   // liquidityVenues.push(new Erc20Wrapper());
   // liquidityVenues.push(new Erc4626());
-  liquidityVenues.push(new UniswapSmartOrderRouterVenue());
+
+  // Add USM venue first so it takes priority when destination is a USM stable token
+  if (config.usms && config.usms.length > 0) {
+    liquidityVenues.push(new UsmVenue({ usmAddresses: config.usms }));
+  }
+
+  // liquidityVenues.push(new UniswapSmartOrderRouterVenue());
   // liquidityVenues.push(new UniswapV3Venue());
   // liquidityVenues.push(new UniswapV4Venue());
 

@@ -151,11 +151,11 @@ export class UniswapSmartOrderRouterVenue implements LiquidityVenue {
         route.methodParameters.calldata as `0x${string}`
       );
 
-      // Return the updated state (assumed to be the last liquidity venue)
+      // Return the updated state with the expected amount received
       return {
         src: dst,
         dst: dst,
-        srcAmount: 0n,
+        srcAmount: BigInt(route.quote.quotient.toString()),
       };
     } catch (error) {
       throw new Error(

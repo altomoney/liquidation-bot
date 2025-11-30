@@ -3,6 +3,7 @@ import type { Address, Chain, Hex } from "viem";
 export interface Config {
   chain: Chain;
   markets: Hex[];
+  usms: Hex[];
   wNative: Address;
   options: Options;
 }

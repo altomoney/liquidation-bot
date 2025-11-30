@@ -6,3 +6,4 @@ export * from "./pendlePT";
 export * from "./uniswapSmartOrderRouter";
 export * from "./uniswapV3";
 export * from "./uniswapV4";
+export * from "./usm";
