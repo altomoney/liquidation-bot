@@ -16,7 +16,6 @@ import {
   LiquidationConfiguration,
 } from "../utils/liquidation-engine/DlbDcfPriorityLiquidationEngine";
 import { ILiquidationEngine } from "../utils/liquidation-engine/types";
-import { logToFile } from "../utils/log";
 import { Market } from "../utils/market/Market";
 import { ILiquidatablePosition, IMarket, IndexerApiResponse } from "./types";
 
@@ -137,7 +136,7 @@ export async function getLiquidatablePositions({
       const state = replaceBigIntStringsToBigInts(
         dbMarket.liquidationEngine.config as LiquidationConfiguration
       );
-      logToFile("state: " + JSON.stringify(dbMarket.liquidationEngine.config));
+
       liquidationEngine = new DlbDcfPriorityLiquidationEngine(
         market,
         state,
