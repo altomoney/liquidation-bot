@@ -4,6 +4,7 @@ import {
   addCollateral,
   addSupply,
   borrow,
+  governanceLiquidation,
   liquidation,
   removeCollateral,
   removeSupply,
@@ -100,3 +101,17 @@ ponder.on("AltoMintMarket:SetLiquidationEngine", async ({ event, context }) => {
 ponder.on("AltoMintMarket:SetDebtCeiling", async ({ event, context }) => {
   await setDebtCeiling({ context, event });
 });
+
+ponder.on(
+  "AltoBorrowMarket:GovernanceLiquidation",
+  async ({ event, context }) => {
+    await governanceLiquidation({ context, event });
+  }
+);
+
+ponder.on(
+  "AltoMintMarket:GovernanceLiquidation",
+  async ({ event, context }) => {
+    await governanceLiquidation({ context, event });
+  }
+);

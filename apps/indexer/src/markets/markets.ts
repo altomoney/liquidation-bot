@@ -270,9 +270,9 @@ export const liquidation: Parameters<
       .update(market, { chainId: context.chain.id, address: event.log.address })
       .set((row) => ({
         totalSupplyAssets:
-          row.totalSupplyAssets - event.args.badDebtClearedAssets,
-        totalSupplyShares:
-          row.totalSupplyShares - event.args.badDebtClearedShares,
+          row.type === "borrow"
+            ? row.totalSupplyAssets - event.args.badDebtClearedAssets
+            : row.totalSupplyAssets,
         totalBorrowAssets: FixedPointMath.zeroFloorSub(
           row.totalBorrowAssets,
           event.args.repaidBorrow + event.args.badDebtClearedAssets
@@ -511,4 +511,37 @@ const updateNewLiquidationEngine = async (
   }
 
   throw new Error(`Invalid Liquidation Engine type: ${liquidationEngineType}`);
+};
+
+export const governanceLiquidation: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:GovernanceLiquidation">
+>[1] = async ({ context, event }) => {
+  await Promise.all([
+    // Row must exist because `GovernanceLiquidation` cannot preceed `CreateMarket`.
+    context.db
+      .update(market, { chainId: context.chain.id, address: event.log.address })
+      .set((row) => ({
+        totalSupplyAssets:
+          row.type === "borrow"
+            ? row.totalSupplyAssets - event.args.badDebtClearedAssets
+            : row.totalSupplyAssets,
+        totalBorrowAssets: FixedPointMath.zeroFloorSub(
+          row.totalBorrowAssets,
+          event.args.badDebtClearedAssets
+        ),
+        totalBorrowShares:
+          row.totalBorrowShares - event.args.badDebtClearedShares,
+      })),
+    // Row must exist because `GovernanceLiquidation` cannot preceed `SupplyCollateral`.
+    context.db
+      .update(position, {
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: event.args.user,
+      })
+      .set((row) => ({
+        collateral: 0n,
+        borrowShares: 0n,
+      })),
+  ]);
 };
