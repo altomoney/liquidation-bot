@@ -1,79 +1,96 @@
 import { createConfig, factory } from "ponder";
 
-import { Address, parseAbiItem } from "viem";
+import { parseAbiItem } from "viem";
 import { AdaptiveCurveIrmAbi } from "./abis/AdaptiveCurveIrmAbi";
 import { AltoBorrowMarketAbi } from "./abis/AltoBorrowMarketAbi";
 import { AltoMintMarketAbi } from "./abis/AltoMintMarketAbi";
 import { DlbDcfPriorityLiquidationEngineAbi } from "./abis/DlbDcfPriorityLiquidationEngineAbi";
 import { FixedRateIrmAbi } from "./abis/FixedRateIrmAbi";
+import { MarketRegistryAbi } from "./abis/MarketRegistryAbi";
+import { ENV } from "./src/utils/env";
+import { getMarketAddresses } from "./src/utils/getMarketAddresses";
 
-const MINT_MARKETS: Address[] = ["0xD67062b0bc443c656C2A07A0B1cceEACF114DA06"];
-const BORROW_MARKETS: Address[] = [
-  "0x4d40ddc251Db7F9b24efF017dd26f2294F8d573b",
-];
-const ALL_MARKETS: Address[] = [...MINT_MARKETS, ...BORROW_MARKETS];
+const { allMarkets } = await getMarketAddresses();
 
 export default createConfig({
   chains: {
-    sepolia: {
-      id: 11155111,
-      rpc: process.env.PONDER_RPC_URL_11155111!,
+    [ENV.CHAIN_ID_STRING]: {
+      id: ENV.CHAIN_ID,
+      rpc: ENV.RPC_URL,
     },
   },
   contracts: {
+    MarketRegistry: {
+      abi: MarketRegistryAbi,
+      chain: ENV.CHAIN_ID_STRING,
+      address: ENV.MARKET_REGISTRY_ADDRESS,
+      startBlock: ENV.START_BLOCK,
+    },
     AltoBorrowMarket: {
-      chain: "sepolia",
+      chain: ENV.CHAIN_ID_STRING,
       abi: AltoBorrowMarketAbi,
-      address: BORROW_MARKETS,
-      startBlock: 9740175,
+      address: factory({
+        // Address of the factory contract.
+        address: ENV.MARKET_REGISTRY_ADDRESS,
+        // Event from the factory contract ABI which contains the child address.
+        event: parseAbiItem("event BorrowMarketAdded(address indexed market)"),
+        parameter: "market",
+      }),
+      startBlock: ENV.START_BLOCK,
     },
     AltoMintMarket: {
-      chain: "sepolia",
       abi: AltoMintMarketAbi,
-      address: MINT_MARKETS,
-      startBlock: 9740174,
+      chain: ENV.CHAIN_ID_STRING,
+      address: factory({
+        // Address of the factory contract.
+        address: ENV.MARKET_REGISTRY_ADDRESS,
+        // Event from the factory contract ABI which contains the child address.
+        event: parseAbiItem("event MintMarketAdded(address indexed market)"),
+        parameter: "market",
+      }),
+      startBlock: ENV.START_BLOCK,
     },
     FixedRateIrm: {
       abi: FixedRateIrmAbi,
-      chain: "sepolia",
+      chain: ENV.CHAIN_ID_STRING,
       address: factory({
         // Address of the factory contract.
-        address: ALL_MARKETS,
+        address: allMarkets,
         // Event from the factory contract ABI which contains the child address.
         event: parseAbiItem(
           "event SetIrm(address indexed oldAddr, address indexed newAddr)"
         ),
         parameter: "newAddr",
       }),
-      startBlock: 9740174,
+      startBlock: ENV.START_BLOCK,
     },
     AdaptiveCurveIrm: {
       abi: AdaptiveCurveIrmAbi,
-      chain: "sepolia",
+      chain: ENV.CHAIN_ID_STRING,
       address: factory({
         // Address of the factory contract.
-        address: ALL_MARKETS,
+        address: allMarkets,
         // Event from the factory contract ABI which contains the child address.
         event: parseAbiItem(
           "event SetIrm(address indexed oldAddr, address indexed newAddr)"
         ),
         parameter: "newAddr",
       }),
-      startBlock: 9740174,
+      startBlock: ENV.START_BLOCK,
     },
     DlbDcfPriorityLiquidationEngine: {
       abi: DlbDcfPriorityLiquidationEngineAbi,
-      chain: "sepolia",
+      chain: ENV.CHAIN_ID_STRING,
       address: factory({
         // Address of the factory contract.
-        address: ALL_MARKETS,
+        address: allMarkets,
         // Event from the factory contract ABI which contains the child address.
         event: parseAbiItem(
           "event SetLiquidationEngine(address indexed oldLiquidationEngine, address indexed newLiquidationEngine)"
         ),
         parameter: "newLiquidationEngine",
       }),
-      startBlock: 9740174,
+      startBlock: ENV.START_BLOCK,
     },
   },
 });

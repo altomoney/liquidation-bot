@@ -1,8 +1,15 @@
 import { ponder } from "ponder:registry";
-import { irm } from "ponder:schema";
+import { irm, market } from "ponder:schema";
 import { replaceBigInts } from "../utils";
 
 ponder.on("AdaptiveCurveIrm:IRStateUpdated", async ({ context, event }) => {
+  const marketExists = await context.db.find(market, {
+    chainId: context.chain.id,
+    address: event.log.address,
+  });
+  if (!marketExists) {
+    return;
+  }
   await context.db
     .update(irm, {
       chainId: context.chain.id,
@@ -17,6 +24,13 @@ ponder.on("AdaptiveCurveIrm:IRStateUpdated", async ({ context, event }) => {
 });
 
 ponder.on("AdaptiveCurveIrm:SetIrmConfig", async ({ context, event }) => {
+  const marketExists = await context.db.find(market, {
+    chainId: context.chain.id,
+    address: event.log.address,
+  });
+  if (!marketExists) {
+    return;
+  }
   await context.db
     .update(irm, {
       chainId: context.chain.id,
@@ -28,6 +42,13 @@ ponder.on("AdaptiveCurveIrm:SetIrmConfig", async ({ context, event }) => {
 });
 
 ponder.on("FixedRateIrm:IRStateUpdated", async ({ context, event }) => {
+  const marketExists = await context.db.find(market, {
+    chainId: context.chain.id,
+    address: event.log.address,
+  });
+  if (!marketExists) {
+    return;
+  }
   await context.db
     .update(irm, {
       chainId: context.chain.id,

@@ -19,79 +19,87 @@ import {
   marketTypeToString,
 } from "./utils";
 
-export const setup: (
+export const setupMarket: (
   type: "AltoBorrowMarket" | "AltoMintMarket"
-) => Parameters<typeof ponder.on<"AltoBorrowMarket:setup">>[1] =
+) => Parameters<typeof ponder.on<"MarketRegistry:BorrowMarketAdded">>[1] =
   (type) =>
   async ({ context, event }) => {
-    // TODO this will be adapted once we have registry contract
-    const addresses = context.contracts[type].address;
+    const address = event.args.market;
 
-    for (const address of addresses) {
-      const loanToken = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "borrowToken",
-        address: address,
-      });
-      const collateralToken = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "collateralToken",
-        address: address,
-      });
-      const oracle = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "oracle",
-        address: address,
-      });
-      const irm = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "irm",
-        address: address,
-      });
+    const loanToken = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "borrowToken",
+      address: address,
+    });
+    const collateralToken = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "collateralToken",
+      address: address,
+    });
+    const oracle = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "oracle",
+      address: address,
+    });
+    const irm = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "irm",
+      address: address,
+    });
 
-      const liquidationEngine = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "liquidationEngine",
-        address: address,
-      });
+    const liquidationEngine = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "liquidationEngine",
+      address: address,
+    });
 
-      const marketType = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "MARKET_TYPE",
-        address: address,
-      });
+    const marketType = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "MARKET_TYPE",
+      address: address,
+    });
 
-      const ltv = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "maxLtv",
-        address: address,
-      });
+    const ltv = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "maxLtv",
+      address: address,
+    });
 
-      const feeRecipient = await context.client.readContract({
-        abi: AltoBorrowMarketAbi,
-        functionName: "feeRecipient",
-        address: address,
-      });
+    const feeRecipient = await context.client.readContract({
+      abi: AltoBorrowMarketAbi,
+      functionName: "feeRecipient",
+      address: address,
+    });
 
-      await context.db.insert(market).values({
-        // primary key
-        chainId: context.chain.id,
-        address: address,
-        type: marketTypeToString(marketType),
-        loanToken: loanToken,
-        collateralToken: collateralToken,
-        feeRecipient: feeRecipient,
-        oracle: oracle,
-        irm: irm,
-        ltv: ltv,
-        liquidationEngine: liquidationEngine,
-      });
+    await context.db.insert(market).values({
+      // primary key
+      chainId: context.chain.id,
+      address: address,
+      type: marketTypeToString(marketType),
+      loanToken: loanToken,
+      collateralToken: collateralToken,
+      feeRecipient: feeRecipient,
+      oracle: oracle,
+      irm: irm,
+      ltv: ltv,
+      liquidationEngine: liquidationEngine,
+    });
 
-      await updateNewIrm(irm, address, context);
+    await updateNewIrm(irm, address, context);
 
-      await updateNewLiquidationEngine(liquidationEngine, address, context);
-    }
+    await updateNewLiquidationEngine(liquidationEngine, address, context);
   };
+
+export const deactivateMarket: Parameters<
+  typeof ponder.on<"MarketRegistry:BorrowMarketRemoved">
+>[1] = async ({ context, event }) => {
+  await context.db
+    .update(market, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set((row) => ({ isActive: false }));
+};
 
 export const accrueInterest: Parameters<
   typeof ponder.on<"AltoBorrowMarket:AccrueInterest">

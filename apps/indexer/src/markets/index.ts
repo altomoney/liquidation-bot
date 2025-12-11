@@ -12,16 +12,7 @@ import {
   setDebtCeiling,
   setIrm,
   setLiquidationEngine,
-  setup,
 } from "./markets";
-
-ponder.on("AltoBorrowMarket:setup", async ({ context, event }) => {
-  await setup("AltoBorrowMarket")({ context, event });
-});
-
-ponder.on("AltoMintMarket:setup", async ({ context, event }) => {
-  await setup("AltoMintMarket")({ context, event });
-});
 
 ponder.on("AltoBorrowMarket:AccrueInterest", async ({ event, context }) => {
   await accrueInterest({ context, event });

@@ -29,6 +29,7 @@ export const market = onchainTable(
     liquidationEngine: t.hex().notNull(),
     ltv: t.bigint().notNull(),
     type: marketType().notNull(),
+    isActive: t.boolean().notNull().default(true),
 
     totalSupplyAssets: t.bigint().notNull().default(0n),
     totalSupplyShares: t.bigint().notNull().default(0n),

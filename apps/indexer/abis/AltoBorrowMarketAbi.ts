@@ -355,11 +355,29 @@ export const AltoBorrowMarketAbi = [
             type: "uint128",
             internalType: "uint128",
           },
+          {
+            name: "initialInterestFee",
+            type: "uint256",
+            internalType: "uint256",
+          },
         ],
       },
     ],
     outputs: [],
     stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "interestFee",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -864,6 +882,19 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
+    name: "setInterestFee",
+    inputs: [
+      {
+        name: "_newInterestFee",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "setIrm",
     inputs: [
       {
@@ -1267,6 +1298,31 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "event",
+    name: "InterestFeeAccrued",
+    inputs: [
+      {
+        name: "recipient",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "interest",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "feeShares",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
     name: "Liquidation",
     inputs: [
       {
@@ -1591,6 +1647,25 @@ export const AltoBorrowMarketAbi = [
         type: "address",
         indexed: true,
         internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SetInterestFee",
+    inputs: [
+      {
+        name: "oldInterestFee",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "newInterestFee",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
       },
     ],
     anonymous: false,

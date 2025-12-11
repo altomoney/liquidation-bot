@@ -255,6 +255,19 @@ export const AdaptiveCurveIrmAbi = [
   },
   {
     type: "function",
+    name: "transferOwnershipSkip2Step",
+    inputs: [
+      {
+        name: "newOwner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "updateInterestRate",
     inputs: [
       {
