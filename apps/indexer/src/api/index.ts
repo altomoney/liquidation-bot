@@ -1,10 +1,11 @@
 import { Hono } from "hono";
-import { client, graphql } from "ponder";
+import { and, client, eq, graphql } from "ponder";
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { Address, Hex } from "viem";
 import { replaceBigInts } from "../utils";
 import { getLiquidatablePositions } from "./liquidatable-positions";
+import { IndexerActiveUsmsResponse } from "./types";
 
 const app = new Hono();
 
@@ -18,25 +19,14 @@ app.use("/graphql", graphql({ db, schema }));
  */
 app.post("/chain/:chainId/liquidatable-positions", async (c) => {
   const { chainId: chainIdRaw } = c.req.param();
-  const {
-    marketAddresses: marketAddressesRaw,
-    isPriorityLiquidator,
-    liquidatorAddress,
-  } = (await c.req.json()) as unknown as {
-    marketAddresses: Hex[];
-    isPriorityLiquidator: boolean;
-    liquidatorAddress: Address;
-  };
-
-  if (!Array.isArray(marketAddressesRaw)) {
-    return c.json(
-      { error: "Request body must include a `marketAddresses` array." },
-      400
-    );
-  }
+  const { isPriorityLiquidator, liquidatorAddress } =
+    (await c.req.json()) as unknown as {
+      marketAddresses: Hex[];
+      isPriorityLiquidator: boolean;
+      liquidatorAddress: Address;
+    };
 
   const chainId = Number.parseInt(chainIdRaw, 10);
-  const marketAddresses = [...new Set(marketAddressesRaw)];
 
   const publicClient = Object.values(publicClients).find(
     (publicClient) => publicClient.chain?.id === chainId
@@ -57,11 +47,50 @@ app.post("/chain/:chainId/liquidatable-positions", async (c) => {
     db,
     chainId,
     publicClient,
-    marketAddresses,
     isPriorityLiquidator,
     liquidatorAddress,
   });
   return c.json(replaceBigInts(response));
+});
+
+// Fetch all active USMs for a given chain.
+app.post("/chain/:chainId/active-usms", async (c) => {
+  const { chainId: chainIdRaw } = c.req.param();
+
+  const chainId = Number.parseInt(chainIdRaw, 10);
+
+  const publicClient = Object.values(publicClients).find(
+    (publicClient) => publicClient.chain?.id === chainId
+  );
+
+  if (!publicClient) {
+    return c.json(
+      {
+        error: `${chainIdRaw} is not one of the supported chains: [${Object.keys(
+          publicClients
+        ).join(", ")}]`,
+      },
+      400
+    );
+  }
+
+  const usms = await db.query.usm.findMany({
+    where: (row) =>
+      and(
+        eq(row.chainId, chainId),
+        eq(row.isActive, true),
+        eq(row.type, "permissionless")
+      ),
+    with: {
+      dusdConfig: true,
+    },
+  });
+
+  const result: IndexerActiveUsmsResponse = {
+    activeUsms: usms,
+  };
+
+  return c.json(replaceBigInts(result));
 });
 
 export default app;

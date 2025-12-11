@@ -43,7 +43,6 @@ export interface LiquidationBotInputs {
   logTag: string;
   chainId: number;
   client: WalletClient<Transport, Chain, Account>;
-  markets: Hex[];
   wNative: Address;
   executorAddress: Address;
   treasuryAddress: Address;
@@ -58,7 +57,6 @@ export class LiquidationBot {
   private logTag: string;
   private chainId: number;
   private client: WalletClient<Transport, Chain, Account>;
-  private markets: Hex[];
   private wNative: Address;
   private executorAddress: Address;
   private treasuryAddress: Address;
@@ -72,7 +70,6 @@ export class LiquidationBot {
     this.logTag = inputs.logTag;
     this.chainId = inputs.chainId;
     this.client = inputs.client;
-    this.markets = inputs.markets;
     this.wNative = inputs.wNative;
     this.executorAddress = inputs.executorAddress;
     this.treasuryAddress = inputs.treasuryAddress;
@@ -86,8 +83,8 @@ export class LiquidationBot {
   async run() {
     const liquidationData = await fetchLiquidatablePositions(
       this.chainId,
-      this.markets,
-      this.isPriorityLiquidator
+      this.isPriorityLiquidator,
+      this.client.account.address
     );
 
     return Promise.all(liquidationData.map((data) => this.handleMarket(data)));

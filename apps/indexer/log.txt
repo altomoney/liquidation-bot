@@ -1,0 +1,248 @@
+2025-11-19T21:45:24.706Z - currentLtv: 857591059801985901
+2025-11-19T21:45:55.070Z - currentLtv: 857591092434827448
+2025-11-19T21:46:25.135Z - currentLtv: 857591125067670238
+2025-11-19T21:49:18.980Z - currentLtv: 857591314338182905
+2025-11-19T21:50:22.089Z - currentLtv: 4219739179745064729600
+2025-11-19T21:51:28.046Z - currentLtv: 4219739179745064729600 1110457678880280192
+2025-11-19T21:52:09.441Z - currentLtv: 4219739179745064729600 1110457678880280192
+2025-11-19T22:02:56.689Z - currentLtv: 4219739179745064729600 1110457678880280192
+2025-11-19T22:03:21.036Z - currentLtv: 4219739179745064729600 [object Object]
+2025-11-19T22:04:15.821Z - currentLtv: undefined
+2025-11-19T22:04:15.822Z - currentLtv: 1110457678880280192
+2025-11-19T22:07:21.059Z - currentLtv: 0
+2025-11-19T22:07:21.059Z - currentLtv: 0
+2025-11-19T22:08:11.385Z - currentLtv: 0
+2025-11-19T22:08:11.385Z - currentLtv: 0
+2025-11-19T22:08:51.610Z - currentLtv: 1110457678880280131
+2025-11-19T22:08:51.611Z - currentLtv: 1110457678880280131
+2025-11-19T22:14:59.992Z - currentLtv: 1110457678880280131
+2025-11-19T22:14:59.993Z - currentLtv: 1110457678880280131
+2025-11-19T22:17:41.064Z - currentLtv: 4219739179745064497800 [object Object]
+2025-11-19T22:17:46.579Z - currentLtv: 4219739179745064497800 [object Object]
+2025-11-19T22:19:12.120Z - currentLtv: 464724811341583985
+2025-11-19T22:20:51.088Z - currentLtv: 857593372385764311
+2025-11-19T22:22:33.434Z - currentLtv: 857593483337729834
+2025-11-19T22:22:47.275Z - currentLtv: 857593498566432104
+2025-11-19T22:23:30.415Z - currentLtv: 857593545340305055
+2025-11-19T22:23:38.057Z - currentLtv: 857593554042421234
+2025-11-19T22:30:18.771Z - currentLtv: 575939902361078560
+2025-11-19T22:32:28.188Z - currentLtv: 4304542989294251
+2025-11-19T22:35:05.056Z - currentLtv: 4304541798706207
+2025-11-19T22:38:08.973Z - currentLtv: 4304540403381542
+2025-11-19T22:51:16.972Z - currentLtv: 4304536467738508
+2025-11-19T22:52:56.936Z - currentLtv: 3618827500510055088577 26463295433472469 3618729016864326870462164178 0
+2025-11-19T22:55:51.051Z - currentLtv:26463295433472469
+2025-11-19T22:59:45.732Z - currentLtv:100000000000000000000000
+2025-11-19T22:59:45.733Z - currentLtv:5697784733130051
+2025-11-19T23:09:27.953Z - currentLtv:100000000000000000000000
+2025-11-19T23:09:27.954Z - currentLtv:5697784733130051
+2025-11-20T10:07:09.267Z - totalSupplyAssets:100000000000000000000000
+2025-11-20T10:07:09.267Z - totalSupplyShares:100000000000000000000000000000
+2025-11-20T10:07:09.267Z - totalBorrowAssets:0
+2025-11-20T10:07:09.267Z - totalBorrowShares:0
+2025-11-20T10:07:09.267Z - totalSupplyAssets:26463295433472469
+2025-11-20T10:07:09.267Z - totalSupplyShares:0
+2025-11-20T10:07:09.267Z - totalBorrowAssets:3618827500510055088577
+2025-11-20T10:07:09.267Z - totalBorrowShares:3618729016864326870462164178
+2025-11-20T10:08:58.051Z - totalSupplyAssets:26463295433472469
+2025-11-20T10:08:58.051Z - totalSupplyShares:0
+2025-11-20T10:08:58.051Z - totalBorrowAssets:3618827500510055088577
+2025-11-20T10:08:58.051Z - totalBorrowShares:3618729016864326870462164178
+2025-11-20T10:11:32.388Z - totalSupplyAssets:26463295433472469
+2025-11-20T10:11:32.388Z - totalSupplyShares:0
+2025-11-20T10:11:32.388Z - totalBorrowAssets:3618827500510055088577
+2025-11-20T10:11:32.388Z - totalBorrowShares:3618729016864326870462164178
+2025-11-20T10:20:00.531Z - totalSupplyAssets:26463295433472469
+2025-11-20T10:20:00.531Z - totalSupplyShares:0
+2025-11-20T10:20:00.531Z - totalBorrowAssets:3618827500510055088577
+2025-11-20T10:20:00.531Z - totalBorrowShares:3618729016864326870462164178
+2025-11-20T10:28:45.021Z - totalSupplyAssets:100000026463295433472469
+2025-11-20T10:28:45.021Z - totalSupplyShares:0
+2025-11-20T10:28:45.021Z - totalBorrowAssets:3618827500510055088577
+2025-11-20T10:28:45.021Z - totalBorrowShares:3618729016864326870462164178
+2025-11-20T10:29:35.044Z - totalSupplyAssets:100000026463295433472469
+2025-11-20T10:29:35.044Z - totalSupplyShares:0
+2025-11-20T10:29:35.044Z - totalBorrowAssets:3618827500510055088577
+2025-11-20T10:29:35.044Z - totalBorrowShares:3618729016864326870462164178
+2025-11-20T10:29:35.044Z - type:borrow
+2025-11-20T10:30:41.251Z - marketType:0
+2025-11-20T10:30:41.264Z - marketType:1
+2025-11-20T10:30:58.748Z - marketType:0 mint 0xacfd299b624f8462dca3b840b78c54941e9f6686
+2025-11-20T10:30:58.767Z - marketType:1 borrow 0xcc20007c1b16bc96cc139f5976d3ba7efbeb7cba
+2025-11-20T10:31:32.176Z - marketType:0 borrow 0xacfd299b624f8462dca3b840b78c54941e9f6686
+2025-11-20T10:31:32.187Z - marketType:1 mint 0xcc20007c1b16bc96cc139f5976d3ba7efbeb7cba
+2025-11-20T10:31:36.043Z - totalSupplyAssets:100000000000000000000000
+2025-11-20T10:31:36.043Z - totalSupplyShares:0
+2025-11-20T10:31:36.043Z - totalBorrowAssets:3618827500510055088577
+2025-11-20T10:31:36.043Z - totalBorrowShares:3618729016864326870462164178
+2025-11-20T10:31:36.043Z - type:mint
+2025-11-20T10:42:18.031Z - remainingCollateralAfterFee:1053063859310433367
+2025-11-20T10:52:29.177Z - collateralToSellInBorrowAssets:3422287288539307745116
+2025-11-20T10:54:09.051Z - positionBorrowedAssets:3618827500510055088577
+2025-11-20T10:54:09.052Z - remainingCollateralAfterFeeInBorrowAssets:4001642665379646794600
+2025-11-20T10:55:07.873Z - collateralToSellInBorrowAssets:3422287288539307745116
+2025-11-20T10:55:07.873Z - newLtv:339239471708416784
+2025-11-20T10:56:04.118Z - liquidationPercentage:575950660364479020
+2025-11-20T10:56:04.119Z - collateralToSellInBorrowAssets:3422287288539307745116
+2025-11-20T10:58:09.001Z - liquidationPercentage:575950660364479020
+2025-11-20T10:58:09.001Z - collateralToSellInBorrowAssets:3440299648936146965648
+2025-11-20T11:25:35.422Z - liquidationPercentage:575950660364479020
+2025-11-20T11:25:35.422Z - collateralToSellInBorrowAssets:3440299648936146965648
+2025-11-20T11:26:06.616Z - liquidationPercentage:1000000000000000000
+2025-11-20T11:26:06.616Z - collateralToSellInBorrowAssets:7492165000731615103378
+2025-11-20T11:26:06.616Z - liquidationPercentage:575950660364479020
+2025-11-20T11:26:06.616Z - collateralToSellInBorrowAssets:3440299648936146965648
+2025-11-20T11:33:01.526Z - liquidationPercentage:1000000000000000000
+2025-11-20T11:33:01.526Z - collateralToSellInBorrowAssets:7492275673315744570909
+2025-11-20T11:33:01.526Z - liquidationPercentage:576448915380796420
+2025-11-20T11:33:01.526Z - collateralToSellInBorrowAssets:3440907027897246814460
+2025-11-20T11:37:27.046Z - liquidationPercentage:651970266975042220
+2025-11-20T11:37:27.046Z - collateralToSellInBorrowAssets:3526221637769605817270
+2025-11-20T11:37:42.873Z - liquidationPercentage:1000000000000000000
+2025-11-20T11:37:42.874Z - collateralToSellInBorrowAssets:7496711638036073988525
+2025-11-20T11:37:42.874Z - liquidationPercentage:651970266975042220
+2025-11-20T11:37:42.874Z - collateralToSellInBorrowAssets:3526221637769605817270
+2025-11-20T11:41:44.534Z - totalSupplyAssets:100004436638036073988525
+2025-11-20T11:41:44.534Z - totalSupplyShares:100000000000000000000000000000
+2025-11-20T11:41:44.534Z - totalBorrowAssets:7496711638036073988525
+2025-11-20T11:41:44.534Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T11:41:44.534Z - type:borrow
+2025-11-20T11:41:44.535Z - liquidationPercentage:1000000000000000000
+2025-11-20T11:41:44.535Z - collateralToSellInBorrowAssets:7496711638036073988525
+2025-11-20T11:41:44.535Z - liquidationPercentage:651970266975042220
+2025-11-20T11:41:44.535Z - collateralToSellInBorrowAssets:3526221637769605817270
+2025-11-20T11:43:17.639Z - totalSupplyAssets:100004436638036073988525
+2025-11-20T11:43:17.639Z - totalSupplyShares:100000000000000000000000000000
+2025-11-20T11:43:17.639Z - totalBorrowAssets:7496711638036073988525
+2025-11-20T11:43:17.639Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T11:43:17.639Z - type:borrow
+2025-11-20T11:43:17.639Z - liquidationPercentage:1000000000000000000
+2025-11-20T11:43:17.639Z - collateralToSellInBorrowAssets:7496711638036073988525
+2025-11-20T11:43:17.639Z - liquidationPercentage:651970266975042220
+2025-11-20T11:43:17.639Z - collateralToSellInBorrowAssets:3526221637769605817270
+2025-11-20T11:43:52.057Z - totalSupplyAssets:100004436638036073988525
+2025-11-20T11:43:52.057Z - totalSupplyShares:100000000000000000000000000000
+2025-11-20T11:43:52.057Z - totalBorrowAssets:7496711638036073988525
+2025-11-20T11:43:52.057Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T11:43:52.057Z - type:borrow
+2025-11-20T11:56:23.053Z - totalSupplyAssets:100004436638036073988525
+2025-11-20T11:56:23.053Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T11:56:23.053Z - totalBorrowAssets:7496711638036073988525
+2025-11-20T11:56:23.053Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T11:56:23.053Z - type:borrow
+2025-11-20T12:13:13.040Z - utilization:74922750000000000
+2025-11-20T12:13:13.040Z - totalSupplyAssets:100004436638036073988525
+2025-11-20T12:13:13.040Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T12:13:13.040Z - totalBorrowAssets:7496711638036073988525
+2025-11-20T12:13:13.040Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T12:13:13.040Z - type:borrow
+2025-11-20T12:14:53.037Z - utilization:74922750000000000 7492275000000000000000 100000000000000000000000
+2025-11-20T12:14:53.037Z - totalSupplyAssets:100004436638036073988525
+2025-11-20T12:14:53.038Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T12:14:53.038Z - totalBorrowAssets:7496711638036073988525
+2025-11-20T12:14:53.038Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T12:14:53.038Z - type:borrow
+2025-11-20T12:40:38.719Z - utilization:74894832951017508 7492275000000000000000 100037275000000000000000
+2025-11-20T12:40:38.720Z - totalSupplyAssets:100041711275351892945870
+2025-11-20T12:40:38.720Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T12:40:38.720Z - totalBorrowAssets:7496711275351892945870
+2025-11-20T12:40:38.720Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T12:40:38.720Z - type:borrow
+2025-11-20T12:42:45.550Z - speed:-1437058375842
+2025-11-20T12:42:45.550Z - totalSupplyAssets:100041711275351892945870
+2025-11-20T12:42:45.550Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T12:42:45.550Z - totalBorrowAssets:7496711275351892945870
+2025-11-20T12:42:45.550Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T12:42:45.550Z - type:borrow
+2025-11-20T12:44:07.363Z - speed:-1437058375842 elapsed:6912288 linearAdaptation:-9933361366632146496
+2025-11-20T12:44:07.363Z - totalSupplyAssets:100041711275351892945870
+2025-11-20T12:44:07.363Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T12:44:07.363Z - totalBorrowAssets:7496711275351892945870
+2025-11-20T12:44:07.363Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T12:44:07.363Z - type:borrow
+2025-11-20T12:45:11.166Z - nowSeconds:1770550212 lastUpdate:1763637924
+2025-11-20T12:45:11.166Z - speed:-1437058375842 elapsed:6912288 linearAdaptation:-9933361366632146496
+2025-11-20T12:45:11.166Z - nowSeconds:1770550212 lastUpdate:1763637924
+2025-11-20T12:45:11.166Z - totalSupplyAssets:100041711275351892945870
+2025-11-20T12:45:11.166Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T12:45:11.166Z - totalBorrowAssets:7496711275351892945870
+2025-11-20T12:45:11.166Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T12:45:11.166Z - type:borrow
+2025-11-20T12:54:50.034Z - nowSeconds:1767094212 lastUpdate:1763637924
+2025-11-20T12:54:50.034Z - speed:-1437058375842 elapsed:3456288 linearAdaptation:-4966887619722194496
+2025-11-20T12:54:50.034Z - nowSeconds:1767094212 lastUpdate:1763637924
+2025-11-20T12:54:50.034Z - totalSupplyAssets:100039697620515360858729
+2025-11-20T12:54:50.034Z - totalSupplyShares:100037275000000000000000000000
+2025-11-20T12:54:50.034Z - totalBorrowAssets:7494697620515360858729
+2025-11-20T12:54:50.034Z - totalBorrowShares:7492275000000000000000000000
+2025-11-20T12:54:50.034Z - type:borrow
+2025-11-30T19:34:18.465Z - liquidationEngine: 0x797e9665E8d7D3ae7491c7B38B7C7Ef7A9cF4748
+2025-11-30T19:34:19.037Z - liquidationEngine: 0x74812a25a5EA36fa389F01e40043CaE5cf567617
+2025-11-30T20:05:31.032Z - market totalBorrow.assets: 7496211234117597649928
+2025-11-30T20:05:31.033Z - market totalSupply.assets: 50041211234117597649928
+2025-11-30T20:05:31.033Z - market totalBorrow.assets: 0
+2025-11-30T20:05:31.033Z - market totalSupply.assets: 100000000000000000000000
+2025-11-30T20:08:31.999Z - market totalBorrow.assets: 7496211234117597649928
+2025-11-30T20:08:31.999Z - market totalSupply.assets: 50041211234117597649928
+2025-11-30T20:08:31.999Z - market totalBorrow.assets: 0
+2025-11-30T20:08:31.999Z - market totalSupply.assets: 100000000000000000000000
+2025-11-30T20:10:34.035Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:10:34.036Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:22:52.006Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:22:52.006Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:32:06.031Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:32:06.032Z - liquidationPercentage: 1000000000000000000
+2025-11-30T20:32:06.032Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:32:53.034Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:32:53.034Z - remainingCollateralAfterFee: 9500000
+2025-11-30T20:32:53.035Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:34:10.033Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:34:10.033Z - collateralToSellInBorrowAssets: 7496211234117597649928
+2025-11-30T20:34:10.033Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:35:17.026Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:35:17.026Z - totalCollateralToTake: 9870265
+2025-11-30T20:35:17.026Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:36:11.037Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:36:11.037Z - totalCollateralToTake: 9870265
+2025-11-30T20:36:11.037Z - collateralAmountToSend: 9832765
+2025-11-30T20:36:11.037Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:41:19.964Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:41:19.965Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:41:40.088Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:41:40.088Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:41:45.331Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:41:45.331Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:42:04.251Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:42:04.251Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:42:18.982Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T20:42:18.983Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:07:02.473Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:07:02.474Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:07:13.492Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:07:13.492Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:07:37.667Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:07:37.667Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:08:01.831Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:08:01.831Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:10:20.770Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:10:20.771Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:10:36.931Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:10:36.931Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:11:01.096Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:11:01.096Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:11:33.641Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:11:33.641Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:11:49.771Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:11:49.771Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:19:47.458Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:19:47.458Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:20:03.565Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:20:03.565Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:20:27.741Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:20:27.741Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:22:21.001Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:22:21.001Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:31:45.816Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-11-30T21:31:45.816Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-12-01T10:08:08.042Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}
+2025-12-01T10:08:08.043Z - state: {"maxLiquidationLtv":"800000000000000000n","dynamicBonusFeeStart":"30000000000000000n","ltvForCompleteLiquidation":"900000000000000000n","dynamicBonusFeeDecaySteepness":"5000000000000000000n","liquidationBaseFee":"50000000000000000n","minPenaltyPercentage":"10000000000000000n","protocolFeePercentage":"75000000000000000n","isEnabledPriorityLiquidation":false,"disablePriorityLiquidationAbovePositionLtv":"950000000000000000n","priorityLiquidationGracePeriod":300,"taggerLiquidationGracePeriod":120,"liquidationWindowTag":259200}

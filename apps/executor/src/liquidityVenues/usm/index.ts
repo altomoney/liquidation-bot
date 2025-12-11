@@ -1,9 +1,8 @@
 import type { ExecutorEncoder } from "executooor-viem";
 import { encodeFunctionData, type Address } from "viem";
-import { readContract } from "viem/actions";
 
 import { usmAbi } from "@/abis/usm";
-import type { ToConvert } from "../../utils/types";
+import type { IndexerActiveUsmsResponse, ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
 import { UniswapSmartOrderRouterVenue } from "../uniswapSmartOrderRouter";
 
@@ -17,13 +16,11 @@ export interface UsmVenueConfig {
  * 2. Calls sellAsset on USM to convert underlying asset to the final destination token
  */
 export class UsmVenue implements LiquidityVenue {
-  private usmAddresses: Address[];
-  private underlyingAssets: Map<Address, Address> = new Map();
-  private stableTokens: Map<Address, Address> = new Map();
+  private activeUsms: IndexerActiveUsmsResponse["activeUsms"];
   private uniswapVenue: UniswapSmartOrderRouterVenue;
 
-  constructor(config: UsmVenueConfig) {
-    this.usmAddresses = config.usmAddresses;
+  constructor(activeUsms: IndexerActiveUsmsResponse["activeUsms"]) {
+    this.activeUsms = activeUsms;
     this.uniswapVenue = new UniswapSmartOrderRouterVenue();
   }
 
@@ -39,18 +36,14 @@ export class UsmVenue implements LiquidityVenue {
 
     try {
       // Find a USM that has dst as its stable token
-      const usm = await this.findUsmForStableToken(encoder, dst);
+      const usm = await this.findUsmForStableToken(dst);
       if (!usm) {
         console.log(`(USM) No USM found with stable token ${dst}`);
         return false;
       }
 
       // Get the underlying asset for this USM
-      const underlyingAsset = await this.getUnderlyingAsset(encoder, usm);
-      if (!underlyingAsset) {
-        console.log(`(USM) No underlying asset found for USM ${usm}`);
-        return false;
-      }
+      const underlyingAsset = usm.underlyingAsset;
 
       // Check if src is already the underlying asset
       if (src === underlyingAsset) {
@@ -99,15 +92,12 @@ export class UsmVenue implements LiquidityVenue {
 
     try {
       // Find the USM for the destination token
-      const usm = await this.findUsmForStableToken(encoder, dst);
+      const usm = await this.findUsmForStableToken(dst);
       if (!usm) {
         throw new Error(`No USM found with stable token ${dst}`);
       }
 
-      const underlyingAsset = await this.getUnderlyingAsset(encoder, usm);
-      if (!underlyingAsset) {
-        throw new Error(`No underlying asset found for USM ${usm}`);
-      }
+      const underlyingAsset = usm.underlyingAsset;
 
       let underlyingAmount = srcAmount;
 
@@ -142,14 +132,13 @@ export class UsmVenue implements LiquidityVenue {
       );
 
       // Approve USM to spend the underlying asset
-      encoder.erc20Approve(underlyingAsset, usm, underlyingAmount);
+      encoder.erc20Approve(underlyingAsset, usm.address, underlyingAmount);
 
       // Call sellAsset(maxAmount, receiver, onBehalf)
       // maxAmount: maximum amount of underlying asset to sell
       // receiver: address to receive the stable tokens
-      // onBehalf: address on whose behalf the operation is performed
       encoder.pushCall(
-        usm,
+        usm.address,
         0n,
         encodeFunctionData({
           abi: usmAbi,
@@ -157,7 +146,6 @@ export class UsmVenue implements LiquidityVenue {
           args: [
             underlyingAmount, // maxAmount - use all underlying we have
             encoder.address, // receiver - the executor
-            encoder.address, // onBehalf - the executor
           ],
         })
       );
@@ -183,70 +171,14 @@ export class UsmVenue implements LiquidityVenue {
    * Find a USM that has the given stable token
    */
   private async findUsmForStableToken(
-    encoder: ExecutorEncoder,
     stableToken: Address
-  ): Promise<Address | null> {
-    for (const usmAddress of this.usmAddresses) {
-      try {
-        // Check if we already cached this USM's stable token
-        if (this.stableTokens.has(usmAddress)) {
-          if (this.stableTokens.get(usmAddress) === stableToken) {
-            return usmAddress;
-          }
-          continue;
-        }
-
-        // Fetch and cache the stable token
-        const usmStableToken = await readContract(encoder.client, {
-          address: usmAddress,
-          abi: usmAbi,
-          functionName: "STABLE_TOKEN",
-        });
-
-        this.stableTokens.set(usmAddress, usmStableToken);
-
-        if (usmStableToken === stableToken) {
-          return usmAddress;
-        }
-      } catch (error) {
-        console.warn(
-          `(USM) Error reading stable token for ${usmAddress}:`,
-          error instanceof Error ? error.message : String(error)
-        );
-        continue;
+  ): Promise<IndexerActiveUsmsResponse["activeUsms"][number] | null> {
+    for (const activeUsm of this.activeUsms) {
+      if (activeUsm.stableToken === stableToken) {
+        return activeUsm;
       }
     }
 
     return null;
-  }
-
-  /**
-   * Get the underlying asset for a USM
-   */
-  private async getUnderlyingAsset(
-    encoder: ExecutorEncoder,
-    usmAddress: Address
-  ): Promise<Address | null> {
-    // Check cache first
-    if (this.underlyingAssets.has(usmAddress)) {
-      return this.underlyingAssets.get(usmAddress)!;
-    }
-
-    try {
-      const underlyingAsset = await readContract(encoder.client, {
-        address: usmAddress,
-        abi: usmAbi,
-        functionName: "UNDERLYING_ASSET",
-      });
-
-      this.underlyingAssets.set(usmAddress, underlyingAsset);
-      return underlyingAsset;
-    } catch (error) {
-      console.error(
-        `(USM) Error reading underlying asset for ${usmAddress}:`,
-        error instanceof Error ? error.message : String(error)
-      );
-      return null;
-    }
   }
 }

@@ -1,5 +1,5 @@
 import { and, eq, gt, inArray, ReadonlyDrizzle } from "ponder";
-import { type Address, type Hex, PublicClient, zeroAddress } from "viem";
+import { type Address, PublicClient, zeroAddress } from "viem";
 
 import { OracleAbi } from "../../abis/OracleAbi";
 import * as schema from "../../ponder.schema";
@@ -23,20 +23,17 @@ export async function getLiquidatablePositions({
   db,
   chainId,
   publicClient,
-  marketAddresses,
   isPriorityLiquidator,
   liquidatorAddress,
 }: {
   db: ReadonlyDrizzle<typeof schema>;
   chainId: number;
   publicClient: PublicClient;
-  marketAddresses: Hex[];
   isPriorityLiquidator: boolean;
   liquidatorAddress: Address;
 }): Promise<{ results: IndexerApiResponse[]; warnings: string[] }> {
   const marketRows = await db.query.market.findMany({
-    where: (row) =>
-      and(eq(row.chainId, chainId), inArray(row.address, marketAddresses)),
+    where: (row) => and(eq(row.chainId, chainId), eq(row.isActive, true)),
     with: {
       // ! Note: following is omitted because it created imprecise results when fetching positions (couple of integer digits)
       // positions: { where: (row) => gt(row.borrowShares, 0n) },
@@ -44,6 +41,8 @@ export async function getLiquidatablePositions({
       liquidationEngine: true,
     },
   });
+
+  const marketAddresses = marketRows.map((market) => market.address);
 
   const positions = await db.query.position.findMany({
     where: (row) =>

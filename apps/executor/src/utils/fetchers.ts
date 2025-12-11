@@ -1,6 +1,6 @@
 import type { Address, Hex } from "viem";
 
-import type { IndexerAPIResponse } from "./types";
+import type { IndexerActiveUsmsResponse, IndexerAPIResponse } from "./types";
 
 const PONDER_SERVICE_URL =
   process.env.PONDER_SERVICE_URL ?? "http://localhost:42069";
@@ -43,8 +43,8 @@ export async function fetchMarketsForVaults(
 
 export async function fetchLiquidatablePositions(
   chainId: number,
-  marketAddresses: Hex[],
-  isPriorityLiquidator: boolean
+  isPriorityLiquidator: boolean,
+  liquidatorAddress: Address
 ) {
   const url = new URL(
     `/chain/${chainId}/liquidatable-positions`,
@@ -53,7 +53,7 @@ export async function fetchLiquidatablePositions(
 
   const response = await fetch(url, {
     method: "POST",
-    body: JSON.stringify({ marketAddresses, isPriorityLiquidator }),
+    body: JSON.stringify({ isPriorityLiquidator, liquidatorAddress }),
   });
 
   if (!response.ok) {
@@ -72,4 +72,22 @@ export async function fetchLiquidatablePositions(
   }
 
   return data.results;
+}
+
+export async function fetchActiveUsms(chainId: number) {
+  const url = new URL(`/chain/${chainId}/active-usms`, PONDER_SERVICE_URL);
+
+  const response = await fetch(url, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch active USMs: ${response.statusText}`);
+  }
+
+  const data = parseWithBigInt<IndexerActiveUsmsResponse>(
+    await response.text()
+  );
+
+  return data.activeUsms;
 }

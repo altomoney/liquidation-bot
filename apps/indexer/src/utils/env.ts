@@ -8,16 +8,21 @@ assert(
   "MARKET_REGISTRY_ADDRESS env var is not set"
 );
 assert(process.env.START_BLOCK, "START_BLOCK env var is not set");
+assert(process.env.DUSD_ADDRESS, "DUSD_ADDRESS env var is not set");
 
 const CHAIN_ID = Number(process.env.CHAIN_ID);
 const MARKET_REGISTRY_ADDRESS = process.env.MARKET_REGISTRY_ADDRESS as Address;
+const USM_REGISTRY_ADDRESS = process.env.USM_REGISTRY_ADDRESS as Address;
 const RPC_URL = process.env.PONDER_RPC_URL;
 const START_BLOCK = Number(process.env.START_BLOCK);
+const DUSD_ADDRESS = process.env.DUSD_ADDRESS as Address;
 
 export const ENV = {
   CHAIN_ID,
   CHAIN_ID_STRING: CHAIN_ID.toFixed(0),
   MARKET_REGISTRY_ADDRESS,
+  USM_REGISTRY_ADDRESS,
   RPC_URL,
   START_BLOCK,
+  DUSD_ADDRESS,
 };

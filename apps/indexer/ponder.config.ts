@@ -5,8 +5,11 @@ import { AdaptiveCurveIrmAbi } from "./abis/AdaptiveCurveIrmAbi";
 import { AltoBorrowMarketAbi } from "./abis/AltoBorrowMarketAbi";
 import { AltoMintMarketAbi } from "./abis/AltoMintMarketAbi";
 import { DlbDcfPriorityLiquidationEngineAbi } from "./abis/DlbDcfPriorityLiquidationEngineAbi";
+import { DusdAbi } from "./abis/DusdAbi";
+import { DusdUsmAbi } from "./abis/DusdUsmAbi";
 import { FixedRateIrmAbi } from "./abis/FixedRateIrmAbi";
 import { MarketRegistryAbi } from "./abis/MarketRegistryAbi";
+import { UsmRegistryAbi } from "./abis/UsmRegistryAbi";
 import { ENV } from "./src/utils/env";
 import { getMarketAddresses } from "./src/utils/getMarketAddresses";
 
@@ -20,6 +23,30 @@ export default createConfig({
     },
   },
   contracts: {
+    Dusd: {
+      abi: DusdAbi,
+      chain: ENV.CHAIN_ID_STRING,
+      address: ENV.DUSD_ADDRESS,
+      startBlock: ENV.START_BLOCK,
+    },
+    UsmRegistry: {
+      abi: UsmRegistryAbi,
+      chain: ENV.CHAIN_ID_STRING,
+      address: ENV.USM_REGISTRY_ADDRESS,
+      startBlock: ENV.START_BLOCK,
+    },
+    Usm: {
+      chain: ENV.CHAIN_ID_STRING,
+      abi: DusdUsmAbi,
+      address: factory({
+        // Address of the factory contract.
+        address: ENV.USM_REGISTRY_ADDRESS,
+        // Event from the factory contract ABI which contains the child address.
+        event: parseAbiItem("event UsmAdded(address indexed usm)"),
+        parameter: "usm",
+      }),
+      startBlock: ENV.START_BLOCK,
+    },
     MarketRegistry: {
       abi: MarketRegistryAbi,
       chain: ENV.CHAIN_ID_STRING,

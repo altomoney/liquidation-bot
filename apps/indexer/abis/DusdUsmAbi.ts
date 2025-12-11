@@ -1,4 +1,4 @@
-export const usmAbi = [
+export const DusdUsmAbi = [
   {
     type: "constructor",
     inputs: [

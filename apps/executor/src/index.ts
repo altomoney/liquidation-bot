@@ -8,8 +8,9 @@ import { UniswapSmartOrderRouterVenue, UsmVenue } from "./liquidityVenues";
 import type { LiquidityVenue } from "./liquidityVenues/liquidityVenue";
 import { ChainlinkPricer, DefiLlamaPricer } from "./pricers";
 import type { Pricer } from "./pricers/pricer";
+import { fetchActiveUsms } from "./utils/fetchers";
 
-export const launchBot = (config: ChainConfig) => {
+export const launchBot = async (config: ChainConfig) => {
   const logTag = `[${config.chain.name} client]: `;
   console.log(`${logTag}Starting up`);
 
@@ -19,13 +20,15 @@ export const launchBot = (config: ChainConfig) => {
     account: privateKeyToAccount(config.liquidationPrivateKey),
   });
 
+  const activeUsms = await fetchActiveUsms(config.chainId);
+
   // LIQUIDITY VENUES
   const liquidityVenues: LiquidityVenue[] = [];
   // liquidityVenues.push(new Erc20Wrapper());
   // liquidityVenues.push(new Erc4626());
   liquidityVenues.push(new UniswapSmartOrderRouterVenue());
-  if (config.usms && config.usms.length > 0) {
-    liquidityVenues.push(new UsmVenue({ usmAddresses: config.usms }));
+  if (activeUsms.length > 0) {
+    liquidityVenues.push(new UsmVenue(activeUsms));
   }
   // liquidityVenues.push(new UniswapV3Venue());
   // liquidityVenues.push(new UniswapV4Venue());
@@ -56,7 +59,6 @@ export const launchBot = (config: ChainConfig) => {
     logTag,
     chainId: config.chainId,
     client,
-    markets: config.markets,
     wNative: config.wNative,
     executorAddress: config.executorAddress,
     treasuryAddress: config.treasuryAddress ?? client.account.address,

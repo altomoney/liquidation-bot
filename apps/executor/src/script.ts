@@ -94,7 +94,7 @@ async function run() {
     console.log("🚀 Starting bot...");
 
     for (const config of configs) {
-      launchBot(config);
+      await launchBot(config);
     }
   } catch (err) {
     console.error(err);

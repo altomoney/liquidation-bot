@@ -1,4 +1,6 @@
 import { Hex } from "viem";
+import { DusdConfigDb } from "../dusd/types";
+import { UsmDb } from "../usm/types";
 import { Equal, Expect } from "../utils";
 import { IrmDb } from "../utils/irm/types";
 import { LiquidationEngineDb } from "../utils/liquidation-engine/types";
@@ -47,6 +49,26 @@ type StaticLiquidationEngineDb = {
   config: unknown;
 };
 
+type StaticUsmDb = {
+  chainId: number;
+  address: `0x${string}`;
+  stableToken: `0x${string}`;
+  underlyingAsset: `0x${string}`;
+  underlyingExposureCap: bigint;
+  type: "permissioned" | "permissionless";
+  dusdConfig: `0x${string}`;
+  isActive: boolean;
+};
+
+type StaticDusdConfigDb = {
+  chainId: number;
+  minterAddress: `0x${string}`;
+  minterStatus: boolean;
+  burnerStatus: boolean;
+  minterCeiling: bigint;
+  currentlyMinted: bigint;
+};
+
 // Ensures that static typings match the database types
 type _StaticMarketDbMatchesMarketDb = Expect<
   Equal<StaticMarketDb, Pick<MarketDb, keyof StaticMarketDb>>
@@ -67,6 +89,14 @@ type _StaticLiquidationEngineDbMatchesLiquidationEngineDb = Expect<
   >
 >;
 
+type _StaticUsmDbMatchesUsmDb = Expect<
+  Equal<StaticUsmDb, Pick<UsmDb, keyof StaticUsmDb>>
+>;
+
+type _StaticDusdConfigDbMatchesDusdConfigDb = Expect<
+  Equal<StaticDusdConfigDb, Pick<DusdConfigDb, keyof StaticDusdConfigDb>>
+>;
+
 export type ILiquidatablePosition = StaticPositionDb & {
   seizableCollateral: bigint;
 };
@@ -80,4 +110,12 @@ export type IMarket = StaticMarketDb & {
 export interface IndexerApiResponse {
   market: IMarket;
   positionsLiq: ILiquidatablePosition[];
+}
+
+type StaticUsmDbWithDusdConfig = StaticUsmDb & {
+  dusdConfig: StaticDusdConfigDb;
+};
+
+export interface IndexerActiveUsmsResponse {
+  activeUsms: StaticUsmDbWithDusdConfig[];
 }

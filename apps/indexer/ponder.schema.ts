@@ -143,3 +143,51 @@ export const liquidationEngineRelations = relations(
     }),
   })
 );
+
+export const dusdConfig = onchainTable(
+  "dusdConfig",
+  (t) => ({
+    chainId: t.integer().notNull(),
+    minterAddress: t.hex().notNull(),
+    minterStatus: t.boolean().notNull().default(false),
+    burnerStatus: t.boolean().notNull().default(false),
+    minterCeiling: t.bigint().notNull().default(0n),
+    currentlyMinted: t.bigint().notNull().default(0n),
+  }),
+  (table) => ({
+    pk: primaryKey({ columns: [table.chainId, table.minterAddress] }),
+  })
+);
+
+// Markets
+export const usmType = onchainEnum("usmType", [
+  "permissioned",
+  "permissionless",
+]);
+
+export const usm = onchainTable(
+  "usm",
+  (t) => ({
+    chainId: t.integer().notNull(),
+    address: t.hex().notNull(),
+
+    stableToken: t.hex().notNull(),
+    underlyingAsset: t.hex().notNull(),
+    underlyingExposureCap: t.bigint().notNull().default(0n),
+
+    type: usmType().notNull(),
+
+    dusdConfig: t.hex().notNull(),
+    isActive: t.boolean().notNull().default(true),
+  }),
+  (table) => ({
+    pk: primaryKey({ columns: [table.chainId, table.address] }),
+  })
+);
+
+export const usmRelations = relations(usm, ({ one }) => ({
+  dusdConfig: one(dusdConfig, {
+    fields: [usm.chainId, usm.address],
+    references: [dusdConfig.chainId, dusdConfig.minterAddress],
+  }),
+}));
