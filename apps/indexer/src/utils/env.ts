@@ -16,6 +16,7 @@ const USM_REGISTRY_ADDRESS = process.env.USM_REGISTRY_ADDRESS as Address;
 const RPC_URL = process.env.PONDER_RPC_URL;
 const START_BLOCK = Number(process.env.START_BLOCK);
 const DUSD_ADDRESS = process.env.DUSD_ADDRESS as Address;
+const POSTGRES_DATABASE_URL = process.env.POSTGRES_DATABASE_URL;
 
 export const ENV = {
   CHAIN_ID,
@@ -25,4 +26,5 @@ export const ENV = {
   RPC_URL,
   START_BLOCK,
   DUSD_ADDRESS,
+  POSTGRES_DATABASE_URL,
 };

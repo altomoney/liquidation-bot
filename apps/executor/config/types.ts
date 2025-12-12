@@ -7,10 +7,8 @@ export interface Config {
 }
 
 export interface Options {
-  checkProfit: boolean;
   treasuryAddress?: Address;
   liquidationBufferBps?: number;
-  useFlashbots: boolean;
   blockInterval?: number;
   // NOT IMPLEMENTED YET
   isPriorityLiquidator: boolean;

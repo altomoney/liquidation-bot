@@ -12,6 +12,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { readContract } from "viem/actions";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { ENV } from "./utils/env";
 
 async function run() {
   const argv = yargs(hideBin(process.argv))
@@ -35,19 +36,11 @@ async function run() {
   const token = argv.token as Address;
   const chainId = argv.chainId;
 
-  const rpcUrl = process.env[`RPC_URL_${chainId}`];
-  const privateKey = process.env[`LIQUIDATION_PRIVATE_KEY_${chainId}`];
-  const executorAddress = process.env[`EXECUTOR_ADDRESS_${chainId}`];
+  if (!ENV.CHAIN_CONFIGS[chainId]) {
+    throw new Error(`No chain config found for chainId ${chainId}`);
+  }
 
-  if (!rpcUrl) {
-    throw new Error(`RPC_URL_${chainId} is not set`);
-  }
-  if (!privateKey) {
-    throw new Error(`LIQUIDATION_PRIVATE_KEY_${chainId} is not set`);
-  }
-  if (!executorAddress) {
-    throw new Error(`EXECUTOR_ADDRESS_${chainId} is not set`);
-  }
+  const { rpcUrl, privateKey, executorAddress } = ENV.CHAIN_CONFIGS[chainId];
 
   const chainConfig = chainConfigs[chainId];
   if (!chainConfig) {

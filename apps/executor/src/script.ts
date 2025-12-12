@@ -1,6 +1,6 @@
 import { type ChildProcess } from "node:child_process";
 
-import { chainConfig, chainConfigs } from "@/config";
+import { chainConfig } from "@/config";
 
 import { launchBot } from ".";
 import { ENV } from "./utils/env";
@@ -51,7 +51,7 @@ async function waitForIndexing(apiUrl: string) {
 async function run() {
   let ponder: ChildProcess | undefined;
 
-  const configs = Object.keys(chainConfigs)
+  const configs = Object.keys(ENV.CHAIN_CONFIGS)
     .map((config) => {
       try {
         return chainConfig(Number(config));

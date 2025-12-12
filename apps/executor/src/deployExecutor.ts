@@ -9,24 +9,15 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { waitForTransactionReceipt } from "viem/actions";
+import { ENV } from "./utils/env";
 
 async function run() {
-  const configs = Object.values(chainConfigs);
-
-  for (const config of configs) {
-    const chain = config.chain;
-    const id = chain.id;
-
-    const rpcUrl =
-      process.env[`RPC_URL_${id}`] ?? chain.rpcUrls.default.http[0];
-    const privateKey = process.env[`LIQUIDATION_PRIVATE_KEY_${id}`];
-
-    if (!rpcUrl) {
-      throw new Error(`RPC_URL_${id} is not set`);
+  for (const chainId of Object.keys(ENV.CHAIN_CONFIGS)) {
+    if (!ENV.CHAIN_CONFIGS[chainId]) {
+      throw new Error(`No chain config found for chainId ${chainId}`);
     }
-    if (!privateKey) {
-      throw new Error(`LIQUIDATION_PRIVATE_KEY_${id} is not set`);
-    }
+    const chain = chainConfigs[Number(chainId)]?.chain;
+    const { rpcUrl, privateKey } = ENV.CHAIN_CONFIGS[chainId];
 
     const client = createWalletClient({
       chain,

@@ -1,6 +1,5 @@
 import { mainnet, sepolia } from "viem/chains";
 
-import { ENV } from "@/utils/env";
 import type { Config } from "./types";
 
 export const COOLDOWN_ENABLED = false; // true if you want to enable the cooldown mechanism
@@ -12,9 +11,7 @@ export const chainConfigs: Record<number, Config> = {
     chain: sepolia,
     wNative: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", // uniswap v3 weth
     options: {
-      checkProfit: !ENV.SKIP_CHECK_FOR_PROFIT,
       liquidationBufferBps: 50,
-      useFlashbots: ENV.IS_USING_FLASHBOTS,
       blockInterval: 2,
       isPriorityLiquidator: false,
     },
@@ -23,9 +20,7 @@ export const chainConfigs: Record<number, Config> = {
     chain: mainnet,
     wNative: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // weth
     options: {
-      checkProfit: !ENV.SKIP_CHECK_FOR_PROFIT,
       liquidationBufferBps: 50,
-      useFlashbots: ENV.IS_USING_FLASHBOTS,
       blockInterval: 2,
       isPriorityLiquidator: false,
     },

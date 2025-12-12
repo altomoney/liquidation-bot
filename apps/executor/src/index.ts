@@ -39,12 +39,12 @@ export const launchBot = async (config: ChainConfig) => {
   pricers.push(new DefiLlamaPricer());
   pricers.push(new ChainlinkPricer());
 
-  if (config.checkProfit && pricers.length === 0) {
+  if (ENV.CHECK_PROFIT && pricers.length === 0) {
     throw new Error(`${logTag} You must configure pricers!`);
   }
 
   let flashbotAccount = undefined;
-  if (config.useFlashbots) {
+  if (ENV.USE_FLASHBOTS) {
     if (ENV.FLASHBOTS_PRIVATE_KEY === undefined) {
       throw new Error(`${logTag} FLASHBOTS_PRIVATE_KEY is not set`);
     }
@@ -60,7 +60,7 @@ export const launchBot = async (config: ChainConfig) => {
     executorAddress: config.executorAddress,
     treasuryAddress: config.treasuryAddress ?? client.account.address,
     liquidityVenues,
-    pricers: config.checkProfit ? pricers : undefined,
+    pricers: ENV.CHECK_PROFIT ? pricers : undefined,
     flashbotAccount,
     isPriorityLiquidator: config.isPriorityLiquidator,
   };
