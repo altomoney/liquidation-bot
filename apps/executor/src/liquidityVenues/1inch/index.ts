@@ -1,5 +1,6 @@
 import { API_BASE_URL, slippage, supportedNetworks } from "@/config";
 import { BigIntish } from "@/types";
+import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
 import { Address } from "viem";
 import { ToConvert } from "../../utils/types";
@@ -10,7 +11,7 @@ export class OneInch implements LiquidityVenue {
   private apiKey: string | undefined;
 
   constructor() {
-    this.apiKey = process.env.ONE_INCH_SWAP_API_KEY;
+    this.apiKey = ENV.ONE_INCH_SWAP_API_KEY;
   }
 
   supportsRoute(encoder: ExecutorEncoder, src: Address, dst: Address) {

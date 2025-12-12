@@ -12,6 +12,7 @@ export interface Options {
   liquidationBufferBps?: number;
   useFlashbots: boolean;
   blockInterval?: number;
+  // NOT IMPLEMENTED YET
   isPriorityLiquidator: boolean;
 }
 

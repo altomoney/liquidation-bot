@@ -9,6 +9,7 @@ import { type Address, erc20Abi } from "viem";
 import { readContract } from "viem/actions";
 
 import { uniswapV3SubgraphOverrides } from "@/config/liquidityVenues/uniswapSmartOrderRouter";
+import { ENV } from "@/utils/env";
 import { ethers } from "ethers";
 import type { ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
@@ -191,7 +192,7 @@ export class UniswapSmartOrderRouterVenue implements LiquidityVenue {
           0.01,
           Number.MAX_VALUE,
           uniswapV3SubgraphOverrides[chainId].url,
-          uniswapV3SubgraphOverrides[chainId].bearerToken
+          ENV.UNISWAP_V3_SUBGRAPH_BEARER_TOKEN ?? undefined
         );
 
         routerConfig.v3SubgraphProvider = v3SubgraphProvider;

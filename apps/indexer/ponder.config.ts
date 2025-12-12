@@ -120,4 +120,10 @@ export default createConfig({
       startBlock: ENV.START_BLOCK,
     },
   },
+  database: process.env.POSTGRES_DATABASE_URL
+    ? {
+        kind: "postgres",
+        connectionString: process.env.POSTGRES_DATABASE_URL,
+      }
+    : undefined,
 });

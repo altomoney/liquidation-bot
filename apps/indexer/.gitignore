@@ -1,3 +1,6 @@
 # Ponder
 /generated/
 /.ponder/
+
+# Debug Log
+log.txt

@@ -1,9 +1,7 @@
 import type { Address, Hex } from "viem";
 
+import { ENV } from "./env";
 import type { IndexerActiveUsmsResponse, IndexerAPIResponse } from "./types";
-
-const PONDER_SERVICE_URL =
-  process.env.PONDER_SERVICE_URL ?? "http://localhost:42069";
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function parseWithBigInt<T = unknown>(jsonText: string): T {
@@ -22,7 +20,7 @@ export async function fetchMarketsForVaults(
 ): Promise<Hex[]> {
   const url = new URL(
     `/chain/${chainId}/withdraw-queue-set`,
-    PONDER_SERVICE_URL
+    ENV.PONDER_SERVICE_URL
   );
 
   const response = await fetch(url, {
@@ -48,7 +46,7 @@ export async function fetchLiquidatablePositions(
 ) {
   const url = new URL(
     `/chain/${chainId}/liquidatable-positions`,
-    PONDER_SERVICE_URL
+    ENV.PONDER_SERVICE_URL
   );
 
   const response = await fetch(url, {
@@ -75,7 +73,7 @@ export async function fetchLiquidatablePositions(
 }
 
 export async function fetchActiveUsms(chainId: number) {
-  const url = new URL(`/chain/${chainId}/active-usms`, PONDER_SERVICE_URL);
+  const url = new URL(`/chain/${chainId}/active-usms`, ENV.PONDER_SERVICE_URL);
 
   const response = await fetch(url, {
     method: "POST",

@@ -8,6 +8,7 @@ import { UniswapSmartOrderRouterVenue, UsmVenue } from "./liquidityVenues";
 import type { LiquidityVenue } from "./liquidityVenues/liquidityVenue";
 import { ChainlinkPricer, DefiLlamaPricer } from "./pricers";
 import type { Pricer } from "./pricers/pricer";
+import { ENV } from "./utils/env";
 import { fetchActiveUsms } from "./utils/fetchers";
 
 export const launchBot = async (config: ChainConfig) => {
@@ -44,15 +45,11 @@ export const launchBot = async (config: ChainConfig) => {
 
   let flashbotAccount = undefined;
   if (config.useFlashbots) {
-    const flashbotsPrivateKey = process.env.FLASHBOTS_PRIVATE_KEY;
-
-    if (flashbotsPrivateKey === undefined) {
+    if (ENV.FLASHBOTS_PRIVATE_KEY === undefined) {
       throw new Error(`${logTag} FLASHBOTS_PRIVATE_KEY is not set`);
     }
 
-    flashbotAccount = privateKeyToAccount(
-      process.env.FLASHBOTS_PRIVATE_KEY as Hex
-    );
+    flashbotAccount = privateKeyToAccount(ENV.FLASHBOTS_PRIVATE_KEY as Hex);
   }
 
   const inputs: LiquidationBotInputs = {
