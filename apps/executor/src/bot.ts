@@ -233,10 +233,11 @@ export class LiquidationBot {
         this.flashbotAccount
       );
     } else {
-      await writeContract(this.client, {
+      const txHash = await writeContract(this.client, {
         address: encoder.address,
         ...functionData,
       });
+      console.log(`${this.logTag}Transaction submitted: ${txHash}`);
     }
 
     return true;

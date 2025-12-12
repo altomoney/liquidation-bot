@@ -1,5 +1,5 @@
 import type { ExecutorEncoder } from "executooor-viem";
-import { encodeFunctionData, type Address } from "viem";
+import { encodeFunctionData, isAddressEqual, type Address } from "viem";
 import { readContract } from "viem/actions";
 
 import { usmAbi } from "@/abis/usm";
@@ -24,20 +24,41 @@ export class UsmVenue implements LiquidityVenue {
   }
 
   async supportsRoute(encoder: ExecutorEncoder, src: Address, dst: Address) {
+    console.log(`(USM) Checking route ${src} -> ${dst}`);
+
     if (src === dst) return false;
 
     const usm = this.findViableUsm(dst);
-    if (!usm) return false;
+    if (!usm) {
+      console.log(`(USM) No viable USM found for ${dst}`);
+      return false;
+    }
+
+    console.log(
+      `(USM) Found USM ${usm.address} (underlying: ${usm.underlyingAsset})`
+    );
 
     // If src is already the underlying asset, no swap needed
-    if (src === usm.underlyingAsset) return true;
+    if (isAddressEqual(src, usm.underlyingAsset)) {
+      console.log(`(USM) Route supported (src is underlying)`);
+      return true;
+    }
 
     // Check if Uniswap can swap src to underlying asset
-    return this.uniswapVenue.supportsRoute(encoder, src, usm.underlyingAsset);
+    const canSwap = await this.uniswapVenue.supportsRoute(
+      encoder,
+      src,
+      usm.underlyingAsset
+    );
+    console.log(
+      `(USM) Route ${canSwap ? "supported" : "not supported"} via Uniswap`
+    );
+    return canSwap;
   }
 
   async convert(encoder: ExecutorEncoder, toConvert: ToConvert) {
     const { src, dst, srcAmount } = toConvert;
+    console.log(`(USM) Converting ${srcAmount} of ${src} -> ${dst}`);
 
     const usm = this.findViableUsm(dst);
     if (!usm) {
@@ -48,13 +69,15 @@ export class UsmVenue implements LiquidityVenue {
     let underlyingAmount = srcAmount;
 
     // If src is not the underlying asset, swap it via Uniswap first
-    if (src !== underlyingAsset) {
+    if (!isAddressEqual(src, underlyingAsset)) {
+      console.log(`(USM) Swapping ${src} -> ${underlyingAsset} via Uniswap`);
       const swapResult = await this.uniswapVenue.convert(encoder, {
         src,
         dst: underlyingAsset,
         srcAmount,
       });
       underlyingAmount = swapResult.srcAmount;
+      console.log(`(USM) Swap output: ${underlyingAmount}`);
 
       if (underlyingAmount === 0n) {
         throw new Error("No underlying asset received from swap");
@@ -62,12 +85,19 @@ export class UsmVenue implements LiquidityVenue {
     }
 
     // Get the exact stable token output from the contract
-    const [assetAmount, , grossAmount] = await readContract(encoder.client, {
-      address: usmAddress,
-      abi: usmAbi,
-      functionName: "getStableTokenAmountForSellAsset",
-      args: [underlyingAmount],
-    });
+    const [assetAmount, stableTokenBought, grossAmount] = await readContract(
+      encoder.client,
+      {
+        address: usmAddress,
+        abi: usmAbi,
+        functionName: "getStableTokenAmountForSellAsset",
+        args: [underlyingAmount],
+      }
+    );
+
+    console.log(
+      `(USM) Price quote: sell ${assetAmount} underlying -> mint ${grossAmount} (receive ${stableTokenBought})`
+    );
 
     // Verify USM can accommodate this amount
     this.assertCanAccommodate(usm, assetAmount, grossAmount);
@@ -84,6 +114,7 @@ export class UsmVenue implements LiquidityVenue {
       })
     );
 
+    console.log(`(USM) Encoded sellAsset call to ${usmAddress}`);
     return { src: dst, dst, srcAmount: 0n };
   }
 
@@ -98,18 +129,29 @@ export class UsmVenue implements LiquidityVenue {
     grossAmount: bigint
   ): void {
     const newExposure = usm.currentExposure + assetAmount;
+    const newMinted = usm.dusdConfig.currentlyMinted + grossAmount;
+
+    const exposureAvailable = usm.underlyingExposureCap - usm.currentExposure;
+    const mintingAvailable =
+      usm.dusdConfig.minterCeiling - usm.dusdConfig.currentlyMinted;
+
+    console.log(
+      `(USM) Capacity check: exposure ${exposureAvailable} available (need ${assetAmount}), minting ${mintingAvailable} available (need ${grossAmount})`
+    );
+
     if (newExposure > usm.underlyingExposureCap) {
       throw new Error(
-        `USM exposure cap exceeded: ${newExposure} > ${usm.underlyingExposureCap}`
+        `USM exposure cap exceeded: need ${assetAmount}, only ${exposureAvailable} available`
       );
     }
 
-    const newMinted = usm.dusdConfig.currentlyMinted + grossAmount;
     if (newMinted > usm.dusdConfig.minterCeiling) {
       throw new Error(
-        `USM minter ceiling exceeded: ${newMinted} > ${usm.dusdConfig.minterCeiling}`
+        `USM minter ceiling exceeded: need ${grossAmount}, only ${mintingAvailable} available`
       );
     }
+
+    console.log(`(USM) Capacity OK`);
   }
 
   /**
@@ -122,7 +164,7 @@ export class UsmVenue implements LiquidityVenue {
   private findViableUsm(stableToken: Address): ActiveUsm | undefined {
     return this.activeUsms.find(
       (usm) =>
-        usm.stableToken === stableToken &&
+        isAddressEqual(usm.stableToken, stableToken) &&
         usm.isActive &&
         usm.underlyingExposureCap > usm.currentExposure &&
         usm.dusdConfig.minterCeiling > usm.dusdConfig.currentlyMinted

@@ -320,6 +320,15 @@ const updateNewIrm = async (
     Parameters<typeof ponder.on<"AltoBorrowMarket:setup">>[1]
   >[0]["context"]
 ) => {
+  const marketDb = await context.db.find(market, {
+    chainId: context.chain.id,
+    address: marketAddress,
+  });
+
+  if (!marketDb) {
+    return;
+  }
+
   if (irmAddress === zeroAddress) {
     await context.db
       .update(market, {
@@ -467,6 +476,8 @@ const updateNewLiquidationEngine = async (
       .set((row) => ({
         liquidationEngine: liquidationEngineAddress,
       }));
+  } else {
+    return;
   }
 
   const liquidationEngineTypeIndex = await context.client.readContract({
