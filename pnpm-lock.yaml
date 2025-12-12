@@ -47,6 +47,9 @@ importers:
       '@types/yargs':
         specifier: 17.0.35
         version: 17.0.35
+      bun:
+        specifier: 1.3.2
+        version: 1.3.2
 
   apps/indexer:
     dependencies:
@@ -602,6 +605,61 @@ packages:
 
   '@openzeppelin/contracts@5.0.2':
     resolution: {integrity: sha512-ytPc6eLGcHHnapAZ9S+5qsdomhjo6QBHTDRRBFfTxXIpsicMhVPouPgmUPebZZZGX7vt9USA+Z+0M0dSVtSUEA==}
+
+  '@oven/bun-darwin-aarch64@1.3.2':
+    resolution: {integrity: sha512-licBDIbbLP5L5/S0+bwtJynso94XD3KyqSP48K59Sq7Mude6C7dR5ZujZm4Ut4BwZqUFfNOfYNMWBU5nlL7t1A==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oven/bun-darwin-x64-baseline@1.3.2':
+    resolution: {integrity: sha512-UHxdtbyxdtNJUNcXtIrjx3Lmq8ji3KywlXtIHV/0vn9A8W5mulqOcryqUWMFVH9JTIIzmNn6Q/qVmXHTME63Ww==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oven/bun-darwin-x64@1.3.2':
+    resolution: {integrity: sha512-hn8lLzsYyyh6ULo2E8v2SqtrWOkdQKJwapeVy1rDw7juTTeHY3KDudGWf4mVYteC9riZU6HD88Fn3nGwyX0eIg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oven/bun-linux-aarch64-musl@1.3.2':
+    resolution: {integrity: sha512-OD9DYkjes7WXieBn4zQZGXWhRVZhIEWMDGCetZ3H4vxIuweZ++iul/CNX5jdpNXaJ17myb1ROMvmRbrqW44j3w==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oven/bun-linux-aarch64@1.3.2':
+    resolution: {integrity: sha512-5uZzxzvHU/z+3cZwN/A0H8G+enQ+9FkeJVZkE2fwK2XhiJZFUGAuWajCpy7GepvOWlqV7VjPaKi2+Qmr4IX7nQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oven/bun-linux-x64-baseline@1.3.2':
+    resolution: {integrity: sha512-m9Ov9YH8KjRLui87eNtQQFKVnjGsNk3xgbrR9c8d2FS3NfZSxmVjSeBvEsDjzNf1TXLDriHb/NYOlpiMf/QzDg==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-linux-x64-musl-baseline@1.3.2':
+    resolution: {integrity: sha512-q8Hto8hcpofPJjvuvjuwyYvhOaAzPw1F5vRUUeOJDmDwZ4lZhANFM0rUwchMzfWUJCD6jg8/EVQ8MiixnZWU0A==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-linux-x64-musl@1.3.2':
+    resolution: {integrity: sha512-3TuOsRVoG8K+soQWRo+Cp5ACpRs6rTFSu5tAqc/6WrqwbNWmqjov/eWJPTgz3gPXnC7uNKVG7RxxAmV8r2EYTQ==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-linux-x64@1.3.2':
+    resolution: {integrity: sha512-EoEuRP9bxAxVKuvi6tZ0ZENjueP4lvjz0mKsMzdG0kwg/2apGKiirH1l0RIcdmvfDGGuDmNiv/XBpkoXq1x8ug==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-windows-x64-baseline@1.3.2':
+    resolution: {integrity: sha512-s00T99MjB+xLOWq+t+wVaVBrry+oBOZNiTJijt+bmkp/MJptYS3FGvs7a+nkjLNzoNDoWQcXgKew6AaHES37Bg==}
+    cpu: [x64]
+    os: [win32]
+
+  '@oven/bun-windows-x64@1.3.2':
+    resolution: {integrity: sha512-nZJUa5NprPYQ4Ii4cMwtP9PzlJJTp1XhxJ+A9eSn1Jfr6YygVWyN2KLjenyI93IcuBouBAaepDAVZZjH2lFBhg==}
+    cpu: [x64]
+    os: [win32]
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -1170,6 +1228,12 @@ packages:
     resolution: {integrity: sha512-i/Gln4tbzKNuxP70OWhJRZz1MRfvqExowP7U6JKoI8cntFrtxg7RJK3jvz7wQW54UuvNC8tbKHHri5fy74FVqg==}
     peerDependencies:
       '@types/react': ^19
+
+  bun@1.3.2:
+    resolution: {integrity: sha512-x75mPJiEfhO1j4Tfc65+PtW6ZyrAB6yTZInydnjDZXF9u9PRAnr6OK3v0Q9dpDl0dxRHkXlYvJ8tteJxc8t4Sw==}
+    cpu: [arm64, x64]
+    os: [darwin, linux, win32]
+    hasBin: true
 
   bunyan-blackhole@1.1.1:
     resolution: {integrity: sha512-UwzNPhbbSqbzeJhCbygqjlAY7p0ZUdv1ADXPQvDh3CA7VW3C/rCc1gaQO/8j9QL4vsKQCQZQSQIEwX+lxioPAQ==}
@@ -3582,6 +3646,39 @@ snapshots:
 
   '@openzeppelin/contracts@5.0.2': {}
 
+  '@oven/bun-darwin-aarch64@1.3.2':
+    optional: true
+
+  '@oven/bun-darwin-x64-baseline@1.3.2':
+    optional: true
+
+  '@oven/bun-darwin-x64@1.3.2':
+    optional: true
+
+  '@oven/bun-linux-aarch64-musl@1.3.2':
+    optional: true
+
+  '@oven/bun-linux-aarch64@1.3.2':
+    optional: true
+
+  '@oven/bun-linux-x64-baseline@1.3.2':
+    optional: true
+
+  '@oven/bun-linux-x64-musl-baseline@1.3.2':
+    optional: true
+
+  '@oven/bun-linux-x64-musl@1.3.2':
+    optional: true
+
+  '@oven/bun-linux-x64@1.3.2':
+    optional: true
+
+  '@oven/bun-windows-x64-baseline@1.3.2':
+    optional: true
+
+  '@oven/bun-windows-x64@1.3.2':
+    optional: true
+
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
@@ -4236,6 +4333,20 @@ snapshots:
     dependencies:
       '@types/node': 24.10.1
       '@types/react': 19.2.6
+
+  bun@1.3.2:
+    optionalDependencies:
+      '@oven/bun-darwin-aarch64': 1.3.2
+      '@oven/bun-darwin-x64': 1.3.2
+      '@oven/bun-darwin-x64-baseline': 1.3.2
+      '@oven/bun-linux-aarch64': 1.3.2
+      '@oven/bun-linux-aarch64-musl': 1.3.2
+      '@oven/bun-linux-x64': 1.3.2
+      '@oven/bun-linux-x64-baseline': 1.3.2
+      '@oven/bun-linux-x64-musl': 1.3.2
+      '@oven/bun-linux-x64-musl-baseline': 1.3.2
+      '@oven/bun-windows-x64': 1.3.2
+      '@oven/bun-windows-x64-baseline': 1.3.2
 
   bunyan-blackhole@1.1.1(bunyan@1.8.15):
     dependencies:
