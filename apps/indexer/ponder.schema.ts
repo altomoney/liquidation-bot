@@ -35,6 +35,8 @@ export const market = onchainTable(
     totalSupplyShares: t.bigint().notNull().default(0n),
     totalBorrowAssets: t.bigint().notNull().default(0n),
     totalBorrowShares: t.bigint().notNull().default(0n),
+
+    paused: t.boolean().notNull().default(false),
   }),
   (table) => ({
     // Composite primary key uniquely identifies a market across chains
@@ -174,11 +176,13 @@ export const usm = onchainTable(
     stableToken: t.hex().notNull(),
     underlyingAsset: t.hex().notNull(),
     underlyingExposureCap: t.bigint().notNull().default(0n),
+    currentExposure: t.bigint().notNull().default(0n),
 
     type: usmType().notNull(),
 
     dusdConfig: t.hex().notNull(),
     isActive: t.boolean().notNull().default(true),
+    swapsFrozen: t.boolean().notNull().default(false),
   }),
   (table) => ({
     pk: primaryKey({ columns: [table.chainId, table.address] }),

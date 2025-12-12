@@ -55,9 +55,11 @@ type StaticUsmDb = {
   stableToken: `0x${string}`;
   underlyingAsset: `0x${string}`;
   underlyingExposureCap: bigint;
+  currentExposure: bigint;
   type: "permissioned" | "permissionless";
   dusdConfig: `0x${string}`;
   isActive: boolean;
+  swapsFrozen: boolean;
 };
 
 type StaticDusdConfigDb = {

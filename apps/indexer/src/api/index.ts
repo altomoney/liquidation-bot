@@ -79,7 +79,8 @@ app.post("/chain/:chainId/active-usms", async (c) => {
       and(
         eq(row.chainId, chainId),
         eq(row.isActive, true),
-        eq(row.type, "permissionless")
+        eq(row.type, "permissionless"),
+        eq(row.swapsFrozen, false)
       ),
     with: {
       dusdConfig: true,

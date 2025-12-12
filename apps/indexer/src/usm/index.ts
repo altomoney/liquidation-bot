@@ -133,3 +133,47 @@ ponder.on("UsmRegistry:UsmRemoved", async ({ context, event }) => {
       isActive: false,
     }));
 });
+
+ponder.on("Usm:BuyAsset", async ({ context, event }) => {
+  await context.db
+    .update(usm, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set((row) => ({
+      currentExposure: row.currentExposure - event.args.underlyingAmount,
+    }));
+});
+
+ponder.on("Usm:SellAsset", async ({ context, event }) => {
+  await context.db
+    .update(usm, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set((row) => ({
+      currentExposure: row.currentExposure + event.args.underlyingAmount,
+    }));
+});
+
+ponder.on("Usm:Seized", async ({ context, event }) => {
+  await context.db
+    .update(usm, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set((row) => ({
+      currentExposure: 0n,
+    }));
+});
+
+ponder.on("Usm:SwapFreeze", async ({ context, event }) => {
+  await context.db
+    .update(usm, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set((row) => ({
+      swapsFrozen: event.args.enabled,
+    }));
+});

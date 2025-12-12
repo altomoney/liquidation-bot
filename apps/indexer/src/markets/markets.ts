@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 import { irm, liquidationEngine, market, position } from "ponder:schema";
 
-import { Address, zeroAddress } from "viem";
+import { Address, keccak256, toHex, zeroAddress } from "viem";
 import { AdaptiveCurveIrmAbi } from "../../abis/AdaptiveCurveIrmAbi";
 import { AltoBorrowMarketAbi } from "../../abis/AltoBorrowMarketAbi";
 import { DlbDcfPriorityLiquidationEngineAbi } from "../../abis/DlbDcfPriorityLiquidationEngineAbi";
@@ -550,6 +550,27 @@ export const governanceLiquidation: Parameters<
       .set((row) => ({
         collateral: 0n,
         borrowShares: 0n,
+      })),
+  ]);
+};
+
+export const pauseMarket: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:Paused">
+>[1] = async ({ context, event }) => {
+  // bytes32 constant PAUSE_TYPE = keccak256("PAUSE_TYPE");
+  const pauseType = keccak256(toHex("PAUSE_TYPE"));
+  if (event.args.pauseType !== pauseType) {
+    return;
+  }
+  await Promise.all([
+    // Row must exist because `GovernanceLiquidation` cannot preceed `CreateMarket`.
+    context.db
+      .update(market, {
+        chainId: context.chain.id,
+        address: event.log.address,
+      })
+      .set((row) => ({
+        paused: event.args.paused,
       })),
   ]);
 };

@@ -33,7 +33,12 @@ export async function getLiquidatablePositions({
   liquidatorAddress: Address;
 }): Promise<{ results: IndexerApiResponse[]; warnings: string[] }> {
   const marketRows = await db.query.market.findMany({
-    where: (row) => and(eq(row.chainId, chainId), eq(row.isActive, true)),
+    where: (row) =>
+      and(
+        eq(row.chainId, chainId),
+        eq(row.isActive, true),
+        eq(row.paused, false)
+      ),
     with: {
       // ! Note: following is omitted because it created imprecise results when fetching positions (couple of integer digits)
       // positions: { where: (row) => gt(row.borrowShares, 0n) },
