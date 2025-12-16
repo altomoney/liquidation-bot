@@ -222,7 +222,12 @@ export class LiquidationBot {
     if (this.flashbotAccount) {
       const signedBundle = await Flashbots.signBundle([
         {
-          transaction: { to: encoder.address, ...functionData },
+          transaction: {
+            to: encoder.address,
+            ...functionData,
+            maxFeePerGas: gasPrice,
+            maxPriorityFeePerGas: gasPrice / 10n, // 10% priority fee
+          },
           client: this.client,
         },
       ]);
