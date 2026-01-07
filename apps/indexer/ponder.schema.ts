@@ -195,3 +195,51 @@ export const usmRelations = relations(usm, ({ one }) => ({
     references: [dusdConfig.chainId, dusdConfig.minterAddress],
   }),
 }));
+
+// Historical tracking for interest calculations
+
+// Position history - logs every position change with block number
+export const positionHistory = onchainTable(
+  "positionHistory",
+  (t) => ({
+    id: t.text().primaryKey(), // composite: chainId-marketId-user-blockNumber-logIndex
+    chainId: t.integer().notNull(),
+    marketId: t.hex().notNull(),
+    user: t.hex().notNull(),
+    blockNumber: t.bigint().notNull(),
+    logIndex: t.integer().notNull(),
+
+    supplyShares: t.bigint().notNull(),
+    borrowShares: t.bigint().notNull(),
+    collateral: t.bigint().notNull(),
+  }),
+  (table) => ({
+    userMarketIdx: index().on(
+      table.chainId,
+      table.marketId,
+      table.user,
+      table.blockNumber
+    ),
+    marketBlockIdx: index().on(table.chainId, table.marketId, table.blockNumber),
+  })
+);
+
+// Market state history - logs every market state change with block number
+export const marketStateHistory = onchainTable(
+  "marketStateHistory",
+  (t) => ({
+    id: t.text().primaryKey(), // composite: chainId-address-blockNumber-logIndex
+    chainId: t.integer().notNull(),
+    address: t.hex().notNull(),
+    blockNumber: t.bigint().notNull(),
+    logIndex: t.integer().notNull(),
+
+    totalSupplyAssets: t.bigint().notNull(),
+    totalSupplyShares: t.bigint().notNull(),
+    totalBorrowAssets: t.bigint().notNull(),
+    totalBorrowShares: t.bigint().notNull(),
+  }),
+  (table) => ({
+    marketBlockIdx: index().on(table.chainId, table.address, table.blockNumber),
+  })
+);

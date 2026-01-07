@@ -1,0 +1,1240 @@
+{
+  "chainId": 1,
+  "marketAddress": "0x133cf03d2A7a87B9239b1a3a8Dd62f3f27c46788",
+  "marketType": "borrow",
+  "startBlock": "0",
+  "endBlock": "24172199",
+  "marketStateAtStart": {
+    "blockNumber": "0",
+    "totalSupplyAssets": "0",
+    "totalSupplyShares": "0",
+    "totalBorrowAssets": "0",
+    "totalBorrowShares": "0"
+  },
+  "marketStateAtEnd": {
+    "blockNumber": "24172199",
+    "totalSupplyAssets": "271356444549322966864400",
+    "totalSupplyShares": "266556569003328457113247211125",
+    "totalBorrowAssets": "171245454583111678160960",
+    "totalBorrowShares": "167983102404169280434466018660"
+  },
+  "userInterests": [
+    {
+      "user": "0x68d3431bd22779b08113b50b3cf6a0ba265fc9e0",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "14947746268890379023352872",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "15216909854136262438",
+        "interestEarned": "150539553489569735702",
+        "badDebtLoss": "0",
+        "netChange": "150539553489569735702"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "150539553489569735702"
+    },
+    {
+      "user": "0xea1b93cdb67a92fd961ffe82d15efe414ad08f92",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "30000000000000000000000000",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "30540209032995308511",
+        "interestEarned": "540209032995308511",
+        "badDebtLoss": "0",
+        "netChange": "540209032995308511"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "123613459119459333281668300",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "126014121042791963243",
+        "interestOwed": "2400645119047565188"
+      },
+      "netInterest": "-1860436086052256677"
+    },
+    {
+      "user": "0xb9f06fefc4c53ded77a90cb798ed08dc068bb6dd",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "597757489675553661067637031",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "608521289524331459555",
+        "interestEarned": "7231381703141028495",
+        "badDebtLoss": "0",
+        "netChange": "7231381703141028495"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "7231381703141028495"
+    },
+    {
+      "user": "0xf5b812d76db4f0341c49a2d8e2e8b19d800d6ec3",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1897142245091891012107687287",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1931304024347745646069",
+        "interestEarned": "31113920407286699852",
+        "badDebtLoss": "0",
+        "netChange": "31113920407286699852"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "2083445992834210599693483971",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "2123908006436495377046",
+        "interestOwed": "37733513554137496606"
+      },
+      "netInterest": "-6619593146850796754"
+    },
+    {
+      "user": "0xd65370c5565f2bea121f3c22823233f98a4be793",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "2532958651889933809982242928",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "2578569556688419190637",
+        "interestEarned": "30622723662288091896",
+        "badDebtLoss": "0",
+        "netChange": "30622723662288091896"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "848928397996544143297106989",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "865415195593046723022",
+        "interestOwed": "17083147944680200013"
+      },
+      "netInterest": "13539575717607891883"
+    },
+    {
+      "user": "0x023c1de9cdeb3bf789f1b9594b80a6e6f7e03ae0",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "199933178834106807456740247",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "203533369140828504845",
+        "interestEarned": "3533369096828504846",
+        "badDebtLoss": "0",
+        "netChange": "3533369096828504846"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "338616916568441973479849640",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "345193099647475253788",
+        "interestOwed": "6577219442363995216"
+      },
+      "netInterest": "-3043850345535490370"
+    },
+    {
+      "user": "0xe12f8e5309682cdea4a3f7160fbb25d0d111d9b7",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "200929031279791229655527649",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "204547153869402566868",
+        "interestEarned": "3547153869402566869",
+        "badDebtLoss": "0",
+        "netChange": "3547153869402566869"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "201398924695615807173523000",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "205310236079998780388",
+        "interestOwed": "3908236079998780388"
+      },
+      "netInterest": "-361082210596213519"
+    },
+    {
+      "user": "0x505e38f114f0875ff29a88557ab2793317bb67e1",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "10365330224821529999117",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "10551978392069126",
+        "interestEarned": "1261701993463829",
+        "badDebtLoss": "0",
+        "netChange": "1261701993463829"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "1261701993463829"
+    },
+    {
+      "user": "0x2a3641afd2bb54ce729198295b80feffaa8b14c5",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "78692922083092445644521975583",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "80109942994495196603735",
+        "interestEarned": "1387665125837440399048",
+        "badDebtLoss": "0",
+        "netChange": "1387665125837440399048"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "78764180476309897457020294967",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "80293837281797758763428",
+        "interestOwed": "1608677224596508640768"
+      },
+      "netInterest": "-221012098759068241720"
+    },
+    {
+      "user": "0x4e90da1ddcd5b0fb295b6a69251b5d04d5bcca7a",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "2002690091983988653549152684",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "2041583768144407974817",
+        "interestOwed": "38631353442705873848"
+      },
+      "netInterest": "-38631353442705873848"
+    },
+    {
+      "user": "0x5d50ca0a21f434e9f3f8110e1980005111d1b93b",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "9885813753117218438262",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "10063827282715324",
+        "interestEarned": "20788038832488499338",
+        "badDebtLoss": "0",
+        "netChange": "20788038832488499338"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "332958306175300190031960",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "339424594987102732",
+        "interestOwed": "37671779174192886745"
+      },
+      "netInterest": "-16883740341704387407"
+    },
+    {
+      "user": "0x04fad3020d3fcfedaa2b548143bfb6127e8ea581",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "225810926937757484246933530",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "229877097020451491993",
+        "interestEarned": "2522300763672610598",
+        "badDebtLoss": "0",
+        "netChange": "2522300763672610598"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "171511686862368266082351344",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "174842566679097058387",
+        "interestOwed": "1319685924166320089"
+      },
+      "netInterest": "1202614839506290509"
+    },
+    {
+      "user": "0xc52ddbf8b6d3a5b68bf4cebbc7240834a3cba73b",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "126609687794911154857074221",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "128889544361962050503",
+        "interestEarned": "2259402947506624960",
+        "badDebtLoss": "0",
+        "netChange": "2259402947506624960"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "2259402947506624960"
+    },
+    {
+      "user": "0xc9c3a2eaa824103fa0eb70e39758e9f7974f4e3c",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1499736860177032067107719264",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1526742573476487223895",
+        "interestEarned": "26742573476487223896",
+        "badDebtLoss": "0",
+        "netChange": "26742573476487223896"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1502707276813348897613785952",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1531890928553685792169",
+        "interestOwed": "28890928553685792169"
+      },
+      "netInterest": "-2148355077198568273"
+    },
+    {
+      "user": "0xcc58accacd0db8010e4c8a20ba49d2dc9d4d7f59",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "2478416520347788353753285344",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "2523045286741677557346",
+        "interestEarned": "60043612548545394271",
+        "badDebtLoss": "0",
+        "netChange": "60043612548545394271"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "13570113612598091602780705311",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "13833654939546798432341",
+        "interestOwed": "198223041501783212924"
+      },
+      "netInterest": "-138179428953237818653"
+    },
+    {
+      "user": "0x43e47a90990b0357c5988ff416e77c253f618274",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "299079529557249078549570492",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "304465045005609522373",
+        "interestEarned": "4465045005609522374",
+        "badDebtLoss": "0",
+        "netChange": "4465045005609522374"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "4465045005609522374"
+    },
+    {
+      "user": "0x6ace206b3d969c8d17070f835518333f8a454fb4",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "141006510064126894296434103",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "143545609745719735201",
+        "interestEarned": "2494396382076539482",
+        "badDebtLoss": "0",
+        "netChange": "2494396382076539482"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "2494396382076539482"
+    },
+    {
+      "user": "0x8ce4fe19ac5ea0df14200fadd5450c3cf40cf0d0",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "2470058824394752841152619653",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "2514537094027013440824",
+        "interestEarned": "26377573901013440825",
+        "badDebtLoss": "0",
+        "netChange": "26377573901013440825"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1343098529338675354424067309",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1369182464871548369159",
+        "interestOwed": "25500464871548369159"
+      },
+      "netInterest": "877109029465071666"
+    },
+    {
+      "user": "0xfe8d5dea7987d101247243d5bbaf7804a1ff187a",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "118021924168073586677949052",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "120313994477302099966",
+        "interestOwed": "2250712770166233047"
+      },
+      "netInterest": "-2250712770166233047"
+    },
+    {
+      "user": "0x06216ab9d28d989d31320d24a7c382abe63fba47",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "804270294896939056541336486",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "818752764172709958461",
+        "interestEarned": "11056479378487817827",
+        "badDebtLoss": "0",
+        "netChange": "11056479378487817827"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "11056479378487817827"
+    },
+    {
+      "user": "0xb1f4ee1c99e59cf42a3f60b4e241c1059b88d51c",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "299933317407965223683976832",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "305334206986632951226",
+        "interestEarned": "5300493550486998788",
+        "badDebtLoss": "0",
+        "netChange": "5300493550486998788"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "5300493550486998788"
+    },
+    {
+      "user": "0xd6e8222b207ebdb33dfdd0a6299b9424f2bdf35a",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1199650500107874731470557628",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1221252567994395173400",
+        "interestEarned": "21054567994395173401",
+        "badDebtLoss": "0",
+        "netChange": "21054567994395173401"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "21054567994395173401"
+    },
+    {
+      "user": "0x99aacdb295c6d6fae1d5c0f01a469430cf58e021",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "7761795625444505192"
+      },
+      "netInterest": "-7761795625444505192"
+    },
+    {
+      "user": "0x0fd90b9d61af052c4328bc2fa9a1529627af0a7d",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "68216942787012407911206",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "69445323076908016",
+        "interestEarned": "10223206329285544726",
+        "badDebtLoss": "0",
+        "netChange": "10223206329285544726"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "10223206329285544726"
+    },
+    {
+      "user": "0x9cce1478b5578dd5e597feb7080c5dfc5772c5a9",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "199028545918968651270910191",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "202612446529946931648",
+        "interestEarned": "3012446529946931649",
+        "badDebtLoss": "0",
+        "netChange": "3012446529946931649"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1890064314662576778717163468",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1926770717550916860444",
+        "interestOwed": "22891453766438999575"
+      },
+      "netInterest": "-19879007236492067926"
+    },
+    {
+      "user": "0x1b35fcb58f5e1e2a42ff8e66ddf5646966abf08c",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "929533605141513472597973151",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "947585813600180051625",
+        "interestOwed": "10715813600180051625"
+      },
+      "netInterest": "-10715813600180051625"
+    },
+    {
+      "user": "0x91ddeb35264287785762e666b5fba5da9e83b5c8",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "50979384835418908029669",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "51897368974906819",
+        "interestEarned": "2262850285091013864",
+        "badDebtLoss": "0",
+        "netChange": "2262850285091013864"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "3493233869719169921036348620",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "3561074973754827196225",
+        "interestOwed": "56421174317128284186"
+      },
+      "netInterest": "-54158324032037270322"
+    },
+    {
+      "user": "0xf9373b9cf36547ad019aa24afe48c71fea870c35",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "712131095260026989694972870",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "724954416937903959990",
+        "interestEarned": "4954416937903959991",
+        "badDebtLoss": "0",
+        "netChange": "4954416937903959991"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "719389688151193173359585471",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "733360751210869631443",
+        "interestOwed": "11920751210869631443"
+      },
+      "netInterest": "-6966334272965671452"
+    },
+    {
+      "user": "0x6644394eec6782a2f4d146bb1f8896c50d7f2990",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "347865540288785379311116209",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "354129543859845222089",
+        "interestEarned": "4129543859845222090",
+        "badDebtLoss": "0",
+        "netChange": "4129543859845222090"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "4129543859845222090"
+    },
+    {
+      "user": "0x88de30cdb91de2b66b801512bb8073169035bdfb",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "149756947923046434982554346",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "152453616457107691318",
+        "interestEarned": "2453616457107691319",
+        "badDebtLoss": "0",
+        "netChange": "2453616457107691319"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "175060474035350030144856642",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "178460273841057979099",
+        "interestOwed": "3110273841057979099"
+      },
+      "netInterest": "-656657383950287780"
+    },
+    {
+      "user": "0xa1b49f17440261b67a733d76a147bad0f391e42e",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "16053990331469289841144",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "16343074017891925",
+        "interestEarned": "1378790537346021086",
+        "badDebtLoss": "0",
+        "netChange": "1378790537346021086"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "9320115920194400486227324207",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "9501119247583163363558",
+        "interestOwed": "150458187076470899268"
+      },
+      "netInterest": "-149079396539124878182"
+    },
+    {
+      "user": "0x3e88681de2e12d1ac4116a7a6fb964a2c4c102ae",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "150600829018697070240320998",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "153312693292446474946",
+        "interestEarned": "2361782128446474947",
+        "badDebtLoss": "0",
+        "netChange": "2361782128446474947"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "157322386048301141176122657",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "160377699479090319418",
+        "interestOwed": "2684084784880855267"
+      },
+      "netInterest": "-322302656434380320"
+    },
+    {
+      "user": "0xb401300129437757a22d8ca3aaced4fbe6c4bb82",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "219483465137435423237552248",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "223435696819447206502",
+        "interestEarned": "2027381099230608955",
+        "badDebtLoss": "0",
+        "netChange": "2027381099230608955"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "243626436341347500748102842",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "248357836250451928844",
+        "interestOwed": "2559510604156344356"
+      },
+      "netInterest": "-532129504925735401"
+    },
+    {
+      "user": "0xfb27ea9e342b90d29144f2b02fce921ebb259b67",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "3973788648856723576998999930",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "4045344532967611050850",
+        "interestEarned": "50897293931611050851",
+        "badDebtLoss": "0",
+        "netChange": "50897293931611050851"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "50897293931611050851"
+    },
+    {
+      "user": "0xbcb4c8386c097589e7825aaeb9e7c6295835f1d6",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "10688001016379032186383",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "10880459506169398",
+        "interestEarned": "404254889516472433",
+        "badDebtLoss": "0",
+        "netChange": "404254889516472433"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "121450438256660265030388",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "123809092765414538",
+        "interestOwed": "717548134186371505"
+      },
+      "netInterest": "-313293244669899072"
+    },
+    {
+      "user": "0x7f8dda85d44a6f225257375546fec2f96c3b95ee",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "9547067599666595611336040",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "9732478491241542824",
+        "interestOwed": "155750257626688113"
+      },
+      "netInterest": "-155750257626688113"
+    },
+    {
+      "user": "0x9c523a96804071ee8e9b00271add90dfc347d470",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "49719027009101895388112673045",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "50614315925837047416955",
+        "interestEarned": "714315925837047416956",
+        "badDebtLoss": "0",
+        "netChange": "714315925837047416956"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "714315925837047416956"
+    },
+    {
+      "user": "0x5c803690fb1b1d5b1bf64a516378a3d71e44e1bd",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "991640462449308061144034319",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1009496900292600102792",
+        "interestEarned": "14208128968600102793",
+        "badDebtLoss": "0",
+        "netChange": "14208128968600102793"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1270410651134763977993945575",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1295082936004877567882",
+        "interestOwed": "19948443687194775314"
+      },
+      "netInterest": "-5740314718594672521"
+    },
+    {
+      "user": "0xaabfa7d8835de279574e13552429930872e17743",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "15370642384298775751062470507",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "15669151269755084094944",
+        "interestOwed": "242494641145102385478"
+      },
+      "netInterest": "-242494641145102385478"
+    },
+    {
+      "user": "0xa5acf1b71b653662fcf881edbf8c92460b1c387d",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1643487944366139251707838911",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1673082178804988567654",
+        "interestEarned": "23082178524440270590",
+        "badDebtLoss": "0",
+        "netChange": "23082178524440270590"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1646642757613574959250463499",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1678621739495427829461",
+        "interestOwed": "25321739495427829461"
+      },
+      "netInterest": "-2239560970987558871"
+    },
+    {
+      "user": "0x3482e460d7e8108ef7d24a5d7c60133dc5697597",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "951710915386367476080692318",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "970193823096118879175",
+        "interestOwed": "14621727671446019307"
+      },
+      "netInterest": "-14621727671446019307"
+    },
+    {
+      "user": "0x5451c3c1e156b7e8e3004727577485d4ff1152e0",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "99560659761482060217062382",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "101353445352619565107",
+        "interestEarned": "1353445352619565108",
+        "badDebtLoss": "0",
+        "netChange": "1353445352619565108"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "1353445352619565108"
+    },
+    {
+      "user": "0xe0b43c8426972f1b3113c0ee0ea835539ec8d3dc",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "251156449325834359669654190",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "255679015413195832462",
+        "interestEarned": "3394604270814375875",
+        "badDebtLoss": "0",
+        "netChange": "3394604270814375875"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "3394604270814375875"
+    },
+    {
+      "user": "0x6e3880c88695cebde3e7baa95662050f7126795b",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1046311447481622816322361975",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "1065152343990155115949",
+        "interestEarned": "6894408635858973434",
+        "badDebtLoss": "0",
+        "netChange": "6894408635858973434"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "155637369009098744943638338",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "158659958201969213521",
+        "interestOwed": "1345958201969213521"
+      },
+      "netInterest": "5548450433889759913"
+    },
+    {
+      "user": "0x8bd9a17356a0f61ef331fffa5ca3af5a44059736",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "4968685078006096444172338171",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "5058156030047692857491",
+        "interestEarned": "58156030047692857492",
+        "badDebtLoss": "0",
+        "netChange": "58156030047692857492"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "58156030047692857492"
+    },
+    {
+      "user": "0x82f5604d78ea962a018049732f81bf74851a77ad",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "165084132115368770569081097",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "168056796761132541158",
+        "interestEarned": "1832940917941201857",
+        "badDebtLoss": "0",
+        "netChange": "1832940917941201857"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "1832940917941201857"
+    },
+    {
+      "user": "0xaaf92ac96a7cfc79cc539155ffa068e061d9adda",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "300610703527702218752426640",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "306023790776393531841",
+        "interestEarned": "3023790776393531842",
+        "badDebtLoss": "0",
+        "netChange": "3023790776393531842"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "301126255396135806759942166",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "306974342979759136027",
+        "interestOwed": "3368342979759136027"
+      },
+      "netInterest": "-344552203365604185"
+    },
+    {
+      "user": "0xbb321323ad3122636faf57c9f03a40df03e5baff",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "706301976758470444685052401",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "720018867087864249533",
+        "interestOwed": "7294529817880897179"
+      },
+      "netInterest": "-7294529817880897179"
+    },
+    {
+      "user": "0xeda089739e7110819e680896a1edf752f2532fb0",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1980687534597659377954159884",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "2016353711188688152752",
+        "interestEarned": "16353711188688152753",
+        "badDebtLoss": "0",
+        "netChange": "16353711188688152753"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "16353711188688152753"
+    },
+    {
+      "user": "0xc01bf3d9a1b72541ba84bb3f8650327a0652551a",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "12973928741830898476088503729",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "13225891731528039156697",
+        "interestOwed": "114756052988025349697"
+      },
+      "netInterest": "-114756052988025349697"
+    },
+    {
+      "user": "0xdba9e7399ef94cd0e5ccb298c3d765769fe5d457",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "7664420450727981043841851093",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "7813268986086038056160",
+        "interestOwed": "60759410459153262733"
+      },
+      "netInterest": "-60759410459153262733"
+    },
+    {
+      "user": "0x5f00ed5f5772a81c70a2fd9b5cf9a1acdd5362d3",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "294761798228960779958662522",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "300069564428468284757",
+        "interestEarned": "2031454190468284758",
+        "badDebtLoss": "0",
+        "netChange": "2031454190468284758"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "2031454190468284758"
+    },
+    {
+      "user": "0x6a5dbf2fb5206ec8192620810c3edb6d5e62b188",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "147666882720140451919202",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "150325915517463075",
+        "interestEarned": "42565626686801131694",
+        "badDebtLoss": "0",
+        "netChange": "42565626686801131694"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "42565626686801131694"
+    },
+    {
+      "user": "0xb0fabe3bcac50f065dbf68c0b271118ddc005402",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "1974051025873637381565329907",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "2012388510855355975763",
+        "interestOwed": "8388510855355975763"
+      },
+      "netInterest": "-8388510855355975763"
+    },
+    {
+      "user": "0x74dab97badc26350b8986aa305abd8bb99fc19e1",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "703743876744653178459370403",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "716416170049073134298",
+        "interestEarned": "2075386705073134299",
+        "badDebtLoss": "0",
+        "netChange": "2075386705073134299"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "2075386705073134299"
+    },
+    {
+      "user": "0x1dcb82280f423f475f7dc3a76ed53f3c38578fa7",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestEarned": "0",
+        "badDebtLoss": "0",
+        "netChange": "0"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "266931485108503123936988623",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "272115485758621143217",
+        "interestOwed": "786536729638505551"
+      },
+      "netInterest": "-786536729638505551"
+    },
+    {
+      "user": "0x513aedace44cc9a0724ca276a8ceeee950903576",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "5908924522529379138025344377",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "6015326335941307836929",
+        "interestEarned": "15326335941307836930",
+        "badDebtLoss": "0",
+        "netChange": "15326335941307836930"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "5913780030146942152325398129",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "6028629874512342288172",
+        "interestOwed": "16629874512342288172"
+      },
+      "netInterest": "-1303538571034451242"
+    },
+    {
+      "user": "0x4096d69dee9ebdbe23c939a241660f7861e0a223",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "780262183429828925607651336",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "794312339416276789482",
+        "interestEarned": "1227132747218043275",
+        "badDebtLoss": "0",
+        "netChange": "1227132747218043275"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "780842900957464360783928410",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "796007429430222591885",
+        "interestOwed": "1336052347825728184"
+      },
+      "netInterest": "-108919600607684909"
+    },
+    {
+      "user": "0xa1148a1b94262540994cf9aa431a13ad39764228",
+      "supply": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "98238492875094165028525128948",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "100007470249726535825846",
+        "interestEarned": "7470249726535825847",
+        "badDebtLoss": "0",
+        "netChange": "7470249726535825847"
+      },
+      "borrow": {
+        "sharesAtStart": "0",
+        "sharesAtEnd": "0",
+        "assetsAtStart": "0",
+        "assetsAtEnd": "0",
+        "interestOwed": "0"
+      },
+      "netInterest": "7470249726535825847"
+    }
+  ],
+  "summary": {
+    "totalUsersWithInterest": 59,
+    "totalSupplyInterestEarned": "2795316117084547342222",
+    "totalSupplyBadDebtLoss": "0",
+    "totalSupplyNetChange": "2795316117084547342222",
+    "usersWithBadDebtLoss": 0,
+    "totalBorrowInterestOwed": "2795316117084547342176"
+  },
+  "sanityChecks": [
+    {
+      "name": "Supply vs Borrow Interest Balance (Borrow Market)",
+      "passed": true,
+      "expected": "Borrow interest >= Supply interest (within rounding tolerance)",
+      "actual": "Borrow: 2795316117084547342176, Supply: 2795316117084547342222",
+      "difference": "-46",
+      "differencePercent": "0%",
+      "message": "OK: Within rounding tolerance (46 wei difference, tolerance: 2795316117084547)"
+    },
+    {
+      "name": "Borrow Growth Breakdown",
+      "passed": true,
+      "expected": "Market borrow change = Interest accrued + Net new borrows",
+      "actual": "Market change: 171245454583111678160960, Interest: 2795316117084547342176, Net principal: 168450138466027130818784",
+      "difference": "168450138466027130818784",
+      "differencePercent": "1.63%",
+      "message": "Interest accounts for 1.63% of borrow growth. Remaining 98.37% is net new borrows."
+    },
+    {
+      "name": "Supply Growth Breakdown",
+      "passed": true,
+      "expected": "Market supply change = Interest earned + Net deposits",
+      "actual": "Market change: 271356444549322966864400, Interest: 2795316117084547342222, Net deposits: 268561128432238419522178",
+      "difference": "268561128432238419522178",
+      "differencePercent": "1.03%",
+      "message": "Interest accounts for 1.03% of supply growth. Remaining 98.97% is net deposits."
+    }
+  ]
+}

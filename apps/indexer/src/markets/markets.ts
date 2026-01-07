@@ -13,6 +13,7 @@ import { AdaptiveCurveIrm } from "../utils/irm/AdaptiveCurveIrm";
 import { FixedRateIrm } from "../utils/irm/FixedRateIrm";
 import { DlbDcfPriorityLiquidationEngine } from "../utils/liquidation-engine/DlbDcfPriorityLiquidationEngine";
 import { FixedPointMath } from "../utils/math/FixedPointMath";
+import { logMarketStateHistory, logPositionHistory } from "./history";
 import {
   irmTypeToString,
   liquidationEngineTypeToString,
@@ -116,6 +117,9 @@ export const accrueInterest: Parameters<
           : row.totalSupplyAssets,
       totalBorrowAssets: row.totalBorrowAssets + event.args.interest,
     }));
+
+  // Log market state history after interest accrual
+  await logMarketStateHistory(context, event);
 };
 
 export const addSupply: Parameters<
@@ -144,6 +148,12 @@ export const addSupply: Parameters<
         supplyShares: row.supplyShares + event.args.shares,
       })),
   ]);
+
+  // Log history after updates
+  await Promise.all([
+    logMarketStateHistory(context, event),
+    logPositionHistory(context, event, event.args.onBehalf),
+  ]);
 };
 
 export const removeSupply: Parameters<
@@ -166,6 +176,12 @@ export const removeSupply: Parameters<
       })
       .set((row) => ({ supplyShares: row.supplyShares - event.args.shares })),
   ]);
+
+  // Log history after updates
+  await Promise.all([
+    logMarketStateHistory(context, event),
+    logPositionHistory(context, event, event.args.onBehalf),
+  ]);
 };
 
 export const addCollateral: Parameters<
@@ -185,6 +201,9 @@ export const addCollateral: Parameters<
     .onConflictDoUpdate((row) => ({
       collateral: row.collateral + event.args.amount,
     }));
+
+  // Log position history after update
+  await logPositionHistory(context, event, event.args.onBehalf);
 };
 
 export const removeCollateral: Parameters<
@@ -198,11 +217,19 @@ export const removeCollateral: Parameters<
       user: event.args.onBehalf,
     })
     .set((row) => ({ collateral: row.collateral - event.args.amount }));
+
+  // Log position history after update
+  await logPositionHistory(context, event, event.args.onBehalf);
 };
 
 export const borrow: Parameters<
   typeof ponder.on<"AltoBorrowMarket:Borrow">
 >[1] = async ({ context, event }) => {
+  const mkt = await context.db.find(market, {
+    address: event.log.address,
+    chainId: context.chain.id,
+  });
+
   await Promise.all([
     // Row must exist because `Borrow` cannot preceed `CreateMarket`.
     context.db
@@ -228,22 +255,26 @@ export const borrow: Parameters<
         user: event.args.onBehalf,
       })
       .set((row) => ({ borrowShares: row.borrowShares + event.args.shares })),
-    await context.db
+    context.db
       .insert(position)
       .values({
         // primary key
         chainId: context.chain.id,
         marketId: event.log.address,
-        user: (await context.db.find(market, {
-          address: event.log.address,
-          chainId: context.chain.id,
-        }))!.feeRecipient,
+        user: mkt!.feeRecipient,
         // `Position` struct (unspecified fields default to 0n)
         supplyShares: event.args.feeSupplyShares,
       })
       .onConflictDoUpdate((row) => ({
         supplyShares: row.supplyShares + event.args.feeSupplyShares,
       })),
+  ]);
+
+  // Log history after updates
+  await Promise.all([
+    logMarketStateHistory(context, event),
+    logPositionHistory(context, event, event.args.onBehalf),
+    logPositionHistory(context, event, mkt!.feeRecipient),
   ]);
 };
 
@@ -266,6 +297,12 @@ export const repay: Parameters<
         user: event.args.onBehalf,
       })
       .set((row) => ({ borrowShares: row.borrowShares - event.args.shares })),
+  ]);
+
+  // Log history after updates
+  await Promise.all([
+    logMarketStateHistory(context, event),
+    logPositionHistory(context, event, event.args.onBehalf),
   ]);
 };
 
@@ -304,6 +341,12 @@ export const liquidation: Parameters<
           event.args.repaidBorrowShares -
           event.args.badDebtClearedShares,
       })),
+  ]);
+
+  // Log history after updates
+  await Promise.all([
+    logMarketStateHistory(context, event),
+    logPositionHistory(context, event, event.args.user),
   ]);
 };
 
@@ -562,6 +605,12 @@ export const governanceLiquidation: Parameters<
         collateral: 0n,
         borrowShares: 0n,
       })),
+  ]);
+
+  // Log history after updates
+  await Promise.all([
+    logMarketStateHistory(context, event),
+    logPositionHistory(context, event, event.args.user),
   ]);
 };
 
