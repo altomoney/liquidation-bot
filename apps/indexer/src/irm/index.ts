@@ -1,13 +1,15 @@
 import { ponder } from "ponder:registry";
-import { irm, market } from "ponder:schema";
+import { irm } from "ponder:schema";
 import { replaceBigInts } from "../utils";
 
 ponder.on("AdaptiveCurveIrm:IRStateUpdated", async ({ context, event }) => {
-  const marketExists = await context.db.find(market, {
+  // event.log.address is the IRM contract address
+  // Check if this IRM is tracked in our database
+  const irmExists = await context.db.find(irm, {
     chainId: context.chain.id,
     address: event.log.address,
   });
-  if (!marketExists) {
+  if (!irmExists) {
     return;
   }
   await context.db
@@ -24,11 +26,12 @@ ponder.on("AdaptiveCurveIrm:IRStateUpdated", async ({ context, event }) => {
 });
 
 ponder.on("AdaptiveCurveIrm:SetIrmConfig", async ({ context, event }) => {
-  const marketExists = await context.db.find(market, {
+  // event.log.address is the IRM contract address
+  const irmExists = await context.db.find(irm, {
     chainId: context.chain.id,
     address: event.log.address,
   });
-  if (!marketExists) {
+  if (!irmExists) {
     return;
   }
   await context.db
@@ -42,11 +45,12 @@ ponder.on("AdaptiveCurveIrm:SetIrmConfig", async ({ context, event }) => {
 });
 
 ponder.on("FixedRateIrm:IRStateUpdated", async ({ context, event }) => {
-  const marketExists = await context.db.find(market, {
+  // event.log.address is the IRM contract address
+  const irmExists = await context.db.find(irm, {
     chainId: context.chain.id,
     address: event.log.address,
   });
-  if (!marketExists) {
+  if (!irmExists) {
     return;
   }
   await context.db
