@@ -71,6 +71,17 @@ export const setupMarket: (
       address: address,
     });
 
+    // For mint markets, read the initial totalSupply (debt ceiling) since
+    // SetDebtCeiling is emitted before the market is registered
+    const [totalSupplyAssets, totalSupplyShares] =
+      type === "AltoMintMarket"
+        ? await context.client.readContract({
+            abi: AltoBorrowMarketAbi,
+            functionName: "totalSupply",
+            address: address,
+          })
+        : [0n, 0n];
+
     await context.db.insert(market).values({
       // primary key
       chainId: context.chain.id,
@@ -83,6 +94,8 @@ export const setupMarket: (
       irm: irm,
       ltv: ltv,
       liquidationEngine: liquidationEngine,
+      totalSupplyAssets: totalSupplyAssets,
+      totalSupplyShares: totalSupplyShares,
     });
 
     await updateNewIrm(irm, address, context);
