@@ -29,7 +29,9 @@ import { fetchLiquidatablePositions } from "./utils/fetchers.js";
 import { Flashbots } from "./utils/flashbots.js";
 import { LiquidationEncoder } from "./utils/LiquidationEncoder.js";
 import {
+  calculatePositionLtv,
   DEFAULT_LIQUIDATION_BUFFER_BPS,
+  formatOraclePrice,
   WAD,
   wMulDown,
 } from "./utils/maths.js";
@@ -99,10 +101,20 @@ export class LiquidationBot {
   private async liquidate(market: IMarket, position: LiquidatablePosition) {
     const badDebtPosition = position.seizableCollateral === position.collateral;
 
+    const positionLtv = calculatePositionLtv(
+      position.collateral,
+      position.borrowShares,
+      market.totalBorrowAssets,
+      market.totalBorrowShares,
+      market.price
+    );
+
     console.log(
       `${this.logTag}Liquidating ${position.user} on ${market.address}`,
       {
         badDebtPosition,
+        oraclePrice: formatOraclePrice(market.price),
+        positionLtv: `${positionLtv.toFixed(2)}%`,
         seizableCollateral: position.seizableCollateral,
         collateral: position.collateral,
         borrowShares: position.borrowShares,
