@@ -4,7 +4,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { watchBlocks } from "viem/actions";
 
 import { LiquidationBot, type LiquidationBotInputs } from "./bot";
-import { UniswapSmartOrderRouterVenue, UsmVenue } from "./liquidityVenues";
+import { UniswapSmartOrderRouterVenue, UniswapV4Venue, UsmVenue } from "./liquidityVenues";
 import type { LiquidityVenue } from "./liquidityVenues/liquidityVenue";
 import { ChainlinkPricer, DefiLlamaPricer } from "./pricers";
 import type { Pricer } from "./pricers/pricer";
@@ -27,12 +27,13 @@ export const launchBot = async (config: ChainConfig) => {
   const liquidityVenues: LiquidityVenue[] = [];
   // liquidityVenues.push(new Erc20Wrapper());
   // liquidityVenues.push(new Erc4626());
+  liquidityVenues.push(new UniswapV4Venue());
   liquidityVenues.push(new UniswapSmartOrderRouterVenue());
   if (activeUsms.length > 0) {
     liquidityVenues.push(new UsmVenue(activeUsms));
   }
   // liquidityVenues.push(new UniswapV3Venue());
-  // liquidityVenues.push(new UniswapV4Venue());
+  
 
   // PRICERS
   const pricers: Pricer[] = [];

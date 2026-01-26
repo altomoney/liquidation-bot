@@ -1,4 +1,4 @@
-import { ALWAYS_REALIZE_BAD_DEBT, chainConfigs } from "@/config";
+import { ALWAYS_REALIZE_BAD_DEBT, chainConfigs, INTERMEDIARY_TOKENS } from "@/config";
 import { executorAbi } from "executooor-viem";
 import {
   erc20Abi,
@@ -253,28 +253,85 @@ export class LiquidationBot {
     seizableCollateral: bigint,
     encoder: LiquidationEncoder
   ) {
-    let toConvert = {
-      src: getAddress(marketParams.collateralToken),
-      dst: getAddress(marketParams.loanToken),
+    const src = getAddress(marketParams.collateralToken);
+    const dst = getAddress(marketParams.loanToken);
+
+    // 1. Try direct conversion first
+    const directResult = await this.tryConvert(encoder, {
+      src,
+      dst,
       srcAmount: seizableCollateral,
-    };
+    });
+
+    if (directResult.src === directResult.dst) return true;
+
+    // 2. If direct conversion failed, try via intermediary tokens
+    const intermediaries = INTERMEDIARY_TOKENS[this.chainId] ?? [];
+
+    for (const intermediate of intermediaries) {
+      if (intermediate === src || intermediate === dst) continue;
+
+      console.log(
+        `${this.logTag}Trying intermediate hop via ${intermediate}`
+      );
+
+      // First leg: src → intermediate
+      const hop1Result = await this.tryConvert(encoder, {
+        src,
+        dst: intermediate,
+        srcAmount: seizableCollateral,
+      });
+
+      if (hop1Result.src !== intermediate) {
+        // First leg failed, try next intermediary
+        continue;
+      }
+
+      // Second leg: intermediate → dst
+      const hop2Result = await this.tryConvert(encoder, {
+        src: intermediate,
+        dst,
+        srcAmount: hop1Result.srcAmount,
+      });
+
+      if (hop2Result.src === hop2Result.dst) {
+        console.log(
+          `${this.logTag}Successfully converted via ${intermediate}`
+        );
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Attempt to convert tokens through available liquidity venues.
+   * Returns the final state after trying all venues.
+   */
+  private async tryConvert(
+    encoder: LiquidationEncoder,
+    toConvert: { src: Address; dst: Address; srcAmount: bigint }
+  ) {
+    let result = { ...toConvert };
 
     for (const venue of this.liquidityVenues) {
       try {
-        if (await venue.supportsRoute(encoder, toConvert.src, toConvert.dst))
-          toConvert = await venue.convert(encoder, toConvert);
+        if (await venue.supportsRoute(encoder, result.src, result.dst)) {
+          result = await venue.convert(encoder, result);
+        }
       } catch (error) {
         console.error(
-          `${this.logTag}Error converting ${toConvert.src} to ${toConvert.dst}`,
+          `${this.logTag}Error converting ${result.src} to ${result.dst}`,
           error
         );
         continue;
       }
 
-      if (toConvert.src === toConvert.dst) return true;
+      if (result.src === result.dst) break;
     }
 
-    return false;
+    return result;
   }
 
   private async price(asset: Address, amount: bigint, pricers: Pricer[]) {
