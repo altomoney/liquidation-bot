@@ -1,14 +1,18 @@
 import { CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sdk-core";
 import {
   AlphaRouter,
+  SwapRoute,
   SwapType,
   V3SubgraphProvider,
 } from "@uniswap/smart-order-router";
 import { ExecutorEncoder } from "executooor-viem";
-import { type Address, erc20Abi } from "viem";
+import { getAddress, type Address, erc20Abi } from "viem";
 import { readContract } from "viem/actions";
 
-import { uniswapV3SubgraphOverrides } from "@/config/liquidityVenues/uniswapSmartOrderRouter";
+import {
+  preferredIntermediateTokens,
+  uniswapV3SubgraphOverrides,
+} from "@/config/liquidityVenues/uniswapSmartOrderRouter";
 import { ENV } from "@/utils/env";
 import { ethers } from "ethers";
 import type { ToConvert } from "../../utils/types";
@@ -88,6 +92,7 @@ export class UniswapSmartOrderRouterVenue implements LiquidityVenue {
 
   /**
    * Convert the amount from src to dst using the best route found by the smart order router.
+   * If preferred intermediate tokens are configured, tries routes through them and picks the best.
    */
   async convert(encoder: ExecutorEncoder, toConvert: ToConvert) {
     const { src, dst, srcAmount } = toConvert;
@@ -99,6 +104,7 @@ export class UniswapSmartOrderRouterVenue implements LiquidityVenue {
     });
 
     try {
+      const chainId = encoder.client.chain.id;
       const router = this.getOrCreateRouter(encoder);
       const [srcToken, dstToken] = await Promise.all([
         this.getToken(encoder, src),
@@ -110,53 +116,181 @@ export class UniswapSmartOrderRouterVenue implements LiquidityVenue {
         srcAmount.toString()
       );
 
+      const swapOptions = {
+        type: SwapType.SWAP_ROUTER_02 as const,
+        recipient: encoder.address,
+        slippageTolerance: new Percent(50, 10000), // 0.5%
+        deadline: Math.floor(Date.now() / 1000) + 1800, // 30 minutes
+      };
+
+      // Check if there are preferred intermediate tokens for this source
+      const intermediates =
+        preferredIntermediateTokens[chainId]?.[getAddress(src)] ?? [];
+
+      // Try direct route
       console.log(`(UniswapSmartOrderRouter) Finding best route...`);
-      const route = await router.route(
+      const directRoute = await router.route(
         amount,
         dstToken,
         TradeType.EXACT_INPUT,
-        {
-          type: SwapType.SWAP_ROUTER_02,
-          recipient: encoder.address,
-          slippageTolerance: new Percent(50, 10000), // 0.5%
-          deadline: Math.floor(Date.now() / 1000) + 1800, // 30 minutes
-        }
+        swapOptions
       );
 
-      if (!route) {
+      // Try routes through intermediate tokens
+      const intermediateRoutes: {
+        intermediate: Address;
+        route1: SwapRoute;
+        route2: SwapRoute;
+        totalQuote: bigint;
+      }[] = [];
+
+      for (const intermediate of intermediates) {
+        try {
+          const intermediateToken = await this.getToken(encoder, intermediate);
+
+          // Route 1: src -> intermediate
+          const route1 = await router.route(
+            amount,
+            intermediateToken,
+            TradeType.EXACT_INPUT,
+            swapOptions
+          );
+
+          if (!route1) continue;
+
+          // Route 2: intermediate -> dst
+          const intermediateAmount = CurrencyAmount.fromRawAmount(
+            intermediateToken,
+            route1.quote.quotient.toString()
+          );
+
+          const route2 = await router.route(
+            intermediateAmount,
+            dstToken,
+            TradeType.EXACT_INPUT,
+            swapOptions
+          );
+
+          if (!route2) continue;
+
+          const totalQuote = BigInt(route2.quote.quotient.toString());
+          intermediateRoutes.push({
+            intermediate,
+            route1,
+            route2,
+            totalQuote,
+          });
+
+          console.log(
+            `(UniswapSmartOrderRouter) Intermediate route via ${intermediateToken.symbol}:`,
+            {
+              path: `${srcToken.symbol} -> ${intermediateToken.symbol} -> ${dstToken.symbol}`,
+              step1Quote: route1.quote.toExact(),
+              step2Quote: route2.quote.toExact(),
+              totalQuote: route2.quote.toExact(),
+            }
+          );
+        } catch (error) {
+          console.log(
+            `(UniswapSmartOrderRouter) Failed to find route via ${intermediate}:`,
+            error instanceof Error ? error.message : String(error)
+          );
+        }
+      }
+
+      // Compare routes and pick the best one
+      const directQuote = directRoute
+        ? BigInt(directRoute.quote.quotient.toString())
+        : 0n;
+      const bestIntermediate = intermediateRoutes.reduce<
+        (typeof intermediateRoutes)[0] | null
+      >(
+        (best, current) =>
+          !best || current.totalQuote > best.totalQuote ? current : best,
+        null
+      );
+
+      const useIntermediate =
+        bestIntermediate && bestIntermediate.totalQuote > directQuote;
+
+      if (useIntermediate && bestIntermediate) {
+        const intermediateToken = await this.getToken(
+          encoder,
+          bestIntermediate.intermediate
+        );
+        console.log(
+          `(UniswapSmartOrderRouter) Using intermediate route via ${intermediateToken.symbol} (${bestIntermediate.totalQuote} > ${directQuote})`
+        );
+
+        // Encode first swap: src -> intermediate
+        const router1Address = bestIntermediate.route1.methodParameters
+          ?.to as Address;
+        encoder.erc20Approve(src, router1Address, srcAmount);
+        encoder.pushCall(
+          router1Address,
+          BigInt(bestIntermediate.route1.methodParameters!.value),
+          bestIntermediate.route1.methodParameters!.calldata as `0x${string}`
+        );
+
+        // Encode second swap: intermediate -> dst
+        const intermediateAmount = BigInt(
+          bestIntermediate.route1.quote.quotient.toString()
+        );
+        const router2Address = bestIntermediate.route2.methodParameters
+          ?.to as Address;
+        encoder.erc20Approve(
+          bestIntermediate.intermediate,
+          router2Address,
+          intermediateAmount
+        );
+        encoder.pushCall(
+          router2Address,
+          BigInt(bestIntermediate.route2.methodParameters!.value),
+          bestIntermediate.route2.methodParameters!.calldata as `0x${string}`
+        );
+
+        return {
+          src: dst,
+          dst: dst,
+          srcAmount: bestIntermediate.totalQuote,
+        };
+      }
+
+      // Use direct route
+      if (!directRoute) {
         throw new Error("No route found");
       }
 
-      console.log(`(UniswapSmartOrderRouter) Route found:`, {
-        quote: route.quote.toExact(),
-        quoteGasAdjusted: route.quoteGasAdjusted.toExact(),
-        estimatedGasUsed: route.estimatedGasUsed.toString(),
-        protocols: route.route.map((r) => r.protocol).join(" -> "),
-        tokenPath: route.route
+      console.log(`(UniswapSmartOrderRouter) Using direct route:`, {
+        quote: directRoute.quote.toExact(),
+        quoteGasAdjusted: directRoute.quoteGasAdjusted.toExact(),
+        estimatedGasUsed: directRoute.estimatedGasUsed.toString(),
+        protocols: directRoute.route.map((r) => r.protocol).join(" -> "),
+        tokenPath: directRoute.route
           .flatMap((r) => r.tokenPath.map((t) => t.symbol))
           .join(" -> "),
       });
 
       // Approve the router to spend the source token
-      const routerAddress = route.methodParameters?.to as Address;
+      const routerAddress = directRoute.methodParameters?.to as Address;
       encoder.erc20Approve(src, routerAddress, srcAmount);
 
       // Execute the swap
-      if (!route.methodParameters) {
+      if (!directRoute.methodParameters) {
         throw new Error("No method parameters returned from router");
       }
 
       encoder.pushCall(
         routerAddress,
-        BigInt(route.methodParameters.value),
-        route.methodParameters.calldata as `0x${string}`
+        BigInt(directRoute.methodParameters.value),
+        directRoute.methodParameters.calldata as `0x${string}`
       );
 
       // Return the updated state with the expected amount received
       return {
         src: dst,
         dst: dst,
-        srcAmount: BigInt(route.quote.quotient.toString()),
+        srcAmount: BigInt(directRoute.quote.quotient.toString()),
       };
     } catch (error) {
       throw new Error(

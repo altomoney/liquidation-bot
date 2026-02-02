@@ -67,6 +67,7 @@ export class LiquidationBot {
   private cooldownMechanism?: CooldownMechanism;
   private flashbotAccount?: LocalAccount;
   private isPriorityLiquidator: boolean;
+  private tokenDecimalsCache: Map<Address, number> = new Map();
 
   constructor(inputs: LiquidationBotInputs) {
     this.logTag = inputs.logTag;
@@ -101,6 +102,10 @@ export class LiquidationBot {
   private async liquidate(market: IMarket, position: LiquidatablePosition) {
     const badDebtPosition = position.seizableCollateral === position.collateral;
 
+    const collateralDecimals = await this.getTokenDecimals(
+      market.collateralToken as Address
+    );
+
     const positionLtv = calculatePositionLtv(
       position.collateral,
       position.borrowShares,
@@ -113,7 +118,7 @@ export class LiquidationBot {
       `${this.logTag}Liquidating ${position.user} on ${market.address}`,
       {
         badDebtPosition,
-        oraclePrice: formatOraclePrice(market.price),
+        oraclePrice: formatOraclePrice(market.price, collateralDecimals),
         positionLtv: `${positionLtv.toFixed(2)}%`,
         seizableCollateral: position.seizableCollateral,
         collateral: position.collateral,
@@ -162,7 +167,7 @@ export class LiquidationBot {
         );
       else
         console.log(
-          `${this.logTag}ℹ️ Skipped ${position.user} on ${market.address} (not profitable)`
+          `${this.logTag}Skipped ${position.user} on ${market.address} (not profitable)`
         );
     } catch (error) {
       console.error(
@@ -207,30 +212,27 @@ export class LiquidationBot {
     ]);
 
     if (results[1].status !== "success") {
-      console.warn(
-        `${this.logTag}Transaction failed in simulation: ${results[1].error}`
-      );
-      return;
+      return false;
     }
 
-    if (
-      !(await this.checkProfit(
-        marketParams.loanToken,
-        {
-          beforeTx: results[0].result,
-          afterTx: results[2].result,
-        },
-        {
-          used: results[1].gasUsed,
-          price: gasPrice,
-        },
-        badDebtPosition
-      ))
-    )
+    const isProfitable = await this.checkProfit(
+      marketParams.loanToken,
+      {
+        beforeTx: results[0].result,
+        afterTx: results[2].result,
+      },
+      {
+        used: results[1].gasUsed,
+        price: gasPrice,
+      },
+      badDebtPosition
+    );
+
+    if (!isProfitable) {
       return false;
+    }
 
     // TX EXECUTION
-
     if (this.flashbotAccount) {
       const signedBundle = await Flashbots.signBundle([
         {
@@ -245,7 +247,7 @@ export class LiquidationBot {
       ]);
 
       return await Flashbots.sendRawBundle(
-        signedBundle,
+            signedBundle,
         (await getBlockNumber(this.client)) + 1n,
         this.flashbotAccount
       );
@@ -329,21 +331,25 @@ export class LiquidationBot {
     if (
       loanAssetBalance.beforeTx === undefined ||
       loanAssetBalance.afterTx === undefined
-    )
+    ) {
       return false;
+    }
 
     const loanAssetProfit =
       loanAssetBalance.afterTx - loanAssetBalance.beforeTx;
 
-    if (loanAssetProfit <= 0n) return false;
+    if (loanAssetProfit <= 0n) {
+      return false;
+    }
 
     const [loanAssetProfitUsd, gasUsedUsd] = await Promise.all([
       this.price(loanAsset, loanAssetProfit, this.pricers),
       this.price(this.wNative, gas.used * gas.price, this.pricers),
     ]);
 
-    if (loanAssetProfitUsd === undefined || gasUsedUsd === undefined)
+    if (loanAssetProfitUsd === undefined || gasUsedUsd === undefined) {
       return false;
+    }
 
     const profitUsd = loanAssetProfitUsd - gasUsedUsd;
 
@@ -374,5 +380,19 @@ export class LiquidationBot {
       return false;
     }
     return true;
+  }
+
+  private async getTokenDecimals(token: Address): Promise<number> {
+    const cached = this.tokenDecimalsCache.get(token);
+    if (cached !== undefined) return cached;
+
+    const decimals = await readContract(this.client, {
+      address: token,
+      abi: erc20Abi,
+      functionName: "decimals",
+    });
+
+    this.tokenDecimalsCache.set(token, decimals);
+    return decimals;
   }
 }

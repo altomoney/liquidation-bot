@@ -41,15 +41,14 @@ export function calculatePositionLtv(
 
 /**
  * Format oracle price to human-readable format
- * Assumes collateral has 8 decimals (like cbBTC) and loan has 18 decimals (like DUSD)
  * @param oraclePrice - oracle price (36 decimals precision)
- * @param collateralDecimals - decimals of collateral token (default: 8 for cbBTC)
+ * @param collateralDecimals - decimals of collateral token
  * @param loanDecimals - decimals of loan token (default: 18 for DUSD)
  * @returns formatted price string (e.g., "$86,091.23")
  */
 export function formatOraclePrice(
   oraclePrice: bigint,
-  collateralDecimals = 8,
+  collateralDecimals: number,
   loanDecimals = 18
 ): string {
   // For 1 full unit of collateral: value = 10^collateralDecimals * price / 10^36
