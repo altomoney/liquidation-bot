@@ -68,6 +68,10 @@ export class LiquidationBot {
   private flashbotAccount?: LocalAccount;
   private isPriorityLiquidator: boolean;
   private tokenDecimalsCache: Map<Address, number> = new Map();
+  // Cache for positions skipped as unprofitable: key = "marketId-user", value = { collateral, timestamp }
+  private unprofitableCache: Map<string, { collateral: bigint; timestamp: number }> = new Map();
+  private static UNPROFITABLE_COOLDOWN_SEC = 300; // 5 minutes
+  private static COLLATERAL_INCREASE_THRESHOLD = 1.2; // 20% increase to re-check
 
   constructor(inputs: LiquidationBotInputs) {
     this.logTag = inputs.logTag;
@@ -101,6 +105,22 @@ export class LiquidationBot {
 
   private async liquidate(market: IMarket, position: LiquidatablePosition) {
     const badDebtPosition = position.seizableCollateral === position.collateral;
+
+    // Check if this position was recently skipped as unprofitable
+    const cacheKey = `${market.address}-${position.user}`;
+    const cached = this.unprofitableCache.get(cacheKey);
+    if (cached) {
+      const now = Date.now() / 1000;
+      const cooldownExpired = now > cached.timestamp + LiquidationBot.UNPROFITABLE_COOLDOWN_SEC;
+      const collateralIncreased = position.collateral > cached.collateral * BigInt(Math.floor(LiquidationBot.COLLATERAL_INCREASE_THRESHOLD * 100)) / 100n;
+      
+      if (!cooldownExpired && !collateralIncreased) {
+        console.log(
+          `${this.logTag}Skipping ${position.user} on ${market.address} (cached as unprofitable)`
+        );
+        return;
+      }
+    }
 
     const collateralDecimals = await this.getTokenDecimals(
       market.collateralToken as Address
@@ -161,14 +181,22 @@ export class LiquidationBot {
         badDebtPosition
       );
 
-      if (success)
+      if (success) {
         console.log(
           `${this.logTag}Liquidated ${position.user} on ${market.address}`
         );
-      else
+        // Clear from unprofitable cache on success
+        this.unprofitableCache.delete(cacheKey);
+      } else {
         console.log(
           `${this.logTag}Skipped ${position.user} on ${market.address} (not profitable)`
         );
+        // Add to unprofitable cache
+        this.unprofitableCache.set(cacheKey, {
+          collateral: position.collateral,
+          timestamp: Date.now() / 1000,
+        });
+      }
     } catch (error) {
       console.error(
         `${this.logTag}Failed to liquidate ${position.user} on ${market.address}`,
