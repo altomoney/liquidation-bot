@@ -36,6 +36,8 @@ export const market = onchainTable(
     totalBorrowAssets: t.bigint().notNull().default(0n),
     totalBorrowShares: t.bigint().notNull().default(0n),
 
+    interestFee: t.bigint().notNull().default(0n),
+
     paused: t.boolean().notNull().default(false),
   }),
   (table) => ({

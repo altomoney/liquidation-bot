@@ -5,11 +5,14 @@ import {
   addSupply,
   borrow,
   governanceLiquidation,
+  interestFeeAccrued,
   liquidation,
   removeCollateral,
   removeSupply,
   repay,
   setDebtCeiling,
+  setFeeRecipient,
+  setInterestFee,
   setIrm,
   setLiquidationEngine,
 } from "./markets";
@@ -104,5 +107,33 @@ ponder.on(
   "AltoMintMarket:GovernanceLiquidation",
   async ({ event, context }) => {
     await governanceLiquidation({ context, event });
+  }
+);
+
+ponder.on(
+  "AltoBorrowMarket:InterestFeeAccrued",
+  async ({ event, context }) => {
+    await interestFeeAccrued({ context, event });
+  }
+);
+
+ponder.on(
+  "AltoBorrowMarket:SetInterestFee",
+  async ({ event, context }) => {
+    await setInterestFee({ context, event });
+  }
+);
+
+ponder.on(
+  "AltoBorrowMarket:SetFeeRecipient",
+  async ({ event, context }) => {
+    await setFeeRecipient({ context, event });
+  }
+);
+
+ponder.on(
+  "AltoMintMarket:SetFeeRecipient",
+  async ({ event, context }) => {
+    await setFeeRecipient({ context, event });
   }
 );

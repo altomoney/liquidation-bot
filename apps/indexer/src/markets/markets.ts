@@ -82,6 +82,16 @@ export const setupMarket: (
           })
         : [0n, 0n];
 
+    // For borrow markets, read the interest fee percentage
+    const interestFee =
+      type === "AltoBorrowMarket"
+        ? await context.client.readContract({
+            abi: AltoBorrowMarketAbi,
+            functionName: "interestFee",
+            address: address,
+          })
+        : 0n;
+
     await context.db.insert(market).values({
       // primary key
       chainId: context.chain.id,
@@ -96,6 +106,7 @@ export const setupMarket: (
       liquidationEngine: liquidationEngine,
       totalSupplyAssets: totalSupplyAssets,
       totalSupplyShares: totalSupplyShares,
+      interestFee: interestFee,
     });
 
     await updateNewIrm(irm, address, context);
@@ -597,4 +608,58 @@ export const pauseMarket: Parameters<
         paused: event.args.paused,
       })),
   ]);
+};
+
+export const interestFeeAccrued: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:InterestFeeAccrued">
+>[1] = async ({ context, event }) => {
+  await Promise.all([
+    // Update market totalSupplyShares with the fee shares
+    context.db
+      .update(market, {
+        chainId: context.chain.id,
+        address: event.log.address,
+      })
+      .set((row) => ({
+        totalSupplyShares: row.totalSupplyShares + event.args.feeShares,
+      })),
+    // Upsert fee recipient's position with the fee shares
+    context.db
+      .insert(position)
+      .values({
+        chainId: context.chain.id,
+        marketId: event.log.address,
+        user: event.args.recipient,
+        supplyShares: event.args.feeShares,
+      })
+      .onConflictDoUpdate((row) => ({
+        supplyShares: row.supplyShares + event.args.feeShares,
+      })),
+  ]);
+};
+
+export const setInterestFee: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:SetInterestFee">
+>[1] = async ({ context, event }) => {
+  await context.db
+    .update(market, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set(() => ({
+      interestFee: event.args.newInterestFee,
+    }));
+};
+
+export const setFeeRecipient: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:SetFeeRecipient">
+>[1] = async ({ context, event }) => {
+  await context.db
+    .update(market, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set(() => ({
+      feeRecipient: event.args.newAddr,
+    }));
 };
