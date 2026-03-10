@@ -651,6 +651,32 @@ export const setInterestFee: Parameters<
     }));
 };
 
+export const setOracle: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:SetOracle">
+>[1] = async ({ context, event }) => {
+  await context.db
+    .update(market, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set(() => ({
+      oracle: event.args.newAddr,
+    }));
+};
+
+export const setMaxLtv: Parameters<
+  typeof ponder.on<"AltoBorrowMarket:SetMaxLtv">
+>[1] = async ({ context, event }) => {
+  await context.db
+    .update(market, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set(() => ({
+      ltv: event.args.newMaxLtv,
+    }));
+};
+
 export const setFeeRecipient: Parameters<
   typeof ponder.on<"AltoBorrowMarket:SetFeeRecipient">
 >[1] = async ({ context, event }) => {

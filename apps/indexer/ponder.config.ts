@@ -85,7 +85,7 @@ export default createConfig({
         address: allMarkets,
         // Event from the factory contract ABI which contains the child address.
         event: parseAbiItem(
-          "event SetIrm(address indexed oldAddr, address indexed newAddr)"
+          "event SetIrm(address indexed oldAddr, address indexed newAddr)",
         ),
         parameter: "newAddr",
       }),
@@ -99,7 +99,7 @@ export default createConfig({
         address: allMarkets,
         // Event from the factory contract ABI which contains the child address.
         event: parseAbiItem(
-          "event SetIrm(address indexed oldAddr, address indexed newAddr)"
+          "event SetIrm(address indexed oldAddr, address indexed newAddr)",
         ),
         parameter: "newAddr",
       }),
@@ -113,7 +113,7 @@ export default createConfig({
         address: allMarkets,
         // Event from the factory contract ABI which contains the child address.
         event: parseAbiItem(
-          "event SetLiquidationEngine(address indexed oldLiquidationEngine, address indexed newLiquidationEngine)"
+          "event SetLiquidationEngine(address indexed oldLiquidationEngine, address indexed newLiquidationEngine)",
         ),
         parameter: "newLiquidationEngine",
       }),

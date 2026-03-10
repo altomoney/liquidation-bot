@@ -15,6 +15,8 @@ import {
   setInterestFee,
   setIrm,
   setLiquidationEngine,
+  setOracle,
+  setMaxLtv,
 } from "./markets";
 
 ponder.on("AltoBorrowMarket:AccrueInterest", async ({ event, context }) => {
@@ -90,6 +92,22 @@ ponder.on(
 
 ponder.on("AltoMintMarket:SetLiquidationEngine", async ({ event, context }) => {
   await setLiquidationEngine({ context, event });
+});
+
+ponder.on("AltoBorrowMarket:SetOracle", async ({ event, context }) => {
+  await setOracle({ context, event });
+});
+
+ponder.on("AltoMintMarket:SetOracle", async ({ event, context }) => {
+  await setOracle({ context, event });
+});
+
+ponder.on("AltoBorrowMarket:SetMaxLtv", async ({ event, context }) => {
+  await setMaxLtv({ context, event });
+});
+
+ponder.on("AltoMintMarket:SetMaxLtv", async ({ event, context }) => {
+  await setMaxLtv({ context, event });
 });
 
 ponder.on("AltoMintMarket:SetDebtCeiling", async ({ event, context }) => {
