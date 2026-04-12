@@ -11,6 +11,8 @@ export const chainConfigs: Record<number, Config> = {
     chain: sepolia,
     wNative: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", // uniswap v3 weth
     options: {
+      liquidityVenues: [],
+      pricers: [],
       liquidationBufferBps: 50,
       blockInterval: 2,
       isPriorityLiquidator: false,
@@ -23,6 +25,16 @@ export const chainConfigs: Record<number, Config> = {
       liquidationBufferBps: 50,
       blockInterval: 2,
       isPriorityLiquidator: false,
+      liquidityVenues: [
+        "pendlePT",
+        "midas",
+        "1inch",
+        "erc20Wrapper",
+        "erc4626",
+        "uniswapV3",
+        "uniswapV4",
+      ],
+      pricers: ["defillama", "chainlink", "uniswapV3"],
     },
   },
 };

@@ -4,12 +4,9 @@ import { privateKeyToAccount } from "viem/accounts";
 import { watchBlocks } from "viem/actions";
 
 import { LiquidationBot, type LiquidationBotInputs } from "./bot";
-import { UniswapSmartOrderRouterVenue, UsmVenue } from "./liquidityVenues";
-import type { LiquidityVenue } from "./liquidityVenues/liquidityVenue";
-import { ChainlinkPricer, DefiLlamaPricer, StablecoinPricer } from "./pricers";
-import type { Pricer } from "./pricers/pricer";
+import { createLiquidityVenue } from "./liquidity-venues";
+import { createPricer } from "./pricers";
 import { ENV } from "./utils/env";
-import { fetchActiveUsms } from "./utils/fetchers";
 
 export const launchBot = async (config: ChainConfig) => {
   const logTag = `[${config.chain.name} client]: `;
@@ -21,30 +18,17 @@ export const launchBot = async (config: ChainConfig) => {
     account: privateKeyToAccount(config.liquidationPrivateKey),
   });
 
-  const activeUsms = await fetchActiveUsms(config.chainId);
-
   // LIQUIDITY VENUES
-  const liquidityVenues: LiquidityVenue[] = [];
-  // liquidityVenues.push(new Erc20Wrapper());
-  // liquidityVenues.push(new Erc4626());
-  liquidityVenues.push(new UniswapSmartOrderRouterVenue());
-  if (activeUsms.length > 0) {
-    liquidityVenues.push(new UsmVenue(activeUsms));
-  }
-  // liquidityVenues.push(new UniswapV3Venue());
-  // liquidityVenues.push(new UniswapV4Venue());
+  const liquidityVenues = config.liquidityVenues.map((liquidityVenueName) =>
+    createLiquidityVenue(liquidityVenueName),
+  );
 
   // PRICERS
-  const pricers: Pricer[] = [];
-  pricers.push(
-    new StablecoinPricer([
-      "0x63d74d22E689C715a04F2C13962b1f77F443d35b", // DUSD
-    ]),
-  );
-  pricers.push(new DefiLlamaPricer());
-  pricers.push(new ChainlinkPricer());
+  const pricers = config.pricers
+    ? config.pricers.map((pricerName) => createPricer(pricerName))
+    : undefined;
 
-  if (ENV.CHECK_PROFIT && pricers.length === 0) {
+  if (ENV.CHECK_PROFIT && !(pricers && pricers.length > 0)) {
     throw new Error(`${logTag} You must configure pricers!`);
   }
 
@@ -75,16 +59,26 @@ export const launchBot = async (config: ChainConfig) => {
   const blockInterval = config.blockInterval ?? 1;
   let count = 0;
 
-  watchBlocks(client, {
-    onBlock: () => {
-      if (count % blockInterval === 0) {
-        try {
-          void bot.run();
-        } catch (e) {
-          console.error(`${logTag} uncaught error in bot.run():`, e);
+  const startWatching = () => {
+    watchBlocks(client, {
+      onBlock: () => {
+        if (count % blockInterval === 0) {
+          bot.run().catch((e) => {
+            console.error(`${logTag} uncaught error in bot.run():`, e);
+          });
         }
-      }
-      count++;
-    },
-  });
+        count++;
+      },
+      onError: (error) => {
+        const retryDelay = config.watchBlocksRetryDelayMs ?? 5_000;
+        console.error(
+          `${logTag} watchBlocks error, restarting watcher in ${retryDelay}ms:`,
+          error,
+        );
+        setTimeout(startWatching, retryDelay);
+      },
+    });
+  };
+
+  startWatching();
 };

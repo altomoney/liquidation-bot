@@ -2,7 +2,7 @@ import type { Account, Address, Chain, Client, Transport } from "viem";
 
 import type { Pricer } from "../types";
 
-export class MorphoApi implements Pricer {
+export class MorphoPricer implements Pricer {
   private readonly API_URL = "https://blue-api.morpho.org/graphql";
   private supportedChains: number[] = [];
   private initialized = false;
