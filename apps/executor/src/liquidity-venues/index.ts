@@ -3,6 +3,7 @@ import { OneInch } from "./1inch";
 import { Erc20Wrapper } from "./erc20Wrapper";
 import { Erc4626 } from "./erc4626";
 import { MidasVenue } from "./midas";
+import { Odos } from "./odos";
 import { PendlePTVenue } from "./pendlePT";
 import { LiquidityVenue } from "./types";
 import { UniswapV3Venue } from "./uniswapV3";
@@ -12,6 +13,7 @@ export * from "./1inch";
 export * from "./erc20Wrapper";
 export * from "./erc4626";
 export * from "./midas";
+export * from "./odos";
 export * from "./pendlePT";
 export * from "./uniswapV3";
 export * from "./uniswapV4";
@@ -22,6 +24,8 @@ export const createLiquidityVenue = (
   switch (liquidityVenueName) {
     case "1inch":
       return new OneInch();
+    case "odos":
+      return new Odos();
     case "erc20Wrapper":
       return new Erc20Wrapper();
     case "erc4626":

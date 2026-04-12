@@ -1,11 +1,12 @@
 import { BigIntish } from "@/types";
 import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
-import { Address } from "viem";
+import { Address, parseUnits } from "viem";
 import { ToConvert } from "../../utils/types";
 import { LiquidityVenue } from "../types";
 import { ONE_INCH_LIQUIDITY_VENUE_CONFIG } from "./config";
 import { SwapParams, SwapResponse } from "./types";
+import { chainConfig } from "@/config/index";
 
 export class OneInch implements LiquidityVenue {
   private apiKey: string | undefined;
@@ -27,13 +28,15 @@ export class OneInch implements LiquidityVenue {
 
   async convert(encoder: ExecutorEncoder, toConvert: ToConvert) {
     try {
+      const config = chainConfig(encoder.client.chain.id);
+      const slippage = config.slippagePercentage ? config.slippagePercentage : 0.01; // 0.01% default
       const swapResponse = await this.fetchSwap({
         chainId: encoder.client.chain.id,
         src: toConvert.src,
         dst: toConvert.dst,
         amount: toConvert.srcAmount,
         from: encoder.address,
-        slippage: ONE_INCH_LIQUIDITY_VENUE_CONFIG.slippage,
+        slippage: parseUnits(slippage.toFixed(18), 18) / 10n ** 14n,
         origin: encoder.client.account.address,
         includeTokensInfo: false,
         includeProtocols: false,

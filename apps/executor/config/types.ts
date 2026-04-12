@@ -2,6 +2,7 @@ import type { Address, Chain, Hex } from "viem";
 
 export type LiquidityVenueName =
   | "1inch"
+  | "odos"
   | "erc20Wrapper"
   | "erc4626"
   | "midas"
@@ -29,6 +30,7 @@ export interface Options {
   liquidationBufferBps?: number;
   blockInterval?: number;
   watchBlocksRetryDelayMs?: number;
+  slippagePercentage?: number;
   // NOT IMPLEMENTED YET
   isPriorityLiquidator: boolean;
 }
