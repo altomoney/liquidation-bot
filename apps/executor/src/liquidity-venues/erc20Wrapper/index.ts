@@ -2,7 +2,7 @@ import type { ExecutorEncoder } from "executooor-viem";
 import { zeroAddress, type Address } from "viem";
 
 import type { ToConvert } from "../../utils/types";
-import type { LiquidityVenue } from "../liquidityVenue";
+import type { LiquidityVenue } from "../types";
 import { ERC20_WRAPPER_LIQUIDITY_VENUE_CONFIGS } from "./config";
 
 export class Erc20Wrapper implements LiquidityVenue {

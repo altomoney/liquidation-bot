@@ -21,7 +21,7 @@ import {
   uniswapV4StateViewAbi,
 } from "../../abis/uniswapV4";
 import type { ToConvert } from "../../utils/types";
-import type { LiquidityVenue } from "../liquidityVenue";
+import type { LiquidityVenue } from "../types";
 import { UNISWAP_V4_LIQUIDITY_VENUE_CONFIG } from "./config";
 
 export class UniswapV4Venue implements LiquidityVenue {

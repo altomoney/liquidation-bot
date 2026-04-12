@@ -11,7 +11,7 @@ import {
 } from "viem";
 import { readContract } from "viem/actions";
 
-import { UNISWAP_V3_LIQUIDITY_VENUE_CONFIG } from "@/liquidityVenues/uniswapV3";
+import { UNISWAP_V3_LIQUIDITY_VENUE_CONFIG } from "@/liquidity-venues/uniswapV3";
 import { base, mainnet } from "viem/chains";
 import { uniswapV3FactoryAbi, uniswapV3PoolAbi } from "../../abis/uniswapV3";
 import type { Pricer } from "../types";

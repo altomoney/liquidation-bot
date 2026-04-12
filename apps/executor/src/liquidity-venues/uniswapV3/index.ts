@@ -11,7 +11,7 @@ import { readContract } from "viem/actions";
 
 import { uniswapV3FactoryAbi, uniswapV3PoolAbi } from "../../abis/uniswapV3";
 import type { ToConvert } from "../../utils/types";
-import type { LiquidityVenue } from "../liquidityVenue";
+import type { LiquidityVenue } from "../types";
 import { UNISWAP_V3_LIQUIDITY_VENUE_CONFIG } from "./config";
 
 export class UniswapV3Venue implements LiquidityVenue {

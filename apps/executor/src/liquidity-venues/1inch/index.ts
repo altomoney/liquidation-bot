@@ -3,7 +3,7 @@ import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
 import { Address } from "viem";
 import { ToConvert } from "../../utils/types";
-import { LiquidityVenue } from "../liquidityVenue";
+import { LiquidityVenue } from "../types";
 import { ONE_INCH_LIQUIDITY_VENUE_CONFIG } from "./config";
 import { SwapParams, SwapResponse } from "./types";
 

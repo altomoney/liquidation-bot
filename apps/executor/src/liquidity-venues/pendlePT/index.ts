@@ -3,7 +3,7 @@ import { type Address, getAddress, maxUint256 } from "viem";
 
 import { BigIntish } from "@/types";
 import type { ToConvert } from "../../utils/types";
-import type { LiquidityVenue } from "../liquidityVenue";
+import type { LiquidityVenue } from "../types";
 import { PENDLE_PT_LIQUIDITY_VENUE_CONFIG } from "./config";
 import {
   PendleMarket,

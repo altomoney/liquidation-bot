@@ -4,7 +4,7 @@ import { readContract } from "viem/actions";
 
 import { midasDataFeedAbi, redemptionVaultAbi } from "../../abis/midas";
 import type { ToConvert } from "../../utils/types";
-import type { LiquidityVenue } from "../liquidityVenue";
+import type { LiquidityVenue } from "../types";
 import { MIDAS_LIQUIDITY_VENUE_CONFIGS } from "./config";
 import { PreviewRedeemInstantParams } from "./types";
 

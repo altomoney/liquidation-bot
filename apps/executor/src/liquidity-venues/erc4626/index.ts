@@ -3,7 +3,7 @@ import { erc4626Abi, zeroAddress, type Address } from "viem";
 import { readContract } from "viem/actions";
 
 import type { ToConvert } from "../../utils/types";
-import type { LiquidityVenue } from "../liquidityVenue";
+import type { LiquidityVenue } from "../types";
 
 export class Erc4626 implements LiquidityVenue {
   private underlying: Record<Address, Address> = {};
