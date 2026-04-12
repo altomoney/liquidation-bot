@@ -24,7 +24,7 @@ type Contracts =
   | "Permit2"
   | "Native";
 
-export const DEPLOYMENTS: Record<
+export const UNISWAP_V4_LIQUIDITY_VENUE_CONFIG: Record<
   number,
   Record<Contracts, { address: Address; fromBlock?: bigint }>
 > = {

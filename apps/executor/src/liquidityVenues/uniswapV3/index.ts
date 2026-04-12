@@ -1,10 +1,3 @@
-import {
-  DEFAULT_FACTORY_ADDRESS,
-  FEE_TIERS,
-  MAX_SQRT_RATIO,
-  MIN_SQRT_RATIO,
-  specificFactoryAddresses,
-} from "@/config";
 import { executorAbi, type ExecutorEncoder } from "executooor-viem";
 import {
   type Address,
@@ -19,6 +12,7 @@ import { readContract } from "viem/actions";
 import { uniswapV3FactoryAbi, uniswapV3PoolAbi } from "../../abis/uniswapV3";
 import type { ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
+import { UNISWAP_V3_LIQUIDITY_VENUE_CONFIG } from "./config";
 
 export class UniswapV3Venue implements LiquidityVenue {
   private pools: Record<Address, Record<Address, Address[]>> = {};
@@ -56,13 +50,13 @@ export class UniswapV3Venue implements LiquidityVenue {
               functionName: "liquidity",
             }),
           };
-        })
+        }),
       );
 
       const biggestPool = liquidities.reduce(
         (max, liquidity) =>
           max !== null && liquidity.amount > max.amount ? liquidity : max,
-        liquidities[0] ?? null
+        liquidities[0] ?? null,
       )?.pool;
 
       if (!biggestPool) {
@@ -101,17 +95,19 @@ export class UniswapV3Venue implements LiquidityVenue {
             encoder.address,
             zeroForOne,
             srcAmount,
-            zeroForOne ? MIN_SQRT_RATIO + 1n : MAX_SQRT_RATIO - 1n,
+            zeroForOne
+              ? UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.minSqrtRatio + 1n
+              : UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.maxSqrtRatio - 1n,
             encodeAbiParameters(
               [{ type: "bytes[]" }, { type: "bytes" }],
-              [callbacks, "0x"]
+              [callbacks, "0x"],
             ),
           ],
         }),
         {
           sender: biggestPool,
           dataIndex: 2n, // uniswapV3SwapCallback(int256,int256,bytes)
-        }
+        },
       );
 
       /// assumed to be the last liquidity venue
@@ -124,7 +120,7 @@ export class UniswapV3Venue implements LiquidityVenue {
       throw new Error(
         `(UniswapV3) Error swapping: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
@@ -138,23 +134,24 @@ export class UniswapV3Venue implements LiquidityVenue {
   private async fetchPools(
     encoder: ExecutorEncoder,
     src: Address,
-    dst: Address
+    dst: Address,
   ) {
     const factoryAddress =
-      specificFactoryAddresses[encoder.client.chain.id] ??
-      DEFAULT_FACTORY_ADDRESS;
+      UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.specificFactoryAddresses[
+        encoder.client.chain.id
+      ] ?? UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.defaultFactoryAddress;
 
     try {
       const newPools = (
         await Promise.all(
-          FEE_TIERS.map(async (fee) =>
+          UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.feeTiers.map(async (fee) =>
             readContract(encoder.client, {
               address: factoryAddress,
               abi: uniswapV3FactoryAbi,
               functionName: "getPool",
               args: [src, dst, fee],
-            })
-          )
+            }),
+          ),
         )
       ).filter((pool) => pool !== zeroAddress);
 
@@ -167,8 +164,10 @@ export class UniswapV3Venue implements LiquidityVenue {
       throw new Error(
         `(UniswapV3) Error fetching pools: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
 }
+
+export * from "./config";

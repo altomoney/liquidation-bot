@@ -1,9 +1,9 @@
-import { wrappers } from "@/config";
 import type { ExecutorEncoder } from "executooor-viem";
 import { zeroAddress, type Address } from "viem";
 
 import type { ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
+import { ERC20_WRAPPER_LIQUIDITY_VENUE_CONFIGS } from "./config";
 
 export class Erc20Wrapper implements LiquidityVenue {
   private underlying: Record<Address, Address> = {};
@@ -34,6 +34,8 @@ export class Erc20Wrapper implements LiquidityVenue {
   }
 
   private getUnderlying(src: Address, chainId: number) {
-    return wrappers[chainId]?.[src];
+    return ERC20_WRAPPER_LIQUIDITY_VENUE_CONFIGS[chainId]?.[src];
   }
 }
+
+export * from "./config";

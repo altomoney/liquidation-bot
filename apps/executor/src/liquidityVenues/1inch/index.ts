@@ -1,10 +1,10 @@
-import { API_BASE_URL, slippage, supportedNetworks } from "@/config";
 import { BigIntish } from "@/types";
 import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
 import { Address } from "viem";
 import { ToConvert } from "../../utils/types";
 import { LiquidityVenue } from "../liquidityVenue";
+import { ONE_INCH_LIQUIDITY_VENUE_CONFIG } from "./config";
 import { SwapParams, SwapResponse } from "./types";
 
 export class OneInch implements LiquidityVenue {
@@ -16,7 +16,12 @@ export class OneInch implements LiquidityVenue {
 
   supportsRoute(encoder: ExecutorEncoder, src: Address, dst: Address) {
     if (src === dst) return false;
-    if (!supportedNetworks.includes(encoder.client.chain.id)) return false;
+    if (
+      !ONE_INCH_LIQUIDITY_VENUE_CONFIG.supportedNetworks.includes(
+        encoder.client.chain.id,
+      )
+    )
+      return false;
     return this.apiKey !== undefined;
   }
 
@@ -28,7 +33,7 @@ export class OneInch implements LiquidityVenue {
         dst: toConvert.dst,
         amount: toConvert.srcAmount,
         from: encoder.address,
-        slippage,
+        slippage: ONE_INCH_LIQUIDITY_VENUE_CONFIG.slippage,
         origin: encoder.client.account.address,
         includeTokensInfo: false,
         includeProtocols: false,
@@ -43,7 +48,7 @@ export class OneInch implements LiquidityVenue {
         .pushCall(
           swapResponse.tx.to,
           BigInt(swapResponse.tx.value),
-          swapResponse.tx.data
+          swapResponse.tx.data,
         );
 
       /// assumed to be the last liquidity venue
@@ -56,7 +61,7 @@ export class OneInch implements LiquidityVenue {
       throw new Error(
         `(1inch) Error fetching swap response: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
@@ -64,7 +69,10 @@ export class OneInch implements LiquidityVenue {
   private getSwapApiPath = (chainId: BigIntish) => `/swap/v6.0/${chainId}/swap`;
 
   private async fetchSwap(swapParams: SwapParams) {
-    const url = new URL(this.getSwapApiPath(swapParams.chainId), API_BASE_URL);
+    const url = new URL(
+      this.getSwapApiPath(swapParams.chainId),
+      ONE_INCH_LIQUIDITY_VENUE_CONFIG.apiBaseUrl,
+    );
     Object.entries(swapParams).forEach(([key, value]) => {
       if (value == null) return;
       switch (key) {
@@ -89,3 +97,5 @@ export class OneInch implements LiquidityVenue {
     return (await res.json()) as SwapResponse;
   }
 }
+
+export * from "./config";

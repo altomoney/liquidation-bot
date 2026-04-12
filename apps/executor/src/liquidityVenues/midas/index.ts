@@ -1,4 +1,3 @@
-import { midasConfigs } from "@/config";
 import { type ExecutorEncoder } from "executooor-viem";
 import { type Address, encodeFunctionData, erc20Abi, getContract } from "viem";
 import { readContract } from "viem/actions";
@@ -6,6 +5,7 @@ import { readContract } from "viem/actions";
 import { midasDataFeedAbi, redemptionVaultAbi } from "../../abis/midas";
 import type { ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
+import { MIDAS_LIQUIDITY_VENUE_CONFIGS } from "./config";
 import { PreviewRedeemInstantParams } from "./types";
 
 const ONE_HUNDRED_PERCENT = 100n * 100n;
@@ -28,7 +28,7 @@ export class MidasVenue implements LiquidityVenue {
       redemptionVault,
       tokenOut,
       srcAmount,
-      encoder
+      encoder,
     );
 
     const previewRedeemInstantData =
@@ -47,68 +47,70 @@ export class MidasVenue implements LiquidityVenue {
         abi: redemptionVaultAbi,
         functionName: "redeemInstant",
         args: [tokenOut, srcAmount, amountTokenOutWithoutFee],
-      })
+      }),
     );
 
     return {
       src: tokenOut,
       srcAmount: this._convertFromBase18(
         amountTokenOutWithoutFee,
-        redemptionParams.tokenOutDecimals
+        redemptionParams.tokenOutDecimals,
       ),
       dst: dst,
     };
   }
 
   private isMidasToken(token: Address, chainId: number) {
-    return Object.keys(midasConfigs[chainId] ?? {}).some(
-      (tokenAddress) => tokenAddress === token
+    return Object.keys(MIDAS_LIQUIDITY_VENUE_CONFIGS[chainId] ?? {}).some(
+      (tokenAddress) => tokenAddress === token,
     );
   }
 
   private postRedeemToken(token: Address, chainId: number, dst: Address) {
-    const redeemTokens = midasConfigs[chainId]![token]!.redemptionAssets;
+    const redeemTokens =
+      MIDAS_LIQUIDITY_VENUE_CONFIGS[chainId]![token]!.redemptionAssets;
     return redeemTokens.includes(dst) ? dst : redeemTokens[0]!;
   }
 
   private redemptionVault(token: Address, chainId: number) {
-    return midasConfigs[chainId]![token]!.instantRedemptionVault;
+    return MIDAS_LIQUIDITY_VENUE_CONFIGS[chainId]![token]!
+      .instantRedemptionVault;
   }
 
   previewRedeemInstant(params: PreviewRedeemInstantParams) {
     const feeData = this._calcAndValidateRedeem(params);
     if (!feeData)
       throw new Error(
-        `(Midas) Error calculating and validating redeem for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error calculating and validating redeem for ${params.tokenOutConfig.dataFeed}`,
       );
 
     if (!this._requireAndUpdateLimit(params, feeData.amountMTokenWithoutFee))
       throw new Error(
-        `(Midas) Error validating redeem limit for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error validating redeem limit for ${params.tokenOutConfig.dataFeed}`,
       );
 
     const usdData = this._convertMTokenToUsd(
       params,
-      feeData.amountMTokenWithoutFee
+      feeData.amountMTokenWithoutFee,
     );
 
     if (!usdData)
       throw new Error(
-        `(Midas) Error converting MToken to USD for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error converting MToken to USD for ${params.tokenOutConfig.dataFeed}`,
       );
 
     const tokenData = this._convertUsdToToken(params, usdData.amountUsd);
 
     if (!tokenData)
       throw new Error(
-        `(Midas) Error converting USD to token for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error converting USD to token for ${params.tokenOutConfig.dataFeed}`,
       );
 
     return {
       amountTokenOutWithoutFee: this._truncate(
         (feeData.amountMTokenWithoutFee * usdData.mTokenRate) /
           tokenData.tokenRate,
-        params.tokenOutDecimals
+        params.tokenOutDecimals,
       ),
       feeAmount: feeData.feeAmount,
     };
@@ -117,7 +119,7 @@ export class MidasVenue implements LiquidityVenue {
   private _calcAndValidateRedeem(params: PreviewRedeemInstantParams) {
     if (params.minAmount > params.amountMTokenIn)
       throw new Error(
-        `(Midas) Error calculating and validating redeem for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error calculating and validating redeem for ${params.tokenOutConfig.dataFeed}`,
       );
 
     const feeAmount = this._getFeeAmount(params);
@@ -138,18 +140,18 @@ export class MidasVenue implements LiquidityVenue {
 
   private _requireAndUpdateLimit(
     params: PreviewRedeemInstantParams,
-    amount: bigint
+    amount: bigint,
   ) {
     return params.dailyLimits + amount <= params.instantDailyLimit;
   }
 
   private _convertMTokenToUsd(
     params: PreviewRedeemInstantParams,
-    amount: bigint
+    amount: bigint,
   ) {
     if (amount === 0n || params.mTokenRate === 0n)
       throw new Error(
-        `(Midas) Error converting MToken to USD for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error converting MToken to USD for ${params.tokenOutConfig.dataFeed}`,
       );
 
     return {
@@ -160,11 +162,11 @@ export class MidasVenue implements LiquidityVenue {
 
   private _convertUsdToToken(
     params: PreviewRedeemInstantParams,
-    amountUsd: bigint
+    amountUsd: bigint,
   ) {
     if (amountUsd === 0n)
       throw new Error(
-        `(Midas) Error converting USD to token for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error converting USD to token for ${params.tokenOutConfig.dataFeed}`,
       );
 
     const tokenRate = params.tokenOutConfig.stable
@@ -173,7 +175,7 @@ export class MidasVenue implements LiquidityVenue {
 
     if (tokenRate === 0n)
       throw new Error(
-        `(Midas) Error converting USD to token for ${params.tokenOutConfig.dataFeed}`
+        `(Midas) Error converting USD to token for ${params.tokenOutConfig.dataFeed}`,
       );
 
     return {
@@ -185,7 +187,7 @@ export class MidasVenue implements LiquidityVenue {
   private _truncate(value: bigint, decimals: bigint) {
     return this._convertToBase18(
       this._convertFromBase18(value, decimals),
-      decimals
+      decimals,
     );
   }
 
@@ -200,7 +202,7 @@ export class MidasVenue implements LiquidityVenue {
   private _convert(
     originalAmount: bigint,
     originalDecimals: bigint,
-    decidedDecimals: bigint
+    decidedDecimals: bigint,
   ) {
     if (originalAmount === 0n) return 0n;
     if (originalDecimals === decidedDecimals) return originalAmount;
@@ -218,7 +220,7 @@ export class MidasVenue implements LiquidityVenue {
     vault: Address,
     tokenOut: Address,
     seizedCollateral: bigint,
-    encoder: ExecutorEncoder
+    encoder: ExecutorEncoder,
   ): Promise<PreviewRedeemInstantParams> {
     const midasContract = getContract({
       address: vault,
@@ -282,7 +284,7 @@ export class MidasVenue implements LiquidityVenue {
       throw new Error(
         `(Midas) Error getting redemption params for ${vault} to ${tokenOut}: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
@@ -296,3 +298,5 @@ export class MidasVenue implements LiquidityVenue {
     });
   }
 }
+
+export * from "./config";

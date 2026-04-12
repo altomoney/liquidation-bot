@@ -1,6 +1,6 @@
 import type { Account, Address, Chain, Client, Transport } from "viem";
 
-import type { Pricer } from "../pricer";
+import type { Pricer } from "../types";
 
 export class MorphoApi implements Pricer {
   private readonly API_URL = "https://blue-api.morpho.org/graphql";
@@ -27,7 +27,8 @@ export class MorphoApi implements Pricer {
 
       const items = data.data.assets.items;
 
-      const priceUsd = items.find((item) => item.address === asset)?.priceUsd ?? null;
+      const priceUsd =
+        items.find((item) => item.address === asset)?.priceUsd ?? null;
 
       return priceUsd ?? undefined;
     } catch (error) {
@@ -52,7 +53,9 @@ export class MorphoApi implements Pricer {
         body: JSON.stringify({ query: initilizationQuery }),
       });
 
-      const data = (await response.json()) as { data: { chains: { id: number }[] } };
+      const data = (await response.json()) as {
+        data: { chains: { id: number }[] };
+      };
       this.supportedChains = data.data.chains.map((chain) => chain.id);
       this.initialized = true;
     } catch (error) {

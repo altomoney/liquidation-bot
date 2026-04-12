@@ -3,7 +3,5 @@ export * from "./erc20Wrapper";
 export * from "./erc4626";
 export * from "./midas";
 export * from "./pendlePT";
-export * from "./uniswapSmartOrderRouter";
 export * from "./uniswapV3";
 export * from "./uniswapV4";
-export * from "./usm";

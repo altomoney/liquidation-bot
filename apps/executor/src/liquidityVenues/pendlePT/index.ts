@@ -1,10 +1,10 @@
 import { type ExecutorEncoder } from "executooor-viem";
 import { type Address, getAddress, maxUint256 } from "viem";
 
-import { API_REFRESH_INTERVAL } from "@/config";
 import { BigIntish } from "@/types";
 import type { ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
+import { PENDLE_PT_LIQUIDITY_VENUE_CONFIG } from "./config";
 import {
   PendleMarket,
   PendleMarketsResponse,
@@ -13,23 +13,21 @@ import {
   SwapParams,
 } from "./types";
 
-const API_URL = "https://api-v2.pendle.finance/core/";
-
 async function getApiData<T extends {}, U>(
   chainId: number,
   endpoint: string,
   params: T,
-  api: "sdk" | "non-sdk" = "sdk"
+  api: "sdk" | "non-sdk" = "sdk",
 ) {
   const queryParams = new URLSearchParams(
     Object.entries(params).map(([key, value]) => [key, String(value)]) as [
       string,
-      string
-    ][]
+      string,
+    ][],
   ).toString();
 
   const apiPath = api === "sdk" ? `v2/sdk/${chainId}` : `v2/${chainId}`;
-  const url = `${API_URL}${apiPath}${endpoint}?${queryParams}`;
+  const url = `${PENDLE_PT_LIQUIDITY_VENUE_CONFIG.apiBaseUrl}${apiPath}${endpoint}?${queryParams}`;
 
   const res = await fetch(url, {
     method: "GET",
@@ -44,7 +42,7 @@ async function getApiData<T extends {}, U>(
 }
 
 async function getMarkets(chainId: number) {
-  const url = `${API_URL}v1/markets/all?chainId=${chainId}`;
+  const url = `${PENDLE_PT_LIQUIDITY_VENUE_CONFIG.apiBaseUrl}v1/markets/all?chainId=${chainId}`;
 
   const res = await fetch(url, {
     method: "GET",
@@ -61,12 +59,12 @@ async function getMarkets(chainId: number) {
 async function getSwapCallData(
   chainId: number,
   marketAddress: string,
-  params: SwapParams
+  params: SwapParams,
 ) {
   return getApiData<SwapParams, SwapCallData>(
     chainId,
     `/markets/${marketAddress}/swap`,
-    params
+    params,
   );
 }
 
@@ -85,11 +83,11 @@ export class PendlePTVenue implements LiquidityVenue {
       this.pendleMarkets[encoder.client.chain.id] === undefined ||
       this.lastPoolRefresh[encoder.client.chain.id] === undefined ||
       Date.now() - this.lastPoolRefresh[encoder.client.chain.id]! >
-        API_REFRESH_INTERVAL
+        PENDLE_PT_LIQUIDITY_VENUE_CONFIG.apiRefreshInterval
     ) {
       try {
         this.pendleMarkets[encoder.client.chain.id] = await getMarkets(
-          encoder.client.chain.id
+          encoder.client.chain.id,
         );
         this.lastPoolRefresh[encoder.client.chain.id] = Date.now();
       } catch (error) {
@@ -97,7 +95,7 @@ export class PendlePTVenue implements LiquidityVenue {
         throw new Error(
           `(PendlePT) Error fetching pendle tokens: ${
             error instanceof Error ? error.message : String(error)
-          }`
+          }`,
         );
       }
     }
@@ -133,13 +131,13 @@ export class PendlePTVenue implements LiquidityVenue {
           pendleMarket,
           srcAmount,
           src,
-          underlyingToken
+          underlyingToken,
         );
       } catch (error) {
         throw new Error(
           `(PendlePT) Error redeeming PT to underlying: ${
             error instanceof Error ? error.message : String(error)
-          }`
+          }`,
         );
       }
     } else {
@@ -150,13 +148,13 @@ export class PendlePTVenue implements LiquidityVenue {
           pendleMarket,
           srcAmount,
           src,
-          underlyingToken
+          underlyingToken,
         );
       } catch (error) {
         throw new Error(
           `(PendlePT) Error swapping PT to underlying: ${
             error instanceof Error ? error.message : String(error)
-          }`
+          }`,
         );
       }
     }
@@ -173,7 +171,7 @@ export class PendlePTVenue implements LiquidityVenue {
     pendleMarket: PendleMarket,
     srcAmount: bigint,
     src: Address,
-    underlyingToken: string
+    underlyingToken: string,
   ) {
     const redeemCallData = await getRedeemCallData(encoder.client.chain.id, {
       receiver: encoder.address,
@@ -189,7 +187,7 @@ export class PendlePTVenue implements LiquidityVenue {
       .pushCall(
         redeemCallData.tx.to,
         redeemCallData.tx.value ? BigInt(redeemCallData.tx.value) : 0n,
-        redeemCallData.tx.data
+        redeemCallData.tx.data,
       );
 
     return BigInt(redeemCallData.data.amountOut);
@@ -200,7 +198,7 @@ export class PendlePTVenue implements LiquidityVenue {
     pendleMarket: PendleMarket,
     srcAmount: bigint,
     src: Address,
-    underlyingToken: string
+    underlyingToken: string,
   ) {
     const swapCallData = await getSwapCallData(
       encoder.client.chain.id,
@@ -211,14 +209,14 @@ export class PendlePTVenue implements LiquidityVenue {
         tokenIn: src.toLowerCase(),
         tokenOut: underlyingToken,
         amountIn: srcAmount.toString(),
-      }
+      },
     );
     encoder
       .erc20Approve(src, swapCallData.tx.to, maxUint256)
       .pushCall(
         swapCallData.tx.to,
         swapCallData.tx.value ? BigInt(swapCallData.tx.value) : 0n,
-        swapCallData.tx.data
+        swapCallData.tx.data,
       );
 
     return BigInt(swapCallData.data.amountOut);
@@ -231,3 +229,5 @@ export class PendlePTVenue implements LiquidityVenue {
     });
   }
 }
+
+export * from "./config";

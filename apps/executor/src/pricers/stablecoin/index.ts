@@ -1,7 +1,7 @@
 import type { Account, Address, Chain, Client, Transport } from "viem";
 import { getAddress } from "viem";
 
-import type { Pricer } from "../pricer";
+import type { Pricer } from "../types";
 
 /**
  * A simple pricer for stablecoins known to be pegged to $1.

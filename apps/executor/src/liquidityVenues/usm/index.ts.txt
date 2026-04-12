@@ -5,7 +5,6 @@ import { readContract } from "viem/actions";
 import { usmAbi } from "@/abis/usm";
 import type { IndexerActiveUsmsResponse, ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
-import { UniswapSmartOrderRouterVenue } from "../uniswapSmartOrderRouter";
 
 type ActiveUsm = IndexerActiveUsmsResponse["activeUsms"][number];
 

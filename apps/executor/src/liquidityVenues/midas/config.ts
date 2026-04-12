@@ -1,12 +1,11 @@
 import { Address } from "viem";
 import { base, mainnet } from "viem/chains";
+import { MidasConfig } from "./types";
 
-export type MidasConfig = {
-  instantRedemptionVault: Address;
-  redemptionAssets: Address[];
-};
-
-export const midasConfigs: Record<number, Record<Address, MidasConfig>> = {
+export const MIDAS_LIQUIDITY_VENUE_CONFIGS: Record<
+  number,
+  Record<Address, MidasConfig>
+> = {
   [mainnet.id]: {
     "0xDD629E5241CbC5919847783e6C96B2De4754e438": {
       // mTBILL
@@ -109,14 +108,4 @@ export const midasConfigs: Record<number, Record<Address, MidasConfig>> = {
       redemptionAssets: ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"], // USDC
     },
   },
-  /* [katana.id]: {
-    "0xC6135d59F8D10c9C035963ce9037B3635170D716": {
-      // mRe7SOL
-      instantRedemptionVault: "0xE93E6Cf151588d63bB669138277D20f28C2E7cdA",
-      redemptionAssets: [
-        "0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55", // uSOL
-        "0x6C16E26013f2431e8B2e1Ba7067ECCcad0Db6C52", // jitoSOL
-      ],
-    },
-  }, */
 };

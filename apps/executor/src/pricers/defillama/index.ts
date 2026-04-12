@@ -1,6 +1,6 @@
 import type { Account, Address, Chain, Client, Transport } from "viem";
 
-import type { Pricer } from "../pricer";
+import type { Pricer } from "../types";
 
 type CoinKey = `${string}:0x${string}`;
 
@@ -30,7 +30,10 @@ export class DefiLlamaPricer implements Pricer {
     const cacheKey = this.getCoinKey(client, asset);
     const cachedResult = this.priceCache.get(cacheKey);
 
-    if (cachedResult && Date.now() - cachedResult.fetchTimestamp < this.cacheTimeoutMs) {
+    if (
+      cachedResult &&
+      Date.now() - cachedResult.fetchTimestamp < this.cacheTimeoutMs
+    ) {
       return cachedResult.price;
     }
 
@@ -71,7 +74,10 @@ export class DefiLlamaPricer implements Pricer {
     }
   }
 
-  private getCoinKey(client: Client<Transport, Chain, Account>, asset: Address): CoinKey {
+  private getCoinKey(
+    client: Client<Transport, Chain, Account>,
+    asset: Address,
+  ): CoinKey {
     return `${client.chain.name}:${asset}`;
   }
 }

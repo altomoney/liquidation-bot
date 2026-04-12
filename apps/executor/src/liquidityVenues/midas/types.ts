@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 export type TokenConfig = {
   dataFeed: `0x${string}`;
   fee: bigint;
@@ -17,4 +19,9 @@ export type PreviewRedeemInstantParams = {
   instantDailyLimit: bigint;
   STABLECOIN_RATE: bigint;
   waivedFeeRestriction: boolean;
+};
+
+export type MidasConfig = {
+  instantRedemptionVault: Address;
+  redemptionAssets: Address[];
 };

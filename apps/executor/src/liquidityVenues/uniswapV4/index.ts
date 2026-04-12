@@ -1,4 +1,3 @@
-import { DEPLOYMENTS } from "@/config";
 import { CommandType, RoutePlanner } from "@uniswap/universal-router-sdk";
 import { Actions, type PoolKey, V4Planner } from "@uniswap/v4-sdk";
 import type { ExecutorEncoder } from "executooor-viem";
@@ -23,6 +22,7 @@ import {
 } from "../../abis/uniswapV4";
 import type { ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../liquidityVenue";
+import { UNISWAP_V4_LIQUIDITY_VENUE_CONFIG } from "./config";
 
 export class UniswapV4Venue implements LiquidityVenue {
   private STALE_TIME = 60 * 60 * 1000; // 1 hour
@@ -45,15 +45,18 @@ export class UniswapV4Venue implements LiquidityVenue {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     src: Address,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    dst: Address
+    dst: Address,
   ): Promise<boolean> | boolean {
-    return DEPLOYMENTS[encoder.client.chain.id] !== undefined;
+    return (
+      UNISWAP_V4_LIQUIDITY_VENUE_CONFIG[encoder.client.chain.id] !== undefined
+    );
   }
 
   async convert(encoder: ExecutorEncoder, toConvert: ToConvert) {
     const { src: rawSrc, dst: rawDst, srcAmount } = toConvert;
 
-    const deployments = DEPLOYMENTS[encoder.client.chain.id];
+    const deployments =
+      UNISWAP_V4_LIQUIDITY_VENUE_CONFIG[encoder.client.chain.id];
     if (!deployments) return toConvert;
     const { PoolManager, StateView, UniversalRouter, Native } = deployments;
 
@@ -67,7 +70,7 @@ export class UniswapV4Venue implements LiquidityVenue {
       encoder,
       PoolManager,
       src,
-      dst
+      dst,
     );
     if (pools.length === 0) return toConvert;
 
@@ -99,7 +102,7 @@ export class UniswapV4Venue implements LiquidityVenue {
       throw new Error(
         `(UniswapV4) Error fetching pools liquidities: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
 
@@ -152,7 +155,7 @@ export class UniswapV4Venue implements LiquidityVenue {
       routePlanner.addCommand(
         CommandType.UNWRAP_WETH,
         [UniversalRouter.address, 0],
-        false
+        false,
       );
     }
     // See https://github.com/Uniswap/sdks/blob/5a1cbfb55d47625afd40f5f0f5e934ed18dfd5e4/sdks/universal-router-sdk/src/utils/routerCommands.ts#L268
@@ -173,7 +176,7 @@ export class UniswapV4Venue implements LiquidityVenue {
       throw new Error(
         `(UniswapV4) Error fetching Permit2 allowance: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
 
@@ -191,7 +194,7 @@ export class UniswapV4Venue implements LiquidityVenue {
           srcAmount,
           Number(deadline),
         ],
-      })
+      }),
     );
 
     encoder.pushCall(
@@ -205,7 +208,7 @@ export class UniswapV4Venue implements LiquidityVenue {
           routePlanner.inputs as Hex[],
           deadline,
         ],
-      })
+      }),
     );
     if (shouldWrap) {
       // `Executor` contract caps amount at `address(this).balance`, and WETH receive
@@ -219,9 +222,9 @@ export class UniswapV4Venue implements LiquidityVenue {
 
   private async fetchPools(
     encoder: ExecutorEncoder,
-    poolManager: ValueOf<ValueOf<typeof DEPLOYMENTS>>,
+    poolManager: ValueOf<ValueOf<typeof UNISWAP_V4_LIQUIDITY_VENUE_CONFIG>>,
     src: Address,
-    dst: Address
+    dst: Address,
   ) {
     // Each pool's currencies are always sorted numerically.
     const [currency0, currency1] =
@@ -259,8 +262,10 @@ export class UniswapV4Venue implements LiquidityVenue {
       throw new Error(
         `(UniswapV4) Error fetching pools: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        }`,
       );
     }
   }
 }
+
+export * from "./config";
