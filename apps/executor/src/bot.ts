@@ -1,4 +1,8 @@
-import { ALWAYS_REALIZE_BAD_DEBT, chainConfigs } from "@/config";
+import {
+  ALWAYS_REALIZE_BAD_DEBT,
+  chainConfigs,
+  type UsmMode,
+} from "@/config";
 import { executorAbi } from "executooor-viem";
 import {
   erc20Abi,
@@ -27,6 +31,7 @@ import type { Pricer } from "./pricers/types.js";
 import { CooldownMechanism } from "./utils/cooldownMechanism.js";
 import { fetchLiquidatablePositions } from "./utils/fetchers.js";
 import { Flashbots } from "./utils/flashbots.js";
+import { planBestConversionRoute } from "./utils/conversionRouting.js";
 import { LiquidationEncoder } from "./utils/LiquidationEncoder.js";
 import {
   calculatePositionLtv,
@@ -38,6 +43,7 @@ import {
 import type {
   IMarket,
   IndexerAPIResponse,
+  IndexerActiveUsmsResponse,
   LiquidatablePosition,
 } from "./utils/types.js";
 
@@ -49,6 +55,8 @@ export interface LiquidationBotInputs {
   executorAddress: Address;
   treasuryAddress: Address;
   liquidityVenues: LiquidityVenue[];
+  activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
+  usmMode: UsmMode;
   pricers?: Pricer[];
   cooldownMechanism?: CooldownMechanism;
   flashbotAccount?: LocalAccount;
@@ -63,6 +71,8 @@ export class LiquidationBot {
   private executorAddress: Address;
   private treasuryAddress: Address;
   private liquidityVenues: LiquidityVenue[];
+  private activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
+  private usmMode: UsmMode;
   private pricers?: Pricer[];
   private cooldownMechanism?: CooldownMechanism;
   private flashbotAccount?: LocalAccount;
@@ -84,6 +94,8 @@ export class LiquidationBot {
     this.executorAddress = inputs.executorAddress;
     this.treasuryAddress = inputs.treasuryAddress;
     this.liquidityVenues = inputs.liquidityVenues;
+    this.activeUsms = inputs.activeUsms;
+    this.usmMode = inputs.usmMode;
     this.pricers = inputs.pricers;
     this.cooldownMechanism = inputs.cooldownMechanism;
     this.flashbotAccount = inputs.flashbotAccount;
@@ -305,28 +317,31 @@ export class LiquidationBot {
     seizableCollateral: bigint,
     encoder: LiquidationEncoder,
   ) {
-    let toConvert = {
-      src: getAddress(marketParams.collateralToken),
-      dst: getAddress(marketParams.loanToken),
-      srcAmount: seizableCollateral,
-    };
+    const route = await planBestConversionRoute({
+      executorAddress: this.executorAddress,
+      client: this.client,
+      liquidityVenues: this.liquidityVenues,
+      activeUsms: this.activeUsms,
+      usmMode: this.usmMode,
+      surplusRecipient: this.treasuryAddress,
+      toConvert: {
+        src: getAddress(marketParams.collateralToken),
+        dst: getAddress(marketParams.loanToken),
+        srcAmount: seizableCollateral,
+      },
+    });
 
-    for (const venue of this.liquidityVenues) {
-      try {
-        if (await venue.supportsRoute(encoder, toConvert.src, toConvert.dst))
-          toConvert = await venue.convert(encoder, toConvert);
-      } catch (error) {
+    if (!route.success) {
+      for (const error of route.errors) {
         console.error(
-          `${this.logTag}Error converting ${toConvert.src} to ${toConvert.dst}`,
-          error,
+          `${this.logTag}Error converting ${marketParams.collateralToken} to ${marketParams.loanToken}: ${error}`,
         );
-        continue;
       }
-
-      if (toConvert.src === toConvert.dst) return true;
+      return false;
     }
 
-    return false;
+    encoder.appendEncodedCalls(route.calls);
+    return true;
   }
 
   private async price(asset: Address, amount: bigint, pricers: Pricer[]) {

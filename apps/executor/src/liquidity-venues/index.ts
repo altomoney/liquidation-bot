@@ -17,6 +17,7 @@ export * from "./odos";
 export * from "./pendlePT";
 export * from "./uniswapV3";
 export * from "./uniswapV4";
+export * from "./usm";
 
 export const createLiquidityVenue = (
   liquidityVenueName: LiquidityVenueName,

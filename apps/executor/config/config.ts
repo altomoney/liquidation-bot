@@ -25,6 +25,7 @@ export const chainConfigs: Record<number, Config> = {
       liquidationBufferBps: 50,
       blockInterval: 2,
       isPriorityLiquidator: false,
+      useUsm: "always",
       liquidityVenues: [
         "pendlePT",
         "midas",

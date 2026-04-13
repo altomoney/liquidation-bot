@@ -15,8 +15,6 @@ import type {
 
 export class Odos implements LiquidityVenue {
   private apiKey: string | undefined;
-  private lastQuote: OdosQuoteResponse | undefined;
-
   constructor() {
     this.apiKey = ENV.ODOS_API_KEY;
   }
@@ -52,8 +50,6 @@ export class Odos implements LiquidityVenue {
         slippageLimitPercent: slippage,
         compact: true,
       });
-      this.lastQuote = quote;
-
       if (!quote.pathId) {
         throw new Error(quote.detail ?? quote.error ?? "No pathId returned");
       }
@@ -86,7 +82,7 @@ export class Odos implements LiquidityVenue {
       return {
         src: toConvert.dst,
         dst: toConvert.dst,
-        srcAmount: 0n,
+        srcAmount: quote.outAmounts?.[0] ? BigInt(quote.outAmounts[0]) : 0n,
       };
     } catch (error) {
       throw new Error(
@@ -95,10 +91,6 @@ export class Odos implements LiquidityVenue {
         }`,
       );
     }
-  }
-
-  getLastQuote() {
-    return this.lastQuote;
   }
 
   private async fetchQuote(
