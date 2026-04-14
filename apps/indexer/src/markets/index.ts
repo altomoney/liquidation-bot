@@ -4,6 +4,7 @@ import {
   addCollateral,
   addSupply,
   borrow,
+  deactivateMarket,
   governanceLiquidation,
   interestFeeAccrued,
   liquidation,
@@ -17,7 +18,28 @@ import {
   setLiquidationEngine,
   setOracle,
   setMaxLtv,
+  setupMarket,
 } from "./markets";
+
+// --- Registry events ---
+
+ponder.on("MarketRegistry:BorrowMarketAdded", async ({ context, event }) => {
+  await setupMarket("AltoBorrowMarket")({ context, event });
+});
+
+ponder.on("MarketRegistry:MintMarketAdded", async ({ context, event }) => {
+  await setupMarket("AltoMintMarket")({ context, event });
+});
+
+ponder.on("MarketRegistry:BorrowMarketRemoved", async ({ context, event }) => {
+  await deactivateMarket({ context, event });
+});
+
+ponder.on("MarketRegistry:MintMarketRemoved", async ({ context, event }) => {
+  await deactivateMarket({ context, event });
+});
+
+// --- Market events ---
 
 ponder.on("AltoBorrowMarket:AccrueInterest", async ({ event, context }) => {
   await accrueInterest({ context, event });

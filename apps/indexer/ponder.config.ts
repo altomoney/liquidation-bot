@@ -28,12 +28,14 @@ export default createConfig({
       chain: ENV.CHAIN_ID_STRING,
       address: ENV.DUSD_ADDRESS,
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     UsmRegistry: {
       abi: UsmRegistryAbi,
       chain: ENV.CHAIN_ID_STRING,
       address: ENV.USM_REGISTRY_ADDRESS,
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     Usm: {
       chain: ENV.CHAIN_ID_STRING,
@@ -46,12 +48,14 @@ export default createConfig({
         parameter: "usm",
       }),
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     MarketRegistry: {
       abi: MarketRegistryAbi,
       chain: ENV.CHAIN_ID_STRING,
       address: ENV.MARKET_REGISTRY_ADDRESS,
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     AltoBorrowMarket: {
       chain: ENV.CHAIN_ID_STRING,
@@ -64,6 +68,7 @@ export default createConfig({
         parameter: "market",
       }),
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     AltoMintMarket: {
       abi: AltoMintMarketAbi,
@@ -76,6 +81,7 @@ export default createConfig({
         parameter: "market",
       }),
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     FixedRateIrm: {
       abi: FixedRateIrmAbi,
@@ -90,6 +96,7 @@ export default createConfig({
         parameter: "newAddr",
       }),
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     AdaptiveCurveIrm: {
       abi: AdaptiveCurveIrmAbi,
@@ -104,6 +111,7 @@ export default createConfig({
         parameter: "newAddr",
       }),
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
     DlbDcfPriorityLiquidationEngine: {
       abi: DlbDcfPriorityLiquidationEngineAbi,
@@ -118,6 +126,7 @@ export default createConfig({
         parameter: "newLiquidationEngine",
       }),
       startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
     },
   },
   database: ENV.POSTGRES_DATABASE_URL

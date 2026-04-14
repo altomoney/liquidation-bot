@@ -3,20 +3,13 @@ import { type Address, PublicClient, zeroAddress } from "viem";
 
 import { OracleAbi } from "../../abis/OracleAbi";
 import * as schema from "../../ponder.schema";
-import { replaceBigIntStringsToBigInts } from "../utils";
+import { ENV } from "../utils/env";
 import {
-  AdaptiveCurveIrm,
-  AdaptiveCurveIrmConfig,
-  AdaptiveCurveIrmState,
-} from "../utils/irm/AdaptiveCurveIrm";
-import { FixedRateIrm, FixedRateIrmState } from "../utils/irm/FixedRateIrm";
-import { IIrm } from "../utils/irm/types";
-import {
-  DlbDcfPriorityLiquidationEngine,
-  LiquidationConfiguration,
-} from "../utils/liquidation-engine/DlbDcfPriorityLiquidationEngine";
-import { ILiquidationEngine } from "../utils/liquidation-engine/types";
-import { Market } from "../utils/market/Market";
+  toSdkIrm,
+  toSdkLiquidationEngine,
+  toSdkLiquidationPosition,
+  toSdkMarket,
+} from "../utils/sdkAdapters";
 import { ILiquidatablePosition, IMarket, IndexerApiResponse } from "./types";
 
 export async function getLiquidatablePositions({
@@ -37,7 +30,7 @@ export async function getLiquidatablePositions({
       and(
         eq(row.chainId, chainId),
         eq(row.isActive, true),
-        eq(row.paused, false)
+        eq(row.paused, false),
       ),
     with: {
       // ! Note: following is omitted because it created imprecise results when fetching positions (couple of integer digits)
@@ -54,7 +47,7 @@ export async function getLiquidatablePositions({
       and(
         gt(row.borrowShares, 0n),
         eq(row.chainId, chainId),
-        inArray(row.marketId, marketAddresses)
+        inArray(row.marketId, marketAddresses),
       ),
   });
 
@@ -72,6 +65,7 @@ export async function getLiquidatablePositions({
     })),
     allowFailure: true,
     batchSize: 2 ** 16,
+    blockNumber: ENV.DEV_END_BLOCK ? BigInt(ENV.DEV_END_BLOCK) : undefined,
   });
   const prices: Record<Address, (typeof pricesArr)[number]> = {};
   for (let i = 0; i < oracles.length; i += 1) {
@@ -79,7 +73,8 @@ export async function getLiquidatablePositions({
     prices[oracles[i]!] = pricesArr[i]!;
   }
 
-  const now = BigInt((Date.now() / 1000).toFixed(0));
+  const now =
+    ENV.DEV_EVALUATION_TIMESTAMP ?? BigInt((Date.now() / 1000).toFixed(0));
 
   const warnings: string[] = [];
 
@@ -90,7 +85,7 @@ export async function getLiquidatablePositions({
     }
     if (price === undefined) {
       warnings.push(
-        `${oracle} was skipped when fetching prices -- SHOULD NEVER HAPPEN.`
+        `${oracle} was skipped when fetching prices -- SHOULD NEVER HAPPEN.`,
       );
       return;
     }
@@ -108,49 +103,23 @@ export async function getLiquidatablePositions({
 
   for (const dbMarket of marketRows) {
     const dbPositions = positions.filter(
-      (position) => position.marketId === dbMarket.address
+      (position) => position.marketId === dbMarket.address,
     );
 
     const price = getPrice(dbMarket.oracle);
     if (price === undefined) continue;
 
-    let irm: IIrm | undefined;
-
-    if (dbMarket.irm) {
-      if (dbMarket.irm.type === "fixed") {
-        const state = replaceBigIntStringsToBigInts(
-          dbMarket.irm.state as FixedRateIrmState
-        );
-        irm = new FixedRateIrm(state);
-      } else if (dbMarket.irm.type === "adaptive") {
-        const config = replaceBigIntStringsToBigInts(
-          dbMarket.irm.config as AdaptiveCurveIrmConfig
-        );
-        const state = replaceBigIntStringsToBigInts(
-          dbMarket.irm.state as AdaptiveCurveIrmState
-        );
-        irm = new AdaptiveCurveIrm(config, state);
-      }
-    }
-
-    const market = new Market(dbMarket, price, irm).accrueInterest(now);
-
-    let liquidationEngine: ILiquidationEngine | undefined;
-    if (dbMarket.liquidationEngine.type === "DlbDcfPriorityLiquidationEngine") {
-      const state = replaceBigIntStringsToBigInts(
-        dbMarket.liquidationEngine.config as LiquidationConfiguration
-      );
-
-      liquidationEngine = new DlbDcfPriorityLiquidationEngine(
-        market,
-        state,
-        isPriorityLiquidator
-      );
-    } else {
-      throw new Error(
-        `Invalid Liquidation Engine type: ${dbMarket.liquidationEngine.type}`
-      );
-    }
+    const irm = toSdkIrm(dbMarket.irm);
+    const market = toSdkMarket({
+      dbMarket,
+      price,
+      irm,
+    }).accrueInterest(now);
+    const liquidationEngine = toSdkLiquidationEngine({
+      market,
+      dbLiquidationEngine: dbMarket.liquidationEngine,
+      isPriorityLiquidator,
+    });
 
     const positionsLiq: ILiquidatablePosition[] = dbPositions
       .map((dbPosition) => {
@@ -158,9 +127,9 @@ export async function getLiquidatablePositions({
           ...dbPosition,
           seizableCollateral:
             liquidationEngine.seizableCollateralOfPosition(
-              dbPosition,
+              toSdkLiquidationPosition(dbPosition),
               liquidatorAddress,
-              undefined
+              undefined,
             ) ?? 0n,
         };
       })
@@ -168,13 +137,17 @@ export async function getLiquidatablePositions({
 
     // Sort
     positionsLiq.sort((a, b) =>
-      a.seizableCollateral > b.seizableCollateral ? -1 : 1
+      a.seizableCollateral > b.seizableCollateral ? -1 : 1,
     );
 
     if (positionsLiq.length > 0) {
       results.push({
         market: {
           ...dbMarket,
+          totalSupplyAssets: market.totalSupplyAssets,
+          totalSupplyShares: market.totalSupplyShares,
+          totalBorrowAssets: market.totalBorrowAssets,
+          totalBorrowShares: market.totalBorrowShares,
           price,
           irmConfig: dbMarket.irm,
           liquidationEngineConfig: dbMarket.liquidationEngine,

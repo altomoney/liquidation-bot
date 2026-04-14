@@ -5,7 +5,7 @@ assert(process.env.CHAIN_ID, "CHAIN_ID env var is not set");
 assert(process.env.PONDER_RPC_URL, "PONDER_RPC_URL env var is not set");
 assert(
   process.env.MARKET_REGISTRY_ADDRESS,
-  "MARKET_REGISTRY_ADDRESS env var is not set"
+  "MARKET_REGISTRY_ADDRESS env var is not set",
 );
 assert(process.env.START_BLOCK, "START_BLOCK env var is not set");
 assert(process.env.DUSD_ADDRESS, "DUSD_ADDRESS env var is not set");
@@ -18,6 +18,17 @@ const START_BLOCK = Number(process.env.START_BLOCK);
 const DUSD_ADDRESS = process.env.DUSD_ADDRESS as Address;
 const POSTGRES_DATABASE_URL = process.env.POSTGRES_DATABASE_URL;
 
+// Development variables
+const DEV_EVALUATION_TIMESTAMP =
+  process.env.DEV_EVALUATION_TIMESTAMP === undefined
+    ? undefined
+    : BigInt(process.env.DEV_EVALUATION_TIMESTAMP);
+
+const DEV_END_BLOCK =
+  process.env.DEV_END_BLOCK === undefined
+    ? undefined
+    : Number(process.env.DEV_END_BLOCK);
+
 export const ENV = {
   CHAIN_ID,
   CHAIN_ID_STRING: CHAIN_ID.toFixed(0),
@@ -27,4 +38,6 @@ export const ENV = {
   START_BLOCK,
   DUSD_ADDRESS,
   POSTGRES_DATABASE_URL,
+  DEV_END_BLOCK,
+  DEV_EVALUATION_TIMESTAMP,
 };
