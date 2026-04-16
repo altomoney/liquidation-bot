@@ -1,4 +1,8 @@
-import { ALWAYS_REALIZE_BAD_DEBT, chainConfigs } from "@/config";
+import {
+  ALWAYS_REALIZE_BAD_DEBT,
+  chainConfigs,
+  type UsmMode,
+} from "@/config";
 import { executorAbi } from "executooor-viem";
 import {
   erc20Abi,
@@ -22,11 +26,12 @@ import {
   writeContract,
 } from "viem/actions";
 
-import type { LiquidityVenue } from "./liquidityVenues/liquidityVenue.js";
-import type { Pricer } from "./pricers/pricer.js";
+import type { LiquidityVenue } from "./liquidity-venues/types.js";
+import type { Pricer } from "./pricers/types.js";
 import { CooldownMechanism } from "./utils/cooldownMechanism.js";
 import { fetchLiquidatablePositions } from "./utils/fetchers.js";
 import { Flashbots } from "./utils/flashbots.js";
+import { planBestConversionRoute } from "./utils/conversionRouting.js";
 import { LiquidationEncoder } from "./utils/LiquidationEncoder.js";
 import {
   calculatePositionLtv,
@@ -38,6 +43,7 @@ import {
 import type {
   IMarket,
   IndexerAPIResponse,
+  IndexerActiveUsmsResponse,
   LiquidatablePosition,
 } from "./utils/types.js";
 
@@ -49,6 +55,8 @@ export interface LiquidationBotInputs {
   executorAddress: Address;
   treasuryAddress: Address;
   liquidityVenues: LiquidityVenue[];
+  activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
+  usmMode: UsmMode;
   pricers?: Pricer[];
   cooldownMechanism?: CooldownMechanism;
   flashbotAccount?: LocalAccount;
@@ -63,13 +71,18 @@ export class LiquidationBot {
   private executorAddress: Address;
   private treasuryAddress: Address;
   private liquidityVenues: LiquidityVenue[];
+  private activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
+  private usmMode: UsmMode;
   private pricers?: Pricer[];
   private cooldownMechanism?: CooldownMechanism;
   private flashbotAccount?: LocalAccount;
   private isPriorityLiquidator: boolean;
   private tokenDecimalsCache: Map<Address, number> = new Map();
   // Cache for positions skipped as unprofitable: key = "marketId-user", value = { collateral, timestamp }
-  private unprofitableCache: Map<string, { collateral: bigint; timestamp: number }> = new Map();
+  private unprofitableCache: Map<
+    string,
+    { collateral: bigint; timestamp: number }
+  > = new Map();
   private static UNPROFITABLE_COOLDOWN_SEC = 300; // 5 minutes
   private static COLLATERAL_INCREASE_THRESHOLD = 1.2; // 20% increase to re-check
 
@@ -81,6 +94,8 @@ export class LiquidationBot {
     this.executorAddress = inputs.executorAddress;
     this.treasuryAddress = inputs.treasuryAddress;
     this.liquidityVenues = inputs.liquidityVenues;
+    this.activeUsms = inputs.activeUsms;
+    this.usmMode = inputs.usmMode;
     this.pricers = inputs.pricers;
     this.cooldownMechanism = inputs.cooldownMechanism;
     this.flashbotAccount = inputs.flashbotAccount;
@@ -91,7 +106,7 @@ export class LiquidationBot {
     const liquidationData = await fetchLiquidatablePositions(
       this.chainId,
       this.isPriorityLiquidator,
-      this.client.account.address
+      this.client.account.address,
     );
 
     return Promise.all(liquidationData.map((data) => this.handleMarket(data)));
@@ -111,19 +126,26 @@ export class LiquidationBot {
     const cached = this.unprofitableCache.get(cacheKey);
     if (cached) {
       const now = Date.now() / 1000;
-      const cooldownExpired = now > cached.timestamp + LiquidationBot.UNPROFITABLE_COOLDOWN_SEC;
-      const collateralIncreased = position.collateral > cached.collateral * BigInt(Math.floor(LiquidationBot.COLLATERAL_INCREASE_THRESHOLD * 100)) / 100n;
-      
+      const cooldownExpired =
+        now > cached.timestamp + LiquidationBot.UNPROFITABLE_COOLDOWN_SEC;
+      const collateralIncreased =
+        position.collateral >
+        (cached.collateral *
+          BigInt(
+            Math.floor(LiquidationBot.COLLATERAL_INCREASE_THRESHOLD * 100),
+          )) /
+          100n;
+
       if (!cooldownExpired && !collateralIncreased) {
         console.log(
-          `${this.logTag}Skipping ${position.user} on ${market.address} (cached as unprofitable)`
+          `${this.logTag}Skipping ${position.user} on ${market.address} (cached as unprofitable)`,
         );
         return;
       }
     }
 
     const collateralDecimals = await this.getTokenDecimals(
-      market.collateralToken as Address
+      market.collateralToken as Address,
     );
 
     const positionLtv = calculatePositionLtv(
@@ -131,7 +153,7 @@ export class LiquidationBot {
       position.borrowShares,
       market.totalBorrowAssets,
       market.totalBorrowShares,
-      market.price
+      market.price,
     );
 
     console.log(
@@ -145,7 +167,7 @@ export class LiquidationBot {
         borrowShares: position.borrowShares,
         totalBorrowAssets: market.totalBorrowAssets,
         totalBorrowShares: market.totalBorrowShares,
-      }
+      },
     );
 
     if (!this.checkCooldown(market.address, position.user)) return;
@@ -159,9 +181,9 @@ export class LiquidationBot {
         market,
         this.decreaseSeizableCollateral(
           position.seizableCollateral,
-          badDebtPosition
+          badDebtPosition,
         ),
-        encoder
+        encoder,
       ))
     )
       return;
@@ -178,18 +200,18 @@ export class LiquidationBot {
         encoder,
         calls,
         market,
-        badDebtPosition
+        badDebtPosition,
       );
 
       if (success) {
         console.log(
-          `${this.logTag}Liquidated ${position.user} on ${market.address}`
+          `${this.logTag}Liquidated ${position.user} on ${market.address}`,
         );
         // Clear from unprofitable cache on success
         this.unprofitableCache.delete(cacheKey);
       } else {
         console.log(
-          `${this.logTag}Skipped ${position.user} on ${market.address} (not profitable)`
+          `${this.logTag}Skipped ${position.user} on ${market.address} (not profitable)`,
         );
         // Add to unprofitable cache
         this.unprofitableCache.set(cacheKey, {
@@ -200,7 +222,7 @@ export class LiquidationBot {
     } catch (error) {
       console.error(
         `${this.logTag}Failed to liquidate ${position.user} on ${market.address}`,
-        error
+        error,
       );
     }
   }
@@ -209,7 +231,7 @@ export class LiquidationBot {
     encoder: LiquidationEncoder,
     calls: Hex[],
     marketParams: IMarket,
-    badDebtPosition: boolean
+    badDebtPosition: boolean,
   ) {
     const functionData = {
       abi: executorAbi,
@@ -253,7 +275,7 @@ export class LiquidationBot {
         used: results[1].gasUsed,
         price: gasPrice,
       },
-      badDebtPosition
+      badDebtPosition,
     );
 
     if (!isProfitable) {
@@ -275,9 +297,9 @@ export class LiquidationBot {
       ]);
 
       return await Flashbots.sendRawBundle(
-            signedBundle,
+        signedBundle,
         (await getBlockNumber(this.client)) + 1n,
-        this.flashbotAccount
+        this.flashbotAccount,
       );
     } else {
       const txHash = await writeContract(this.client, {
@@ -293,30 +315,33 @@ export class LiquidationBot {
   private async convertCollateralToLoan(
     marketParams: IMarket,
     seizableCollateral: bigint,
-    encoder: LiquidationEncoder
+    encoder: LiquidationEncoder,
   ) {
-    let toConvert = {
-      src: getAddress(marketParams.collateralToken),
-      dst: getAddress(marketParams.loanToken),
-      srcAmount: seizableCollateral,
-    };
+    const route = await planBestConversionRoute({
+      executorAddress: this.executorAddress,
+      client: this.client,
+      liquidityVenues: this.liquidityVenues,
+      activeUsms: this.activeUsms,
+      usmMode: this.usmMode,
+      surplusRecipient: this.treasuryAddress,
+      toConvert: {
+        src: getAddress(marketParams.collateralToken),
+        dst: getAddress(marketParams.loanToken),
+        srcAmount: seizableCollateral,
+      },
+    });
 
-    for (const venue of this.liquidityVenues) {
-      try {
-        if (await venue.supportsRoute(encoder, toConvert.src, toConvert.dst))
-          toConvert = await venue.convert(encoder, toConvert);
-      } catch (error) {
+    if (!route.success) {
+      for (const error of route.errors) {
         console.error(
-          `${this.logTag}Error converting ${toConvert.src} to ${toConvert.dst}`,
-          error
+          `${this.logTag}Error converting ${marketParams.collateralToken} to ${marketParams.loanToken}: ${error}`,
         );
-        continue;
       }
-
-      if (toConvert.src === toConvert.dst) return true;
+      return false;
     }
 
-    return false;
+    encoder.appendEncodedCalls(route.calls);
+    return true;
   }
 
   private async price(asset: Address, amount: bigint, pricers: Pricer[]) {
@@ -351,7 +376,7 @@ export class LiquidationBot {
       used: bigint;
       price: bigint;
     },
-    badDebtPosition: boolean
+    badDebtPosition: boolean,
   ) {
     if (ALWAYS_REALIZE_BAD_DEBT && badDebtPosition) return true;
     if (this.pricers === undefined) return true;
@@ -386,7 +411,7 @@ export class LiquidationBot {
 
   private decreaseSeizableCollateral(
     seizableCollateral: bigint,
-    badDebtPosition: boolean
+    badDebtPosition: boolean,
   ) {
     if (badDebtPosition) return seizableCollateral;
 
@@ -396,7 +421,7 @@ export class LiquidationBot {
 
     return wMulDown(
       seizableCollateral,
-      WAD - parseUnits(liquidationBufferBps.toString(), 14)
+      WAD - parseUnits(liquidationBufferBps.toString(), 14),
     );
   }
 

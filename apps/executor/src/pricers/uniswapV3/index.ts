@@ -1,10 +1,4 @@
 import {
-  DEFAULT_FACTORY_ADDRESS,
-  FEE_TIERS,
-  specificFactoryAddresses,
-  USD_REFERENCE,
-} from "@/config";
-import {
   type Account,
   type Address,
   type Chain,
@@ -17,15 +11,56 @@ import {
 } from "viem";
 import { readContract } from "viem/actions";
 
+import { UNISWAP_V3_LIQUIDITY_VENUE_CONFIG } from "@/liquidity-venues/uniswapV3";
+import { base, mainnet } from "viem/chains";
 import { uniswapV3FactoryAbi, uniswapV3PoolAbi } from "../../abis/uniswapV3";
-import type { Pricer } from "../pricer";
+import type { Pricer } from "../types";
+
+const UNISWAP_V3_PRICER_CONFIG: {
+  chain: Record<
+    number,
+    {
+      usdReference?: Address;
+      factoryAddress: Address;
+    }
+  >;
+  feeTiers: number[];
+  minSqrtRatio: bigint;
+  maxSqrtRatio: bigint;
+} = {
+  chain: {
+    [mainnet.id]: {
+      usdReference: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      factoryAddress:
+        UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.specificFactoryAddresses[
+          mainnet.id
+        ] ?? UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.defaultFactoryAddress,
+    },
+    [base.id]: {
+      usdReference: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      factoryAddress:
+        UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.specificFactoryAddresses[base.id] ??
+        UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.defaultFactoryAddress,
+    },
+  },
+  feeTiers: UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.feeTiers,
+  minSqrtRatio: UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.minSqrtRatio,
+  maxSqrtRatio: UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.maxSqrtRatio,
+};
 
 export class UniswapV3Pricer implements Pricer {
   private pools: Record<Address, Record<Address, Address[]>> = {};
   private decimals: Record<Address, number> = {};
 
   async price(client: Client<Transport, Chain, Account>, asset: Address) {
-    const usdReference = USD_REFERENCE[client.chain.id];
+    const config = UNISWAP_V3_PRICER_CONFIG.chain[client.chain.id];
+    if (!config) {
+      console.warn(
+        `Trying to use UniswapV3 pricer on an unsupported chain: ${client.chain.name}`,
+      );
+      return undefined;
+    }
+    const usdReference = config.usdReference;
 
     if (usdReference === undefined) return;
 
@@ -52,13 +87,13 @@ export class UniswapV3Pricer implements Pricer {
               functionName: "liquidity",
             }),
           };
-        })
+        }),
       );
 
       const biggestPool = liquidities.reduce(
         (max, liquidity) =>
           max !== null && liquidity.amount > max.amount ? liquidity : max,
-        liquidities[0] ?? null
+        liquidities[0] ?? null,
       )?.pool;
 
       if (!biggestPool) {
@@ -85,8 +120,8 @@ export class UniswapV3Pricer implements Pricer {
       const price = Number(
         formatUnits(
           (sqrtPriceX96 / 2n ** 96n) ** 2n * 10n ** BigInt(token0Decimals),
-          token1Decimals
-        )
+          token1Decimals,
+        ),
       );
 
       return token0 === asset ? price : 1 / price;
@@ -106,22 +141,29 @@ export class UniswapV3Pricer implements Pricer {
   private async fetchPools(
     client: Client<Transport, Chain, Account>,
     src: Address,
-    dst: Address
+    dst: Address,
   ) {
-    const factoryAddress =
-      specificFactoryAddresses[client.chain.id] ?? DEFAULT_FACTORY_ADDRESS;
+    const config = UNISWAP_V3_PRICER_CONFIG.chain[client.chain.id];
+    if (!config) {
+      console.warn(
+        `Trying to use UniswapV3 pricer on an unsupported chain: ${client.chain.name}`,
+      );
+      return [];
+    }
+
+    const factoryAddress = config.factoryAddress;
 
     try {
       const newPools = (
         await Promise.all(
-          FEE_TIERS.map(async (fee) =>
+          UNISWAP_V3_PRICER_CONFIG.feeTiers.map(async (fee) =>
             readContract(client, {
               address: factoryAddress,
               abi: uniswapV3FactoryAbi,
               functionName: "getPool",
               args: [src, dst, fee],
-            })
-          )
+            }),
+          ),
         )
       ).filter((pool) => pool !== zeroAddress);
 
@@ -132,7 +174,7 @@ export class UniswapV3Pricer implements Pricer {
       return newPools;
     } catch (error) {
       console.log(
-        `Error fetching UniswapV3 pools for src: ${src} and dst: ${dst}. Check if the factory address is correct.`
+        `Error fetching UniswapV3 pools for src: ${src} and dst: ${dst}. Check if the factory address is correct.`,
       );
       console.error(error);
       return [];
@@ -141,7 +183,7 @@ export class UniswapV3Pricer implements Pricer {
 
   private async getDecimals(
     client: Client<Transport, Chain, Account>,
-    asset: Address
+    asset: Address,
   ) {
     if (this.decimals[asset] !== undefined) return this.decimals[asset];
     const decimals = await readContract(client, {

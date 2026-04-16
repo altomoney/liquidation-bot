@@ -11,6 +11,11 @@ export class LiquidationEncoder<
     Account
   >
 > extends ExecutorEncoder<client> {
+  public appendEncodedCalls(calls: Hex[]) {
+    this.calls.push(...calls);
+    return this;
+  }
+
   public altoLiquidate(
     market: IMarket,
     borrower: Address,

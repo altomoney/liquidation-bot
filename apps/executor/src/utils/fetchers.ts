@@ -1,10 +1,10 @@
-import type { Address, Hex } from "viem";
+import type { Address } from "viem";
 
 import { ENV } from "./env";
 import type { IndexerActiveUsmsResponse, IndexerAPIResponse } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-export function parseWithBigInt<T = unknown>(jsonText: string): T {
+function parseWithBigInt<T = unknown>(jsonText: string): T {
   return JSON.parse(jsonText, (_key, value) => {
     if (typeof value === "string" && /^-?\d+n$/.test(value)) {
       return BigInt(value.slice(0, -1));
@@ -14,39 +14,14 @@ export function parseWithBigInt<T = unknown>(jsonText: string): T {
   }) as T;
 }
 
-export async function fetchMarketsForVaults(
-  chainId: number,
-  vaults: Address[]
-): Promise<Hex[]> {
-  const url = new URL(
-    `/chain/${chainId}/withdraw-queue-set`,
-    ENV.PONDER_SERVICE_URL
-  );
-
-  const response = await fetch(url, {
-    method: "POST",
-    body: JSON.stringify({ vaults }),
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch ${vaults} whitelisted markets: ${response.statusText}`
-    );
-  }
-
-  const markets = (await response.json()) as Hex[];
-
-  return markets;
-}
-
 export async function fetchLiquidatablePositions(
   chainId: number,
   isPriorityLiquidator: boolean,
-  liquidatorAddress: Address
+  liquidatorAddress: Address,
 ) {
   const url = new URL(
     `/chain/${chainId}/liquidatable-positions`,
-    ENV.PONDER_SERVICE_URL
+    ENV.PONDER_SERVICE_URL,
   );
 
   const response = await fetch(url, {
@@ -56,7 +31,7 @@ export async function fetchLiquidatablePositions(
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch liquidatable positions: ${response.statusText}`
+      `Failed to fetch liquidatable positions: ${response.statusText}`,
     );
   }
 
@@ -84,7 +59,7 @@ export async function fetchActiveUsms(chainId: number) {
   }
 
   const data = parseWithBigInt<IndexerActiveUsmsResponse>(
-    await response.text()
+    await response.text(),
   );
 
   return data.activeUsms;

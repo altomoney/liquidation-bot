@@ -12,6 +12,7 @@ if (!process.env.PONDER_SERVICE_URL) {
 const uniswapV3SubgraphBearerToken =
   process.env.UNISWAP_V3_SUBGRAPH_BEARER_TOKEN;
 const oneInchSwapApiKey = process.env.ONE_INCH_SWAP_API_KEY;
+const odosApiKey = process.env.ODOS_API_KEY;
 const flashbotsPrivateKey = process.env.FLASHBOTS_PRIVATE_KEY;
 const skipCheckForProfit = process.env.SKIP_CHECK_FOR_PROFIT === "true";
 
@@ -46,6 +47,7 @@ export const ENV = {
   PONDER_SERVICE_URL: ponderServiceUrl,
   UNISWAP_V3_SUBGRAPH_BEARER_TOKEN: uniswapV3SubgraphBearerToken,
   ONE_INCH_SWAP_API_KEY: oneInchSwapApiKey,
+  ODOS_API_KEY: odosApiKey,
   FLASHBOTS_PRIVATE_KEY: flashbotsPrivateKey,
   USE_FLASHBOTS:
     flashbotsPrivateKey !== undefined && flashbotsPrivateKey !== "",
