@@ -1,15 +1,15 @@
 import { ponder } from "ponder:registry";
-import { liquidationEngine, market } from "ponder:schema";
+import { liquidationEngine } from "ponder:schema";
 import { replaceBigInts } from "../utils";
 
 ponder.on(
   "DlbDcfPriorityLiquidationEngine:SetLiquidationConfiguration",
   async ({ context, event }) => {
-    const marketExists = await context.db.find(market, {
+    const leExists = await context.db.find(liquidationEngine, {
       chainId: context.chain.id,
       address: event.log.address,
     });
-    if (!marketExists) {
+    if (!leExists) {
       return;
     }
     await context.db
