@@ -9,12 +9,15 @@
     "db": "ponder db",
     "codegen": "ponder codegen",
     "lint": "eslint .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "snapshot:baseline": "bun ./scripts/snapshot-api.ts capture",
+    "snapshot:verify": "bun ./scripts/snapshot-api.ts verify"
   },
   "dependencies": {
     "ponder": "0.16.3",
     "hono": "4.12.6",
-    "viem": "2.47.1"
+    "viem": "2.47.1",
+    "@altomoney/sdk": "0.1.5"
   },
   "devDependencies": {
     "@types/node": "24.10.1",

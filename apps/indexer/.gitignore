@@ -4,3 +4,6 @@
 
 # Debug Log
 log.txt
+
+# Temp files
+scripts/temp

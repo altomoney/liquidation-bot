@@ -9,15 +9,16 @@ import { FixedRateIrmAbi } from "../../abis/FixedRateIrmAbi";
 import { IAltoLiquidationEngineAbi } from "../../abis/IAltoLiquidationEngineAbi";
 import { IrmAbi } from "../../abis/IrmAbi";
 import { replaceBigInts } from "../utils";
-import { AdaptiveCurveIrm } from "../utils/irm/AdaptiveCurveIrm";
-import { FixedRateIrm } from "../utils/irm/FixedRateIrm";
-import { DlbDcfPriorityLiquidationEngine } from "../utils/liquidation-engine/DlbDcfPriorityLiquidationEngine";
-import { FixedPointMath } from "../utils/math/FixedPointMath";
+import { FixedPointMath } from "@altomoney/sdk";
 import {
+  parseAdaptiveCurveIrmConfig,
+  parseAdaptiveCurveIrmState,
+  parseFixedRateIrmState,
+  parseLiquidationConfiguration,
   irmTypeToString,
   liquidationEngineTypeToString,
   marketTypeToString,
-} from "./utils";
+} from "./abiParsers";
 
 export const setupMarket: (
   type: "AltoBorrowMarket" | "AltoMintMarket"
@@ -402,11 +403,11 @@ const updateNewIrm = async (
         address: irmAddress,
         type: irmType,
         config: null,
-        state: replaceBigInts(FixedRateIrm.stateFromRawState(irmState)),
+        state: replaceBigInts(parseFixedRateIrmState(irmState)),
       })
       .onConflictDoUpdate((row) => ({
         marketAddress: marketAddress,
-        state: replaceBigInts(FixedRateIrm.stateFromRawState(irmState)),
+        state: replaceBigInts(parseFixedRateIrmState(irmState)),
       }));
     return;
   }
@@ -437,13 +438,13 @@ const updateNewIrm = async (
         marketAddress: marketAddress,
         address: irmAddress,
         type: irmType,
-        config: replaceBigInts(AdaptiveCurveIrm.configFromRawConfig(irmConfig)),
-        state: replaceBigInts(AdaptiveCurveIrm.stateFromRawState(irmState)),
+        config: replaceBigInts(parseAdaptiveCurveIrmConfig(irmConfig)),
+        state: replaceBigInts(parseAdaptiveCurveIrmState(irmState)),
       })
       .onConflictDoUpdate((row) => ({
         marketAddress: marketAddress,
-        state: replaceBigInts(AdaptiveCurveIrm.stateFromRawState(irmState)),
-        config: replaceBigInts(AdaptiveCurveIrm.configFromRawConfig(irmConfig)),
+        state: replaceBigInts(parseAdaptiveCurveIrmState(irmState)),
+        config: replaceBigInts(parseAdaptiveCurveIrmConfig(irmConfig)),
       }));
     return;
   }
@@ -537,17 +538,13 @@ const updateNewLiquidationEngine = async (
         address: liquidationEngineAddress,
         type: liquidationEngineType,
         config: replaceBigInts(
-          DlbDcfPriorityLiquidationEngine.configFromRawConfig(
-            liquidationConfiguration
-          )
+          parseLiquidationConfiguration(liquidationConfiguration)
         ),
       })
       .onConflictDoUpdate((row) => ({
         marketAddress: marketAddress,
         config: replaceBigInts(
-          DlbDcfPriorityLiquidationEngine.configFromRawConfig(
-            liquidationConfiguration
-          )
+          parseLiquidationConfiguration(liquidationConfiguration)
         ),
       }));
     return;

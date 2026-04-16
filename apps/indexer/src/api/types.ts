@@ -1,10 +1,6 @@
 import { Hex } from "viem";
-import { DusdConfigDb } from "../dusd/types";
-import { UsmDb } from "../usm/types";
 import { Equal, Expect } from "../utils";
-import { IrmDb } from "../utils/irm/types";
-import { LiquidationEngineDb } from "../utils/liquidation-engine/types";
-import { MarketDb, PositionDb } from "../utils/market/types";
+import { DusdConfigDb, IrmDb, LiquidationEngineDb, MarketDb, PositionDb, UsmDb } from "../utils/dbTypes";
 
 type StaticMarketDb = {
   irm: Hex | null;
