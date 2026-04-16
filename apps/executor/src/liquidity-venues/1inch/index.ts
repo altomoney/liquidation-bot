@@ -1,4 +1,4 @@
-import { chainConfig } from "@/config/index";
+import { chainConfig, DEFAULT_SLIPPAGE_PERCENTAGE } from "@/config/index";
 import { BigIntish } from "@/types";
 import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
@@ -31,7 +31,7 @@ export class OneInch implements LiquidityVenue {
       const config = chainConfig(encoder.client.chain.id);
       const slippage = config.slippagePercentage
         ? config.slippagePercentage
-        : 0.01; // 0.01% default
+        : DEFAULT_SLIPPAGE_PERCENTAGE;
       const swapResponse = await this.fetchSwap({
         chainId: encoder.client.chain.id,
         src: toConvert.src,

@@ -5,6 +5,7 @@ import type { Config } from "./types";
 export const COOLDOWN_ENABLED = false; // true if you want to enable the cooldown mechanism
 export const COOLDOWN_PERIOD = 60 * 60; // 1 hour
 export const ALWAYS_REALIZE_BAD_DEBT = true; // true if you want to always realize bad debt
+export const DEFAULT_SLIPPAGE_PERCENTAGE = 1; // 1%
 
 export const chainConfigs: Record<number, Config> = {
   [sepolia.id]: {
@@ -26,6 +27,7 @@ export const chainConfigs: Record<number, Config> = {
     options: {
       liquidationBufferBps: 50,
       blockInterval: 2,
+      slippagePercentage: DEFAULT_SLIPPAGE_PERCENTAGE,
       isPriorityLiquidator: false,
       useUsm: "always",
       usmSellAdapterAddress: "0xaAC86f77Eb51Fa1D565b743c43deCE2CEF90AF24",

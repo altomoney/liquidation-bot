@@ -26,6 +26,7 @@ export {
   ALWAYS_REALIZE_BAD_DEBT,
   COOLDOWN_ENABLED,
   COOLDOWN_PERIOD,
+  DEFAULT_SLIPPAGE_PERCENTAGE,
 } from "./config";
 export { chainConfigs, type ChainConfig };
 export type { UsmMode } from "./types";

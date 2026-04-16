@@ -131,7 +131,7 @@ The executor's behavior is configured in `apps/executor/config/config.ts`:
 | `liquidationBufferBps`  | Buffer (in basis points) to reduce swap amount, accounting for liquidation fees. Default: 50 |
 | `blockInterval`         | Check for liquidatable positions every N blocks. Default: 2                                  |
 | `watchBlocksRetryDelayMs` | Delay before restarting the block watcher after an RPC/watch error. Default: 5000          |
-| `slippagePercentage`    | Slippage tolerance passed to routed venues like Odos and 1inch. Default: `0.01`              |
+| `slippagePercentage`    | Slippage tolerance passed to routed venues like Odos and 1inch. Default: `1`                  |
 | `treasuryAddress`       | Address to receive profits. Defaults to the bot's EOA                                        |
 
 ### USM Sell Adapter (`usmSellAdapterAddress`)
@@ -142,7 +142,7 @@ When routing through the USM, the exact amount of underlying stablecoins receive
 
 The USM (Unified Stablecoin Module) mints DUSD from an underlying stablecoin. The `useUsm` setting controls whether the bot routes through it:
 
-- **`"always"`** - Always route via USM: swap collateral → underlying, then underlying → DUSD through the USM. Skips direct collateral → DUSD quotes entirely. This is the fastest mode and recommended for most setups since direct DUSD liquidity on DEXes is thin.
+- **`"always"`** - Prefer USM routing: try collateral → underlying, then underlying → DUSD through the USM first. If no USM route succeeds, fall back to direct collateral → DUSD swaps as a safety net. Recommended for most setups since direct DUSD liquidity on DEXes is thin.
 - **`"if_better"`** - Try the direct collateral → DUSD route first. If the price impact is too high, fall back to the two-step USM route. Good if you want to opportunistically capture better direct pricing when available.
 - **`"never"`** - Only use direct collateral → DUSD swaps via liquidity venues. The USM is not used at all. Only viable if deep DUSD DEX liquidity exists.
 
@@ -156,14 +156,18 @@ The USM (Unified Stablecoin Module) mints DUSD from an underlying stablecoin. Th
 
 ## Claiming Profits
 
-Liquidation profits accumulate in the executor contract. To withdraw them, call the executor's `skim` function (via Etherscan or a script) with the token address and recipient.
+Liquidation profits are normally swept automatically to `treasuryAddress` during each liquidation via the executor's `erc20Skim` call.
+
+If tokens remain on the executor contract (for example, leftover dust or assets from an interrupted/manual flow), you can still withdraw them with the separate `skim` script or by calling the executor directly.
 
 ## Operator Notes
 
 - The executor only starts once the indexer is reachable at `PONDER_SERVICE_URL`. It also waits for the indexer `/ready` endpoint to return `200` before beginning liquidation checks.
 - `SKIP_CHECK_FOR_PROFIT=false` does **not** guarantee every liquidation is profit-screened. By default, the bot is configured to realize bad debt positions even when the normal profitability check would reject them.
+- Active USMs are refreshed from the indexer during routing rather than cached only at startup, so exposure caps, frozen status, and mint ceilings stay up to date.
+- If USD pricing is temporarily unavailable, the bot intentionally fails open and may still execute a liquidation rather than skipping it. This favors liveness over strict cost-efficiency during pricing outages.
 - If routed swaps fail in production, the first things to verify are RPC quality, API-key-backed liquidity venues (`ONE_INCH_SWAP_API_KEY`, `ODOS_API_KEY`), and whether your configured `slippagePercentage` is too tight for the collateral you're targeting.
-- Profits stay inside the executor contract until you call `skim`, so plan an operational process for periodically withdrawing them.
+- The separate `skim` flow is mainly a cleanup/recovery tool for leftover executor balances, not the normal profit path.
 
 ## Production Deployment
 
