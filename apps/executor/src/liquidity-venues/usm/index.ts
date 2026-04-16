@@ -2,6 +2,7 @@ import { encodeFunctionData, isAddressEqual, type Address } from "viem";
 import { readContract } from "viem/actions";
 
 import { usmAbi } from "@/abis/usm";
+import { usmSellAdapterAbi } from "@/abis/usmSellAdapter";
 import type { LiquidationEncoder } from "@/utils/LiquidationEncoder";
 import type { IndexerActiveUsmsResponse } from "../../utils/types";
 
@@ -57,16 +58,26 @@ export class UsmVenue {
     encoder: LiquidationEncoder,
     usm: ActiveUsm,
     quote: UsmSellQuote,
+    usmSellAdapterAddress: Address,
     surplusRecipient?: Address,
   ) {
-    encoder.erc20Approve(usm.underlyingAsset, usm.address, quote.assetAmount);
+    encoder.erc20Approve(
+      usm.underlyingAsset,
+      usmSellAdapterAddress,
+      quote.maxAssetAmount,
+    );
     encoder.pushCall(
-      usm.address,
+      usmSellAdapterAddress,
       0n,
       encodeFunctionData({
-        abi: usmAbi,
-        functionName: "sellAsset",
-        args: [quote.maxAssetAmount, encoder.address],
+        abi: usmSellAdapterAbi,
+        functionName: "sellAssetFromSenderBalance",
+        args: [
+          usm.underlyingAsset,
+          usm.address,
+          encoder.address,
+          quote.maxAssetAmount,
+        ],
       }),
     );
 

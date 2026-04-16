@@ -11,7 +11,7 @@ export class Erc4626 implements LiquidityVenue {
   async supportsRoute(encoder: ExecutorEncoder, src: Address, dst: Address) {
     if (src === dst) return false;
     if (this.underlying[src] !== undefined) {
-      return this.underlying[src] !== zeroAddress;
+      return this.underlying[src] !== zeroAddress && this.underlying[src] !== src;
     }
     try {
       const underlying = await readContract(encoder.client, {
@@ -20,7 +20,7 @@ export class Erc4626 implements LiquidityVenue {
         functionName: "asset",
       });
       this.underlying[src] = underlying;
-      return underlying !== zeroAddress;
+      return underlying !== zeroAddress && underlying !== src;
     } catch {
       this.underlying[src] = zeroAddress;
       return false;

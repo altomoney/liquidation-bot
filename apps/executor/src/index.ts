@@ -54,6 +54,7 @@ export const launchBot = async (config: ChainConfig) => {
     client,
     wNative: config.wNative,
     executorAddress: config.executorAddress,
+    usmSellAdapterAddress: config.usmSellAdapterAddress,
     treasuryAddress: config.treasuryAddress ?? client.account.address,
     liquidityVenues,
     activeUsms,

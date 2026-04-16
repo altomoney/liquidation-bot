@@ -1,15 +1,15 @@
 import type { Account, Address, Chain, Transport, WalletClient } from "viem";
 import { isAddressEqual } from "viem";
 
-import type { LiquidityVenue } from "@/liquidity-venues/types";
 import type { UsmMode } from "@/config";
+import type { LiquidityVenue } from "@/liquidity-venues/types";
 import { UsmVenue } from "@/liquidity-venues/usm";
+import { LiquidationEncoder } from "./LiquidationEncoder";
 import type {
   ConversionRouteResult,
   IndexerActiveUsmsResponse,
   ToConvert,
 } from "./types";
-import { LiquidationEncoder } from "./LiquidationEncoder";
 
 type ActiveUsm = IndexerActiveUsmsResponse["activeUsms"][number];
 
@@ -21,6 +21,7 @@ interface ExecuteVenuePassParams {
 
 interface PlanBestConversionRouteParams {
   executorAddress: Address;
+  usmSellAdapterAddress: Address;
   client: WalletClient<Transport, Chain, Account>;
   liquidityVenues: LiquidityVenue[];
   toConvert: ToConvert;
@@ -31,6 +32,7 @@ interface PlanBestConversionRouteParams {
 
 async function tryUsmFallbackRoutes({
   executorAddress,
+  usmSellAdapterAddress,
   client,
   liquidityVenues,
   toConvert,
@@ -39,6 +41,7 @@ async function tryUsmFallbackRoutes({
   logTag,
 }: {
   executorAddress: Address;
+  usmSellAdapterAddress: Address;
   client: WalletClient<Transport, Chain, Account>;
   liquidityVenues: LiquidityVenue[];
   toConvert: ToConvert;
@@ -88,7 +91,9 @@ async function tryUsmFallbackRoutes({
       const fallbackEncoder = new LiquidationEncoder(executorAddress, client);
       fallbackEncoder.appendEncodedCalls(fallbackRoute.calls);
 
-      console.log(`${logTag} USM[${i}] quoting sellAsset for ${underlyingAmount}...`);
+      console.log(
+        `${logTag} USM[${i}] quoting sellAsset for ${underlyingAmount}...`,
+      );
       const usmQuote = await usmVenue.quoteSellAsset(
         fallbackEncoder,
         usm,
@@ -107,6 +112,7 @@ async function tryUsmFallbackRoutes({
         fallbackEncoder,
         usm,
         usmQuote,
+        usmSellAdapterAddress,
         surplusRecipient,
       );
 
@@ -167,7 +173,10 @@ async function executeVenuePass({
         !isAddressEqual(nextToConvert.dst, toConvert.dst) ||
         nextToConvert.srcAmount !== toConvert.srcAmount;
 
-      if (!progressed && !isAddressEqual(nextToConvert.src, nextToConvert.dst)) {
+      if (
+        !progressed &&
+        !isAddressEqual(nextToConvert.src, nextToConvert.dst)
+      ) {
         errors.push(
           `${venue.constructor.name}: supportsRoute returned true but convert made no progress`,
         );
@@ -208,6 +217,7 @@ async function executeVenuePass({
 
 export async function planBestConversionRoute({
   executorAddress,
+  usmSellAdapterAddress,
   client,
   liquidityVenues,
   toConvert,
@@ -230,6 +240,7 @@ export async function planBestConversionRoute({
     );
     const usmAttempt = await tryUsmFallbackRoutes({
       executorAddress,
+      usmSellAdapterAddress,
       client,
       liquidityVenues,
       toConvert,
@@ -243,7 +254,9 @@ export async function planBestConversionRoute({
       return usmAttempt.result;
     }
 
-    console.log(`${logTag} USM mode=always had no successful fallback, trying direct`);
+    console.log(
+      `${logTag} USM mode=always had no successful fallback, trying direct`,
+    );
   }
 
   console.log(`${logTag} direct pass starting...`);
@@ -269,6 +282,7 @@ export async function planBestConversionRoute({
   );
   const usmAttempt = await tryUsmFallbackRoutes({
     executorAddress,
+    usmSellAdapterAddress,
     client,
     liquidityVenues,
     toConvert,
@@ -284,8 +298,14 @@ export async function planBestConversionRoute({
     }
 
     const fallbackOutput = getOutputAmount(usmAttempt.result);
-    if (directOutput !== undefined && fallbackOutput !== undefined && fallbackOutput > directOutput) {
-      console.log(`${logTag} USM wins: ${fallbackOutput} > direct ${directOutput}`);
+    if (
+      directOutput !== undefined &&
+      fallbackOutput !== undefined &&
+      fallbackOutput > directOutput
+    ) {
+      console.log(
+        `${logTag} USM wins: ${fallbackOutput} > direct ${directOutput}`,
+      );
       return usmAttempt.result;
     }
 

@@ -16,6 +16,8 @@ export const chainConfigs: Record<number, Config> = {
       liquidationBufferBps: 50,
       blockInterval: 2,
       isPriorityLiquidator: false,
+      useUsm: "never",
+      usmSellAdapterAddress: "0x0000000000000000000000000000000000000000",
     },
   },
   [mainnet.id]: {
@@ -26,6 +28,7 @@ export const chainConfigs: Record<number, Config> = {
       blockInterval: 2,
       isPriorityLiquidator: false,
       useUsm: "always",
+      usmSellAdapterAddress: "0xaAC86f77Eb51Fa1D565b743c43deCE2CEF90AF24",
       liquidityVenues: [
         "pendlePT",
         "midas",

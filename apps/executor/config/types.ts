@@ -28,6 +28,7 @@ export interface Config {
 export interface Options {
   liquidityVenues: LiquidityVenueName[];
   useUsm?: UsmMode;
+  usmSellAdapterAddress: Address;
   pricers?: PricerName[];
   treasuryAddress?: Address;
   liquidationBufferBps?: number;

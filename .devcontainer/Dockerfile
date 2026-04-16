@@ -7,6 +7,12 @@ ENV DEVCONTAINER=true
 
 ###### user running scripts ######
 USER vscode
+
+# Install foundry suite
+RUN curl -L https://foundry.paradigm.xyz | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
+# RUN foundryup
+RUN /home/vscode/.foundry/bin/foundryup
+
 # Install FNM
 RUN curl -o- https://fnm.vercel.app/install \
   | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
