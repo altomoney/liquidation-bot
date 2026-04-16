@@ -2,8 +2,7 @@
   "name": "liquidation-bot",
   "version": "0.0.1",
   "description": "Alto Markets Liquidation Bot",
-  "scripts": {
-  },
-  "author": "Pearl Labs",
+  "scripts": {},
+  "author": "Another Epoch Tech Studio",
   "license": "MIT"
 }

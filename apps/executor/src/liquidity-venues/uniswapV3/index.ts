@@ -9,8 +9,12 @@ import {
 } from "viem";
 import { readContract } from "viem/actions";
 
-import { uniswapV3FactoryAbi, uniswapV3PoolAbi } from "../../abis/uniswapV3";
-import type { ToConvert } from "../../utils/types";
+import {
+  uniswapV3FactoryAbi,
+  uniswapV3PoolAbi,
+  uniswapV3QuoterAbi,
+} from "@/abis/uniswapV3";
+import type { ToConvert } from "@/utils/types";
 import type { LiquidityVenue } from "../types";
 import { UNISWAP_V3_LIQUIDITY_VENUE_CONFIG } from "./config";
 
@@ -63,7 +67,26 @@ export class UniswapV3Venue implements LiquidityVenue {
         throw new Error("(UniswapV3) No Uniswap pool found");
       }
 
+      const poolFee = await readContract(encoder.client, {
+        address: biggestPool,
+        abi: uniswapV3PoolAbi,
+        functionName: "fee",
+      });
       const zeroForOne = fromHex(src, "bigint") < fromHex(dst, "bigint");
+      const amountOut = await readContract(encoder.client, {
+        address: UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.defaultQuoterAddress,
+        abi: uniswapV3QuoterAbi,
+        functionName: "quoteExactInputSingle",
+        args: [
+          src,
+          dst,
+          poolFee,
+          srcAmount,
+          zeroForOne
+            ? UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.minSqrtRatio + 1n
+            : UNISWAP_V3_LIQUIDITY_VENUE_CONFIG.maxSqrtRatio - 1n,
+        ],
+      });
 
       const encodedContext = `0x${
         0n.toString(16).padStart(24, "0") + zeroAddress.substring(2)
@@ -114,7 +137,7 @@ export class UniswapV3Venue implements LiquidityVenue {
       return {
         src: dst,
         dst: dst,
-        srcAmount: 0n,
+        srcAmount: amountOut,
       };
     } catch (error) {
       throw new Error(

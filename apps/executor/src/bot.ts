@@ -1,8 +1,4 @@
-import {
-  ALWAYS_REALIZE_BAD_DEBT,
-  chainConfigs,
-  type UsmMode,
-} from "@/config";
+import { ALWAYS_REALIZE_BAD_DEBT, chainConfigs, type UsmMode } from "@/config";
 import { executorAbi } from "executooor-viem";
 import {
   erc20Abi,
@@ -23,15 +19,17 @@ import {
   getGasPrice,
   readContract,
   simulateCalls,
+  waitForTransactionReceipt,
   writeContract,
 } from "viem/actions";
 
 import type { LiquidityVenue } from "./liquidity-venues/types.js";
 import type { Pricer } from "./pricers/types.js";
+import { planBestConversionRoute } from "./utils/conversionRouting.js";
 import { CooldownMechanism } from "./utils/cooldownMechanism.js";
+import { traceFailedExecution } from "./utils/debugTrace.js";
 import { fetchLiquidatablePositions } from "./utils/fetchers.js";
 import { Flashbots } from "./utils/flashbots.js";
-import { planBestConversionRoute } from "./utils/conversionRouting.js";
 import { LiquidationEncoder } from "./utils/LiquidationEncoder.js";
 import {
   calculatePositionLtv,
@@ -42,8 +40,8 @@ import {
 } from "./utils/maths.js";
 import type {
   IMarket,
-  IndexerAPIResponse,
   IndexerActiveUsmsResponse,
+  IndexerAPIResponse,
   LiquidatablePosition,
 } from "./utils/types.js";
 
@@ -53,6 +51,7 @@ export interface LiquidationBotInputs {
   client: WalletClient<Transport, Chain, Account>;
   wNative: Address;
   executorAddress: Address;
+  usmSellAdapterAddress: Address;
   treasuryAddress: Address;
   liquidityVenues: LiquidityVenue[];
   activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
@@ -69,6 +68,7 @@ export class LiquidationBot {
   private client: WalletClient<Transport, Chain, Account>;
   private wNative: Address;
   private executorAddress: Address;
+  private usmSellAdapterAddress: Address;
   private treasuryAddress: Address;
   private liquidityVenues: LiquidityVenue[];
   private activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
@@ -92,6 +92,7 @@ export class LiquidationBot {
     this.client = inputs.client;
     this.wNative = inputs.wNative;
     this.executorAddress = inputs.executorAddress;
+    this.usmSellAdapterAddress = inputs.usmSellAdapterAddress;
     this.treasuryAddress = inputs.treasuryAddress;
     this.liquidityVenues = inputs.liquidityVenues;
     this.activeUsms = inputs.activeUsms;
@@ -262,6 +263,25 @@ export class LiquidationBot {
     ]);
 
     if (results[1].status !== "success") {
+      const simulationError = results[1].error as
+        | { shortMessage?: string }
+        | undefined;
+      console.log(
+        `${this.logTag}Simulation failed:`,
+        simulationError?.shortMessage || "unknown error",
+      );
+
+      // Only trace failed executions if DEBUG_LIQUIDATION is set to 1
+      // Useful for debugging
+      if (process.env.DEBUG_LIQUIDATION === "1") {
+        await traceFailedExecution({
+          client: this.client,
+          executorAddress: encoder.address,
+          calls,
+          logTag: this.logTag,
+        });
+      }
+
       return false;
     }
 
@@ -306,6 +326,7 @@ export class LiquidationBot {
         address: encoder.address,
         ...functionData,
       });
+      await waitForTransactionReceipt(this.client, { hash: txHash });
       console.log(`${this.logTag}Transaction submitted: ${txHash}`);
     }
 
@@ -319,6 +340,7 @@ export class LiquidationBot {
   ) {
     const route = await planBestConversionRoute({
       executorAddress: this.executorAddress,
+      usmSellAdapterAddress: this.usmSellAdapterAddress,
       client: this.client,
       liquidityVenues: this.liquidityVenues,
       activeUsms: this.activeUsms,
@@ -411,10 +433,8 @@ export class LiquidationBot {
 
   private decreaseSeizableCollateral(
     seizableCollateral: bigint,
-    badDebtPosition: boolean,
+    _badDebtPosition: boolean,
   ) {
-    if (badDebtPosition) return seizableCollateral;
-
     const liquidationBufferBps =
       chainConfigs[this.chainId]?.options.liquidationBufferBps ??
       DEFAULT_LIQUIDATION_BUFFER_BPS;
