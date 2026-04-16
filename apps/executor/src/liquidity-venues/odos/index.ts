@@ -2,7 +2,7 @@ import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
 import type { Address } from "viem";
 
-import { chainConfig } from "@/config/index";
+import { chainConfig, DEFAULT_SLIPPAGE_PERCENTAGE } from "@/config/index";
 import type { ToConvert } from "../../utils/types";
 import type { LiquidityVenue } from "../types";
 import { ODOS_LIQUIDITY_VENUE_CONFIG } from "./config";
@@ -31,7 +31,7 @@ export class Odos implements LiquidityVenue {
       const config = chainConfig(encoder.client.chain.id);
       const slippage = config.slippagePercentage
         ? config.slippagePercentage
-        : 0.01; // 0.01% default
+        : DEFAULT_SLIPPAGE_PERCENTAGE;
       const quote = await this.fetchQuote({
         chainId: encoder.client.chain.id,
         inputTokens: [

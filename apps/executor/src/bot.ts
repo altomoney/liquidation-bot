@@ -28,7 +28,7 @@ import type { Pricer } from "./pricers/types.js";
 import { planBestConversionRoute } from "./utils/conversionRouting.js";
 import { CooldownMechanism } from "./utils/cooldownMechanism.js";
 import { traceFailedExecution } from "./utils/debugTrace.js";
-import { fetchLiquidatablePositions } from "./utils/fetchers.js";
+import { fetchActiveUsms, fetchLiquidatablePositions } from "./utils/fetchers.js";
 import { Flashbots } from "./utils/flashbots.js";
 import { LiquidationEncoder } from "./utils/LiquidationEncoder.js";
 import {
@@ -40,7 +40,6 @@ import {
 } from "./utils/maths.js";
 import type {
   IMarket,
-  IndexerActiveUsmsResponse,
   IndexerAPIResponse,
   LiquidatablePosition,
 } from "./utils/types.js";
@@ -54,13 +53,14 @@ export interface LiquidationBotInputs {
   usmSellAdapterAddress: Address;
   treasuryAddress: Address;
   liquidityVenues: LiquidityVenue[];
-  activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
   usmMode: UsmMode;
   pricers?: Pricer[];
   cooldownMechanism?: CooldownMechanism;
   flashbotAccount?: LocalAccount;
   isPriorityLiquidator: boolean;
 }
+
+type HandleTxResult = "submitted" | "unprofitable" | "simulation_failed";
 
 export class LiquidationBot {
   private logTag: string;
@@ -71,7 +71,6 @@ export class LiquidationBot {
   private usmSellAdapterAddress: Address;
   private treasuryAddress: Address;
   private liquidityVenues: LiquidityVenue[];
-  private activeUsms?: IndexerActiveUsmsResponse["activeUsms"];
   private usmMode: UsmMode;
   private pricers?: Pricer[];
   private cooldownMechanism?: CooldownMechanism;
@@ -83,6 +82,7 @@ export class LiquidationBot {
     string,
     { collateral: bigint; timestamp: number }
   > = new Map();
+  private isRunning = false;
   private static UNPROFITABLE_COOLDOWN_SEC = 300; // 5 minutes
   private static COLLATERAL_INCREASE_THRESHOLD = 1.2; // 20% increase to re-check
 
@@ -95,7 +95,6 @@ export class LiquidationBot {
     this.usmSellAdapterAddress = inputs.usmSellAdapterAddress;
     this.treasuryAddress = inputs.treasuryAddress;
     this.liquidityVenues = inputs.liquidityVenues;
-    this.activeUsms = inputs.activeUsms;
     this.usmMode = inputs.usmMode;
     this.pricers = inputs.pricers;
     this.cooldownMechanism = inputs.cooldownMechanism;
@@ -104,13 +103,24 @@ export class LiquidationBot {
   }
 
   async run() {
-    const liquidationData = await fetchLiquidatablePositions(
-      this.chainId,
-      this.isPriorityLiquidator,
-      this.client.account.address,
-    );
+    if (this.isRunning) {
+      console.log(`${this.logTag}Previous run still in progress, skipping block`);
+      return;
+    }
 
-    return Promise.all(liquidationData.map((data) => this.handleMarket(data)));
+    this.isRunning = true;
+
+    try {
+      const liquidationData = await fetchLiquidatablePositions(
+        this.chainId,
+        this.isPriorityLiquidator,
+        this.client.account.address,
+      );
+
+      await Promise.all(liquidationData.map((data) => this.handleMarket(data)));
+    } finally {
+      this.isRunning = false;
+    }
   }
 
   private async handleMarket({ market, positionsLiq }: IndexerAPIResponse) {
@@ -197,20 +207,20 @@ export class LiquidationBot {
     const calls = encoder.flush();
 
     try {
-      const success = await this.handleTx(
+      const txResult = await this.handleTx(
         encoder,
         calls,
         market,
         badDebtPosition,
       );
 
-      if (success) {
+      if (txResult === "submitted") {
         console.log(
           `${this.logTag}Liquidated ${position.user} on ${market.address}`,
         );
         // Clear from unprofitable cache on success
         this.unprofitableCache.delete(cacheKey);
-      } else {
+      } else if (txResult === "unprofitable") {
         console.log(
           `${this.logTag}Skipped ${position.user} on ${market.address} (not profitable)`,
         );
@@ -219,6 +229,10 @@ export class LiquidationBot {
           collateral: position.collateral,
           timestamp: Date.now() / 1000,
         });
+      } else {
+        console.log(
+          `${this.logTag}Skipped ${position.user} on ${market.address} (simulation failed)`,
+        );
       }
     } catch (error) {
       console.error(
@@ -233,7 +247,7 @@ export class LiquidationBot {
     calls: Hex[],
     marketParams: IMarket,
     badDebtPosition: boolean,
-  ) {
+  ): Promise<HandleTxResult> {
     const functionData = {
       abi: executorAbi,
       functionName: "exec_606BaXt",
@@ -248,14 +262,14 @@ export class LiquidationBot {
             to: marketParams.loanToken,
             abi: erc20Abi,
             functionName: "balanceOf",
-            args: [this.client.account.address],
+            args: [this.treasuryAddress],
           },
           { to: encoder.address, ...functionData },
           {
             to: marketParams.loanToken,
             abi: erc20Abi,
             functionName: "balanceOf",
-            args: [this.client.account.address],
+            args: [this.treasuryAddress],
           },
         ],
       }),
@@ -282,7 +296,7 @@ export class LiquidationBot {
         });
       }
 
-      return false;
+      return "simulation_failed";
     }
 
     const isProfitable = await this.checkProfit(
@@ -299,7 +313,7 @@ export class LiquidationBot {
     );
 
     if (!isProfitable) {
-      return false;
+      return "unprofitable";
     }
 
     // TX EXECUTION
@@ -316,11 +330,12 @@ export class LiquidationBot {
         },
       ]);
 
-      return await Flashbots.sendRawBundle(
+      await Flashbots.sendRawBundle(
         signedBundle,
         (await getBlockNumber(this.client)) + 1n,
         this.flashbotAccount,
       );
+      return "submitted";
     } else {
       const txHash = await writeContract(this.client, {
         address: encoder.address,
@@ -330,7 +345,7 @@ export class LiquidationBot {
       console.log(`${this.logTag}Transaction submitted: ${txHash}`);
     }
 
-    return true;
+    return "submitted";
   }
 
   private async convertCollateralToLoan(
@@ -338,12 +353,13 @@ export class LiquidationBot {
     seizableCollateral: bigint,
     encoder: LiquidationEncoder,
   ) {
+    const activeUsms = await this.getActiveUsms();
     const route = await planBestConversionRoute({
       executorAddress: this.executorAddress,
       usmSellAdapterAddress: this.usmSellAdapterAddress,
       client: this.client,
       liquidityVenues: this.liquidityVenues,
-      activeUsms: this.activeUsms,
+      activeUsms,
       usmMode: this.usmMode,
       surplusRecipient: this.treasuryAddress,
       toConvert: {
@@ -423,12 +439,37 @@ export class LiquidationBot {
     ]);
 
     if (loanAssetProfitUsd === undefined || gasUsedUsd === undefined) {
-      return false;
+      // Deliberately fail open here: temporary pricing outages should not cause
+      // missed liquidations or bad debt accumulation. This can allow some
+      // unprofitable liquidations during outages, but that is an intentional
+      // liveness-over-efficiency tradeoff.
+      console.warn(
+        `${this.logTag}Unable to price profit or gas for ${loanAsset}; proceeding without USD profitability check`,
+      );
+      return true;
     }
 
     const profitUsd = loanAssetProfitUsd - gasUsedUsd;
 
     return profitUsd > 0;
+  }
+
+  private async getActiveUsms() {
+    if (this.usmMode === "never") {
+      return undefined;
+    }
+
+    try {
+      return (await fetchActiveUsms(this.chainId)).filter(
+        (usm) => usm.type === "permissionless",
+      );
+    } catch (error) {
+      console.warn(
+        `${this.logTag}Failed to refresh active USMs from indexer, continuing without USM routes`,
+        error,
+      );
+      return undefined;
+    }
   }
 
   private decreaseSeizableCollateral(

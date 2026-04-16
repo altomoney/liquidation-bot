@@ -7,7 +7,6 @@ import { LiquidationBot, type LiquidationBotInputs } from "./bot";
 import { createLiquidityVenue } from "./liquidity-venues";
 import { createPricer } from "./pricers";
 import { ENV } from "./utils/env";
-import { fetchActiveUsms } from "./utils/fetchers";
 
 export const launchBot = async (config: ChainConfig) => {
   const logTag = `[${config.chain.name} client]: `;
@@ -27,12 +26,6 @@ export const launchBot = async (config: ChainConfig) => {
   // PRICERS
   const pricers = config.pricers
     ? config.pricers.map((pricerName) => createPricer(pricerName))
-    : undefined;
-
-  const activeUsms = config.useUsm && config.useUsm !== "never"
-    ? (await fetchActiveUsms(config.chainId)).filter(
-        (usm) => usm.type === "permissionless",
-      )
     : undefined;
 
   if (ENV.CHECK_PROFIT && !(pricers && pricers.length > 0)) {
@@ -57,7 +50,6 @@ export const launchBot = async (config: ChainConfig) => {
     usmSellAdapterAddress: config.usmSellAdapterAddress,
     treasuryAddress: config.treasuryAddress ?? client.account.address,
     liquidityVenues,
-    activeUsms,
     usmMode: config.useUsm ?? "never",
     pricers: ENV.CHECK_PROFIT ? pricers : undefined,
     flashbotAccount,
