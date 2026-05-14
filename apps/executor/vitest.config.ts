@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       fileParallelism: false,
+      pool: "forks",
       hookTimeout: 300_000,
       include: ["test/**/*.test.ts"],
       testTimeout: 300_000,

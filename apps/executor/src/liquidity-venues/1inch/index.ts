@@ -5,7 +5,7 @@ import { ExecutorEncoder } from "executooor-viem";
 import { Address, parseUnits } from "viem";
 import { ToConvert } from "../../utils/types";
 import { LiquidityVenue } from "../types";
-import { ONE_INCH_LIQUIDITY_VENUE_CONFIG } from "./config";
+import { EXCLUDED_PROTOCOLS, ONE_INCH_LIQUIDITY_VENUE_CONFIG } from "./config";
 import { SwapParams, SwapResponse } from "./types";
 
 export class OneInch implements LiquidityVenue {
@@ -17,13 +17,9 @@ export class OneInch implements LiquidityVenue {
 
   supportsRoute(encoder: ExecutorEncoder, src: Address, dst: Address) {
     if (src === dst) return false;
-    if (
-      !ONE_INCH_LIQUIDITY_VENUE_CONFIG.supportedNetworks.includes(
-        encoder.client.chain.id,
-      )
-    )
-      return false;
-    return this.apiKey !== undefined;
+    return ONE_INCH_LIQUIDITY_VENUE_CONFIG.supportedNetworks.includes(
+      encoder.client.chain.id,
+    );
   }
 
   async convert(encoder: ExecutorEncoder, toConvert: ToConvert) {
@@ -46,6 +42,7 @@ export class OneInch implements LiquidityVenue {
         allowPartialFill: false,
         disableEstimate: true,
         usePermit2: false,
+        excludedProtocols: EXCLUDED_PROTOCOLS,
       });
 
       encoder
@@ -71,7 +68,7 @@ export class OneInch implements LiquidityVenue {
     }
   }
 
-  private getSwapApiPath = (chainId: BigIntish) => `/swap/v6.0/${chainId}/swap`;
+  private getSwapApiPath = (chainId: BigIntish) => `/swap/v6.1/${chainId}/swap`;
 
   private async fetchSwap(swapParams: SwapParams) {
     const url = new URL(

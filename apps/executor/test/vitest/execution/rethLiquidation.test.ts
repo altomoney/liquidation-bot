@@ -118,7 +118,6 @@ describe.sequential("rETH liquidation fork test", () => {
         usmSellAdapterAddress,
         treasuryAddress: liquidator,
         liquidityVenues,
-        activeUsms,
         usmMode: "always",
         isPriorityLiquidator: false,
       });

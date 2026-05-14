@@ -1,3 +1,4 @@
+import { createServer } from "node:net";
 import { bytecode, executorAbi, ExecutorEncoder } from "executooor-viem";
 import { Instance } from "prool";
 import {
@@ -11,6 +12,21 @@ import {
 import { test as vitest } from "vitest";
 
 import { chainConfigs } from "@/config";
+
+function getFreePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const srv = createServer();
+    srv.listen(0, () => {
+      const addr = srv.address();
+      if (!addr || typeof addr === "string") {
+        srv.close();
+        return reject(new Error("Failed to get free port"));
+      }
+      const { port } = addr;
+      srv.close(() => resolve(port));
+    });
+  });
+}
 
 function createAnvilClient(rpcUrl: string, account: Address, chain: Chain) {
   return createTestClient({
@@ -45,6 +61,7 @@ export function createExecutionTest(chainId: number, forkBlockNumber: bigint) {
         throw new Error(`Missing chain config for chain ${chainId}`);
       }
 
+      const freePort = await getFreePort();
       const instance = Instance.anvil({
         binary: `${process.env.HOME}/.foundry/bin/anvil`,
         forkUrl: forkRpcUrl,
@@ -53,6 +70,9 @@ export function createExecutionTest(chainId: number, forkBlockNumber: bigint) {
         autoImpersonate: true,
         gasPrice: 0n,
         blockBaseFeePerGas: 0n,
+        port: freePort,
+        retries: 10,
+        noRateLimit: true,
       });
 
       const created = instance.create();

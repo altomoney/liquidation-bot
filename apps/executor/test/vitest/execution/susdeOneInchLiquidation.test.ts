@@ -7,9 +7,9 @@ import { assert, beforeEach, describe, expect } from "vitest";
 import { LiquidationBot } from "@/bot";
 import { createLiquidityVenue } from "@/liquidity-venues";
 import {
-  odosSusdeUsdcFixture,
-  SUSDE_ODOS_FORK_BLOCK_NUMBER,
-} from "@/test/fixtures/odosSusdeUsdc";
+  oneInchSusdeUsdcFixture,
+  SUSDE_ONE_INCH_FORK_BLOCK_NUMBER,
+} from "@/test/fixtures/oneInchSusdeUsdc";
 import {
   buildMockMarketResponse,
   fetchActiveUsms,
@@ -30,26 +30,22 @@ const MARKET_ADDRESS = "0x210bF54092B66443FddFec0f3F156e74B04CD2a2";
 
 const executionTest = createExecutionTest(
   CHAIN_ID,
-  SUSDE_ODOS_FORK_BLOCK_NUMBER,
+  SUSDE_ONE_INCH_FORK_BLOCK_NUMBER,
 );
 
-// Keep this file aligned with the current configuredPairRoutes result for sUSDe -> DUSD.
-// The production planner chooses Odos for sUSDe -> USDC, then the USM leg mints DUSD.
-const liquidityVenues = [createLiquidityVenue("odos")];
+const liquidityVenues = [createLiquidityVenue("1inch")];
 
 beforeEach(() => {
   nock.cleanAll();
-  nock("https://api.odos.xyz")
-    .post("/sor/quote/v3")
-    .reply(200, odosSusdeUsdcFixture.quote);
-  nock("https://api.odos.xyz")
-    .post("/sor/assemble")
-    .reply(200, odosSusdeUsdcFixture.assembled);
+  nock("https://api.1inch.dev")
+    .get("/swap/v6.1/1/swap")
+    .query(true)
+    .reply(200, oneInchSusdeUsdcFixture.swap);
 });
 
-describe.sequential("sUSDe liquidation fork test", () => {
+describe.sequential("sUSDe liquidation fork test (1inch)", () => {
   executionTest(
-    "executes the pinned Odos -> UsmVenue route via the deployed adapter",
+    "executes the pinned 1inch -> UsmVenue route via the deployed adapter",
     async ({ client, encoder }) => {
       const accounts = await client.getAddresses();
       const liquidator = accounts[LIQUIDATOR_INDEX];
@@ -63,6 +59,12 @@ describe.sequential("sUSDe liquidation fork test", () => {
       assert(borrower, "Missing borrower account");
 
       const collateralAmount = 10_000n * 10n ** 18n; // 10k sUSDe
+      const bufferedSwapAmount = (collateralAmount * 995n) / 1000n;
+      console.log(
+        "[test-susde-1inch] Fixture swap",
+        `${bufferedSwapAmount.toString()} -> ${oneInchSusdeUsdcFixture.dstAmount} USDC units`,
+      );
+
       const { position: initialPosition, marketState } = await setupPosition(
         client,
         {
@@ -112,7 +114,7 @@ describe.sequential("sUSDe liquidation fork test", () => {
       mockIndexerActiveUsms(CHAIN_ID, activeUsms);
 
       const bot = new LiquidationBot({
-        logTag: "[test-susde] ",
+        logTag: "[test-susde-1inch] ",
         chainId: CHAIN_ID,
         client: client as never,
         wNative: config.wNative,
