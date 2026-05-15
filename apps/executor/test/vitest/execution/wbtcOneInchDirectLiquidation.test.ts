@@ -7,13 +7,11 @@ import { assert, beforeEach, describe, expect } from "vitest";
 import { LiquidationBot } from "@/bot";
 import { createLiquidityVenue } from "@/liquidity-venues";
 import {
-  oneInchWbtcFrxusdFixture,
-  WBTC_ONE_INCH_FORK_BLOCK_NUMBER,
-} from "@/test/fixtures/oneInchWbtcFrxusd";
+  oneInchWbtcDusdFixture,
+  WBTC_DUSD_ONE_INCH_FORK_BLOCK_NUMBER,
+} from "@/test/fixtures/oneInchWbtcDusd";
 import {
   buildMockMarketResponse,
-  fetchActiveUsms,
-  mockIndexerActiveUsms,
   mockIndexerLiquidatablePositions,
   readMarketPosition,
   readMarketState,
@@ -30,7 +28,7 @@ const MARKET_ADDRESS = "0xefd78a5970a43e25b30426C3952065217c55e5E4";
 
 const executionTest = createExecutionTest(
   CHAIN_ID,
-  WBTC_ONE_INCH_FORK_BLOCK_NUMBER,
+  WBTC_DUSD_ONE_INCH_FORK_BLOCK_NUMBER,
 );
 
 const liquidityVenues = [createLiquidityVenue("1inch")];
@@ -40,13 +38,13 @@ beforeEach(() => {
   nock("https://api.1inch.dev")
     .get("/swap/v6.1/1/swap")
     .query(true)
-    .reply(200, oneInchWbtcFrxusdFixture.swap)
+    .reply(200, oneInchWbtcDusdFixture.swap)
     .persist();
 });
 
-describe.sequential("WBTC liquidation fork test (1inch)", () => {
+describe.sequential("WBTC liquidation fork test (1inch direct, no USM)", () => {
   executionTest(
-    "executes the pinned 1inch (WBTC -> frxUSD) -> UsmVenue route via the deployed adapter",
+    "executes the pinned 1inch WBTC -> DUSD direct route via Curve + Uniswap pools",
     async ({ client, encoder }) => {
       const accounts = await client.getAddresses();
       const liquidator = accounts[LIQUIDATOR_INDEX];
@@ -59,11 +57,11 @@ describe.sequential("WBTC liquidation fork test (1inch)", () => {
       assert(liquidator, "Missing liquidator account");
       assert(borrower, "Missing borrower account");
 
-      const collateralAmount = 5n * 10n ** 8n; // 5 WBTC
+      const collateralAmount = 510000000n; // 5.1 WBTC (~$400k)
       const bufferedSwapAmount = (collateralAmount * 995n) / 1000n;
       console.log(
-        "[test-wbtc-1inch] Fixture swap",
-        `${bufferedSwapAmount.toString()} WBTC sats -> ${oneInchWbtcFrxusdFixture.dstAmount} frxUSD units`,
+        "[test-wbtc-1inch-direct] Fixture swap",
+        `${bufferedSwapAmount.toString()} WBTC sats -> ${oneInchWbtcDusdFixture.dstAmount} DUSD units`,
       );
 
       const { position: initialPosition, marketState } = await setupPosition(
@@ -91,7 +89,6 @@ describe.sequential("WBTC liquidation fork test (1inch)", () => {
       await setOraclePrice(client, marketState.oracle, newPrice);
 
       const updatedState = await readMarketState(client, MARKET_ADDRESS);
-      const activeUsms = await fetchActiveUsms(client);
       const mockMarket = buildMockMarketResponse(
         MARKET_ADDRESS,
         updatedState,
@@ -112,10 +109,9 @@ describe.sequential("WBTC liquidation fork test (1inch)", () => {
       mockIndexerLiquidatablePositions(CHAIN_ID, [
         { market: mockMarket, positionsLiq: [mockPosition] },
       ]);
-      mockIndexerActiveUsms(CHAIN_ID, activeUsms);
 
       const bot = new LiquidationBot({
-        logTag: "[test-wbtc-1inch] ",
+        logTag: "[test-wbtc-1inch-direct] ",
         chainId: CHAIN_ID,
         client: client as never,
         wNative: config.wNative,
@@ -123,7 +119,7 @@ describe.sequential("WBTC liquidation fork test (1inch)", () => {
         usmSellAdapterAddress,
         treasuryAddress: liquidator,
         liquidityVenues,
-        usmMode: "always",
+        usmMode: "never",
         isPriorityLiquidator: false,
       });
 

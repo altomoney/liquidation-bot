@@ -7,9 +7,9 @@ import { assert, beforeEach, describe, expect } from "vitest";
 import { LiquidationBot } from "@/bot";
 import { createLiquidityVenue } from "@/liquidity-venues";
 import {
-  odosWbtcUsdcFixture,
+  odosWbtcFrxusdFixture,
   WBTC_ODOS_FORK_BLOCK_NUMBER,
-} from "@/test/fixtures/odosWbtcUsdc";
+} from "@/test/fixtures/odosWbtcFrxusd";
 import {
   buildMockMarketResponse,
   fetchActiveUsms,
@@ -33,23 +33,23 @@ const executionTest = createExecutionTest(
   WBTC_ODOS_FORK_BLOCK_NUMBER,
 );
 
-// Keep this file aligned with the current configuredPairRoutes result for WBTC -> DUSD.
-// The production planner chooses Odos for WBTC -> USDC, then the USM leg mints DUSD.
 const liquidityVenues = [createLiquidityVenue("odos")];
 
 beforeEach(() => {
   nock.cleanAll();
   nock("https://api.odos.xyz")
     .post("/sor/quote/v3")
-    .reply(200, odosWbtcUsdcFixture.quote);
+    .reply(200, odosWbtcFrxusdFixture.quote)
+    .persist();
   nock("https://api.odos.xyz")
     .post("/sor/assemble")
-    .reply(200, odosWbtcUsdcFixture.assembled);
+    .reply(200, odosWbtcFrxusdFixture.assembled)
+    .persist();
 });
 
 describe.sequential("WBTC liquidation fork test", () => {
   executionTest(
-    "executes the pinned Odos -> UsmVenue route via the deployed adapter",
+    "executes the pinned Odos (WBTC -> frxUSD) -> UsmVenue route via the deployed adapter",
     async ({ client, encoder }) => {
       const accounts = await client.getAddresses();
       const liquidator = accounts[LIQUIDATOR_INDEX];
@@ -62,7 +62,7 @@ describe.sequential("WBTC liquidation fork test", () => {
       assert(liquidator, "Missing liquidator account");
       assert(borrower, "Missing borrower account");
 
-      const collateralAmount = 10n * 10n ** 8n; // 10 WBTC
+      const collateralAmount = 5n * 10n ** 8n; // 5 WBTC
       const { position: initialPosition, marketState } = await setupPosition(
         client,
         {
