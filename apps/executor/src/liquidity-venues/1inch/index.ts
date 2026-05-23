@@ -2,7 +2,7 @@ import { chainConfig, DEFAULT_SLIPPAGE_PERCENTAGE } from "@/config/index";
 import { BigIntish } from "@/types";
 import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
-import { Address, parseUnits } from "viem";
+import { Address } from "viem";
 import { ToConvert } from "../../utils/types";
 import { LiquidityVenue } from "../types";
 import { EXCLUDED_PROTOCOLS, ONE_INCH_LIQUIDITY_VENUE_CONFIG } from "./config";
@@ -34,7 +34,7 @@ export class OneInch implements LiquidityVenue {
         dst: toConvert.dst,
         amount: toConvert.srcAmount,
         from: encoder.address,
-        slippage: parseUnits(slippage.toFixed(18), 18) / 10n ** 14n,
+        slippage: this.toOneInchSlippageParam(slippage),
         origin: encoder.client.account.address,
         includeTokensInfo: false,
         includeProtocols: false,
@@ -70,6 +70,15 @@ export class OneInch implements LiquidityVenue {
 
   private getSwapApiPath = (chainId: BigIntish) => `/swap/v6.1/${chainId}/swap`;
 
+  private toOneInchSlippageParam(slippagePercent: number) {
+    if (!Number.isFinite(slippagePercent) || slippagePercent <= 0) {
+      throw new Error(
+        `Invalid slippagePercentage: ${slippagePercent}. Expected a positive percent value.`,
+      );
+    }
+    return slippagePercent.toString();
+  }
+
   private async fetchSwap(swapParams: SwapParams) {
     const url = new URL(
       this.getSwapApiPath(swapParams.chainId),
@@ -77,14 +86,7 @@ export class OneInch implements LiquidityVenue {
     );
     Object.entries(swapParams).forEach(([key, value]) => {
       if (value == null) return;
-      switch (key) {
-        case "slippage":
-          // 1inch expects slippage as a percentage, so we divide our value (in basis points) by 100
-          url.searchParams.set(key, (Number(value) / 100).toString(10));
-          break;
-        default:
-          url.searchParams.set(key, value);
-      }
+      url.searchParams.set(key, String(value));
     });
 
     const res = await fetch(url, {
