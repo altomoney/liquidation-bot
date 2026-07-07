@@ -2,7 +2,7 @@ import { chainConfig, DEFAULT_SLIPPAGE_PERCENTAGE } from "@/config/index";
 import { BigIntish } from "@/types";
 import { ENV } from "@/utils/env";
 import { ExecutorEncoder } from "executooor-viem";
-import { Address, parseUnits } from "viem";
+import { Address } from "viem";
 import { ToConvert } from "../../utils/types";
 import { LiquidityVenue } from "../types";
 import { EXCLUDED_PROTOCOLS, ONE_INCH_LIQUIDITY_VENUE_CONFIG } from "./config";
@@ -34,7 +34,7 @@ export class OneInch implements LiquidityVenue {
         dst: toConvert.dst,
         amount: toConvert.srcAmount,
         from: encoder.address,
-        slippage: parseUnits(slippage.toFixed(18), 18) / 10n ** 14n,
+        slippage,
         origin: encoder.client.account.address,
         includeTokensInfo: false,
         includeProtocols: false,
@@ -79,11 +79,11 @@ export class OneInch implements LiquidityVenue {
       if (value == null) return;
       switch (key) {
         case "slippage":
-          // 1inch expects slippage as a percentage, so we divide our value (in basis points) by 100
-          url.searchParams.set(key, (Number(value) / 100).toString(10));
+          // 1inch expects slippage as a percentage, matching our config value.
+          url.searchParams.set(key, Number(value).toString(10));
           break;
         default:
-          url.searchParams.set(key, value);
+          url.searchParams.set(key, String(value));
       }
     });
 
@@ -93,10 +93,26 @@ export class OneInch implements LiquidityVenue {
         Authorization: `Bearer ${this.apiKey}`,
       },
     });
+    const responseText = await res.text();
 
-    if (!res.ok) throw Error(res.statusText);
+    if (!res.ok) {
+      let errorMessage = res.statusText;
+      try {
+        const errorBody = JSON.parse(responseText) as {
+          description?: string;
+          error?: string;
+          code?: string;
+        };
+        errorMessage =
+          errorBody.description ??
+          errorBody.error ??
+          errorBody.code ??
+          res.statusText;
+      } catch {}
+      throw Error(errorMessage);
+    }
 
-    return (await res.json()) as SwapResponse;
+    return JSON.parse(responseText) as SwapResponse;
   }
 }
 
