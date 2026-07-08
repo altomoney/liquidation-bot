@@ -120,9 +120,10 @@ describe.sequential("sUSDe liquidation fork test (1inch)", () => {
         wNative: config.wNative,
         executorAddress: encoder.address as Address,
         usmSellAdapterAddress,
+        liquidationPeripheryAddress: config.options.liquidationPeripheryAddress,
         treasuryAddress: liquidator,
         liquidityVenues,
-        usmMode: "always",
+        stableRouteMode: "public_usm_then_swap",
         isPriorityLiquidator: false,
       });
 

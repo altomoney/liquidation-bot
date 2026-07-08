@@ -1,4 +1,5 @@
 import { usmAbi } from "@/abis/usm";
+import { AdvancedPermissionsUSM } from "@/abis/advanced-permissions-usm";
 import { DusdAbi } from "@/indexer/abis/DusdAbi";
 import { UsmRegistryAbi } from "@/indexer/abis/UsmRegistryAbi";
 import type {
@@ -456,10 +457,29 @@ export async function fetchActiveUsms(
 
   const activeUsms = await Promise.all(
     usmAddresses.map(async (usmAddress) => {
+      let implementation: "standard" | "advanced_permissions" = "standard";
+      let type: "permissioned" | "permissionless";
+
+      try {
+        const sellAccess = await client.readContract({
+          address: usmAddress,
+          abi: AdvancedPermissionsUSM,
+          functionName: "getSellAccess",
+        });
+        implementation = "advanced_permissions";
+        type = sellAccess === 1 ? "permissionless" : "permissioned";
+      } catch {
+        const accessMode = await client.readContract({
+          address: usmAddress,
+          abi: usmAbi,
+          functionName: "getAccessMode",
+        });
+        type = accessMode === 0 ? "permissionless" : "permissioned";
+      }
+
       const [
         stableToken,
         underlyingAsset,
-        accessMode,
         underlyingExposureCap,
         availableUnderlyingExposure,
         canSwap,
@@ -473,11 +493,6 @@ export async function fetchActiveUsms(
           address: usmAddress,
           abi: usmAbi,
           functionName: "UNDERLYING_ASSET",
-        }),
-        client.readContract({
-          address: usmAddress,
-          abi: usmAbi,
-          functionName: "getAccessMode",
         }),
         client.readContract({
           address: usmAddress,
@@ -525,9 +540,8 @@ export async function fetchActiveUsms(
         underlyingAsset: getAddress(underlyingAsset),
         underlyingExposureCap,
         currentExposure: underlyingExposureCap - availableUnderlyingExposure,
-        type: (accessMode === 0 ? "permissionless" : "permissioned") as
-          | "permissionless"
-          | "permissioned",
+        type,
+        implementation,
         dusdConfig: {
           chainId: chainId,
           minterAddress: getAddress(usmAddress),
@@ -542,7 +556,5 @@ export async function fetchActiveUsms(
     }),
   );
 
-  return activeUsms.filter(
-    (usm) => usm.isActive && usm.type === "permissionless",
-  );
+  return activeUsms.filter((usm) => usm.isActive && !usm.swapsFrozen);
 }

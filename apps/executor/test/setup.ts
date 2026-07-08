@@ -32,7 +32,7 @@ function createAnvilClient(rpcUrl: string, account: Address, chain: Chain) {
   return createTestClient({
     mode: "anvil",
     chain,
-    transport: http(rpcUrl),
+    transport: http(rpcUrl, { timeout: 60_000 }),
     account,
   })
     .extend(publicActions)
@@ -85,7 +85,7 @@ export function createExecutionTest(chainId: number, forkBlockNumber: bigint) {
       const tempClient = createTestClient({
         mode: "anvil",
         chain,
-        transport: http(rpcUrl),
+        transport: http(rpcUrl, { timeout: 60_000 }),
       }).extend(walletActions);
       const [defaultAccount] = await tempClient.getAddresses();
       if (!defaultAccount) {

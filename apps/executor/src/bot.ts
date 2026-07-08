@@ -1,9 +1,14 @@
-import { ALWAYS_REALIZE_BAD_DEBT, chainConfigs, type UsmMode } from "@/config";
+import {
+  ALWAYS_REALIZE_BAD_DEBT,
+  chainConfigs,
+  type StableRouteMode,
+} from "@/config";
 import { executorAbi } from "executooor-viem";
 import {
   erc20Abi,
   formatUnits,
   getAddress,
+  isAddressEqual,
   LocalAccount,
   maxUint256,
   parseUnits,
@@ -15,6 +20,8 @@ import {
   type WalletClient,
 } from "viem";
 import {
+  estimateContractGas,
+  getBlock,
   getBlockNumber,
   getGasPrice,
   readContract,
@@ -25,7 +32,10 @@ import {
 
 import type { LiquidityVenue } from "./liquidity-venues/types.js";
 import type { Pricer } from "./pricers/types.js";
-import { planBestConversionRoute } from "./utils/conversionRouting.js";
+import {
+  planBestConversionRoute,
+  planPeripheryUsmRoute,
+} from "./utils/conversionRouting.js";
 import { CooldownMechanism } from "./utils/cooldownMechanism.js";
 import { traceFailedExecution } from "./utils/debugTrace.js";
 import { fetchActiveUsms, fetchLiquidatablePositions } from "./utils/fetchers.js";
@@ -41,6 +51,7 @@ import {
 import type {
   IMarket,
   IndexerAPIResponse,
+  IndexerActiveUsmsResponse,
   LiquidatablePosition,
 } from "./utils/types.js";
 
@@ -51,9 +62,10 @@ export interface LiquidationBotInputs {
   wNative: Address;
   executorAddress: Address;
   usmSellAdapterAddress: Address;
+  liquidationPeripheryAddress: Address;
   treasuryAddress: Address;
   liquidityVenues: LiquidityVenue[];
-  usmMode: UsmMode;
+  stableRouteMode: StableRouteMode;
   pricers?: Pricer[];
   cooldownMechanism?: CooldownMechanism;
   flashbotAccount?: LocalAccount;
@@ -62,6 +74,12 @@ export interface LiquidationBotInputs {
 
 type HandleTxResult = "submitted" | "unprofitable" | "simulation_failed";
 
+type ProfitAssetBalance = {
+  asset: Address;
+  beforeTx: bigint | undefined;
+  afterTx: bigint | undefined;
+};
+
 export class LiquidationBot {
   private logTag: string;
   private chainId: number;
@@ -69,9 +87,10 @@ export class LiquidationBot {
   private wNative: Address;
   private executorAddress: Address;
   private usmSellAdapterAddress: Address;
+  private liquidationPeripheryAddress: Address;
   private treasuryAddress: Address;
   private liquidityVenues: LiquidityVenue[];
-  private usmMode: UsmMode;
+  private stableRouteMode: StableRouteMode;
   private pricers?: Pricer[];
   private cooldownMechanism?: CooldownMechanism;
   private flashbotAccount?: LocalAccount;
@@ -93,9 +112,10 @@ export class LiquidationBot {
     this.wNative = inputs.wNative;
     this.executorAddress = inputs.executorAddress;
     this.usmSellAdapterAddress = inputs.usmSellAdapterAddress;
+    this.liquidationPeripheryAddress = inputs.liquidationPeripheryAddress;
     this.treasuryAddress = inputs.treasuryAddress;
     this.liquidityVenues = inputs.liquidityVenues;
-    this.usmMode = inputs.usmMode;
+    this.stableRouteMode = inputs.stableRouteMode;
     this.pricers = inputs.pricers;
     this.cooldownMechanism = inputs.cooldownMechanism;
     this.flashbotAccount = inputs.flashbotAccount;
@@ -186,33 +206,91 @@ export class LiquidationBot {
     const { client, executorAddress } = this;
 
     const encoder = new LiquidationEncoder(executorAddress, client);
+    const bufferedSeizableCollateral = this.decreaseSeizableCollateral(
+      position.seizableCollateral,
+      badDebtPosition,
+    );
+    const activeUsms =
+      this.stableRouteMode === "swap_only"
+        ? undefined
+        : await this.getActiveUsms();
 
-    if (
-      !(await this.convertCollateralToLoan(
-        market,
-        this.decreaseSeizableCollateral(
-          position.seizableCollateral,
-          badDebtPosition,
-        ),
-        encoder,
-      ))
-    )
-      return;
+    let profitAssets: Address[] = [getAddress(market.loanToken)];
+    const peripheryProfitAssets =
+      this.stableRouteMode === "periphery_usm_then_swap"
+        ? await this.convertCollateralViaLiquidationPeriphery(
+            market,
+            position.user,
+            bufferedSeizableCollateral,
+            activeUsms,
+            encoder,
+          )
+        : false;
 
-    encoder.erc20Approve(market.loanToken, market.address, maxUint256);
+    if (peripheryProfitAssets) {
+      profitAssets = peripheryProfitAssets;
+    } else {
+      if (
+        !(await this.convertCollateralToLoanDirect(
+          market,
+          bufferedSeizableCollateral,
+          activeUsms,
+          this.directStableRouteMode(),
+          encoder,
+        ))
+      )
+        return;
 
-    encoder.altoLiquidate(market, position.user, encoder.flush());
-    encoder.erc20Skim(market.loanToken, this.treasuryAddress);
+      encoder.erc20Approve(market.loanToken, market.address, maxUint256);
+      encoder.altoLiquidate(market, position.user, encoder.flush());
+      encoder.erc20Skim(market.loanToken, this.treasuryAddress);
+    }
 
     const calls = encoder.flush();
 
     try {
-      const txResult = await this.handleTx(
+      let txResult = await this.handleTx(
         encoder,
         calls,
-        market,
         badDebtPosition,
+        profitAssets,
       );
+
+      if (txResult === "simulation_failed" && peripheryProfitAssets) {
+        console.log(
+          `${this.logTag}Liquidation periphery simulation failed, trying direct route fallback`,
+        );
+
+        const fallbackEncoder = new LiquidationEncoder(executorAddress, client);
+        if (
+          await this.convertCollateralToLoanDirect(
+            market,
+            bufferedSeizableCollateral,
+            activeUsms,
+            "swap_only",
+            fallbackEncoder,
+          )
+        ) {
+          fallbackEncoder.erc20Approve(
+            market.loanToken,
+            market.address,
+            maxUint256,
+          );
+          fallbackEncoder.altoLiquidate(
+            market,
+            position.user,
+            fallbackEncoder.flush(),
+          );
+          fallbackEncoder.erc20Skim(market.loanToken, this.treasuryAddress);
+
+          txResult = await this.handleTx(
+            fallbackEncoder,
+            fallbackEncoder.flush(),
+            badDebtPosition,
+            [getAddress(market.loanToken)],
+          );
+        }
+      }
 
       if (txResult === "submitted") {
         console.log(
@@ -245,8 +323,8 @@ export class LiquidationBot {
   private async handleTx(
     encoder: LiquidationEncoder,
     calls: Hex[],
-    marketParams: IMarket,
     badDebtPosition: boolean,
+    profitAssets: Address[],
   ): Promise<HandleTxResult> {
     const functionData = {
       abi: executorAbi,
@@ -254,30 +332,34 @@ export class LiquidationBot {
       args: [calls],
     } as const;
 
+    const balanceOfCalls = profitAssets.map((asset) => ({
+      to: asset,
+      abi: erc20Abi,
+      functionName: "balanceOf",
+      args: [this.treasuryAddress],
+    })) as {
+      to: Address;
+      abi: typeof erc20Abi;
+      functionName: "balanceOf";
+      args: [Address];
+    }[];
+
     const [{ results }, gasPrice] = await Promise.all([
       simulateCalls(this.client, {
         account: this.client.account.address,
         calls: [
-          {
-            to: marketParams.loanToken,
-            abi: erc20Abi,
-            functionName: "balanceOf",
-            args: [this.treasuryAddress],
-          },
+          ...balanceOfCalls,
           { to: encoder.address, ...functionData },
-          {
-            to: marketParams.loanToken,
-            abi: erc20Abi,
-            functionName: "balanceOf",
-            args: [this.treasuryAddress],
-          },
+          ...balanceOfCalls,
         ],
       }),
       getGasPrice(this.client),
     ]);
 
-    if (results[1].status !== "success") {
-      const simulationError = results[1].error as
+    const executionResult = results[profitAssets.length];
+
+    if (executionResult?.status !== "success") {
+      const simulationError = executionResult?.error as
         | { shortMessage?: string }
         | undefined;
       console.log(
@@ -299,14 +381,27 @@ export class LiquidationBot {
       return "simulation_failed";
     }
 
+    const profitAssetBalances = profitAssets.map((asset, index) => {
+      const beforeResult = results[index];
+      const afterResult = results[profitAssets.length + 1 + index];
+
+      return {
+        asset,
+        beforeTx:
+          beforeResult?.status === "success"
+            ? (beforeResult.result as bigint)
+            : undefined,
+        afterTx:
+          afterResult?.status === "success"
+            ? (afterResult.result as bigint)
+            : undefined,
+      };
+    });
+
     const isProfitable = await this.checkProfit(
-      marketParams.loanToken,
+      profitAssetBalances,
       {
-        beforeTx: results[0].result,
-        afterTx: results[2].result,
-      },
-      {
-        used: results[1].gasUsed,
+        used: executionResult.gasUsed,
         price: gasPrice,
       },
       badDebtPosition,
@@ -337,30 +432,102 @@ export class LiquidationBot {
       );
       return "submitted";
     } else {
-      const txHash = await writeContract(this.client, {
+      const block = await getBlock(this.client);
+      // simulateCalls runs the exec call after the balance probes in the same
+      // simulated block, so its gasUsed misses cold-access costs the real tx
+      // pays. Take the max with a standalone estimate to avoid on-chain OOG.
+      const estimatedGas = await estimateContractGas(this.client, {
+        account: this.client.account,
         address: encoder.address,
         ...functionData,
       });
-      await waitForTransactionReceipt(this.client, { hash: txHash });
+      const maxGas =
+        estimatedGas > executionResult.gasUsed
+          ? estimatedGas
+          : executionResult.gasUsed;
+      const bufferedGas = (maxGas * 120n) / 100n;
+      const txHash = await writeContract(this.client, {
+        address: encoder.address,
+        ...functionData,
+        gas:
+          block.gasLimit > 0n && bufferedGas > block.gasLimit
+            ? block.gasLimit
+            : bufferedGas,
+      });
+      const receipt = await waitForTransactionReceipt(this.client, {
+        hash: txHash,
+      });
+      if (receipt.status !== "success") {
+        console.warn(`${this.logTag}Transaction reverted: ${txHash}`);
+        return "simulation_failed";
+      }
       console.log(`${this.logTag}Transaction submitted: ${txHash}`);
     }
 
     return "submitted";
   }
 
-  private async convertCollateralToLoan(
+  private async convertCollateralViaLiquidationPeriphery(
     marketParams: IMarket,
+    borrower: Address,
     seizableCollateral: bigint,
+    activeUsms: IndexerActiveUsmsResponse["activeUsms"] | undefined,
     encoder: LiquidationEncoder,
   ) {
-    const activeUsms = await this.getActiveUsms();
+    const route = await planPeripheryUsmRoute({
+      executorAddress: this.executorAddress,
+      liquidationPeripheryAddress: this.liquidationPeripheryAddress,
+      client: this.client,
+      liquidityVenues: this.liquidityVenues,
+      activeUsms,
+      surplusRecipient: this.treasuryAddress,
+      toConvert: {
+        src: getAddress(marketParams.collateralToken),
+        dst: getAddress(marketParams.loanToken),
+        srcAmount: seizableCollateral,
+      },
+    });
+
+    if (!route.success || !route.usm) {
+      for (const error of route.errors) {
+        console.error(
+          `${this.logTag}Error planning liquidation periphery route for ${marketParams.collateralToken} to ${marketParams.loanToken}: ${error}`,
+        );
+      }
+      return false;
+    }
+
+    encoder.altoLiquidationPeripheryLiquidate(
+      this.liquidationPeripheryAddress,
+      marketParams,
+      borrower,
+      route.usm.address,
+      route.calls,
+    );
+    encoder.erc20Skim(route.usm.underlyingAsset, this.treasuryAddress);
+    encoder.erc20Skim(getAddress(marketParams.loanToken), this.treasuryAddress);
+
+    return this.uniqueAddresses([
+      getAddress(marketParams.collateralToken),
+      route.usm.underlyingAsset,
+      getAddress(marketParams.loanToken),
+    ]);
+  }
+
+  private async convertCollateralToLoanDirect(
+    marketParams: IMarket,
+    seizableCollateral: bigint,
+    activeUsms: IndexerActiveUsmsResponse["activeUsms"] | undefined,
+    stableRouteMode: StableRouteMode,
+    encoder: LiquidationEncoder,
+  ) {
     const route = await planBestConversionRoute({
       executorAddress: this.executorAddress,
       usmSellAdapterAddress: this.usmSellAdapterAddress,
       client: this.client,
       liquidityVenues: this.liquidityVenues,
       activeUsms,
-      usmMode: this.usmMode,
+      stableRouteMode,
       surplusRecipient: this.treasuryAddress,
       toConvert: {
         src: getAddress(marketParams.collateralToken),
@@ -404,12 +571,18 @@ export class LiquidationBot {
     return parseFloat(formatUnits(amount, decimals)) * price;
   }
 
+  private uniqueAddresses(addresses: Address[]) {
+    const unique: Address[] = [];
+    for (const address of addresses) {
+      if (!unique.some((existing) => isAddressEqual(existing, address))) {
+        unique.push(address);
+      }
+    }
+    return unique;
+  }
+
   private async checkProfit(
-    loanAsset: Address,
-    loanAssetBalance: {
-      beforeTx: bigint | undefined;
-      afterTx: bigint | undefined;
-    },
+    profitAssetBalances: ProfitAssetBalance[],
     gas: {
       used: bigint;
       price: bigint;
@@ -418,51 +591,74 @@ export class LiquidationBot {
   ) {
     if (ALWAYS_REALIZE_BAD_DEBT && badDebtPosition) return true;
     if (this.pricers === undefined) return true;
+    const pricers = this.pricers;
 
-    if (
-      loanAssetBalance.beforeTx === undefined ||
-      loanAssetBalance.afterTx === undefined
-    ) {
+    if (profitAssetBalances.length === 0) {
       return false;
     }
 
-    const loanAssetProfit =
-      loanAssetBalance.afterTx - loanAssetBalance.beforeTx;
+    const profitDeltas: { asset: Address; amount: bigint }[] = [];
+    for (const balance of profitAssetBalances) {
+      if (balance.beforeTx === undefined || balance.afterTx === undefined) {
+        return false;
+      }
 
-    if (loanAssetProfit <= 0n) {
+      const profit = balance.afterTx - balance.beforeTx;
+      if (profit > 0n) {
+        profitDeltas.push({ asset: balance.asset, amount: profit });
+      }
+    }
+
+    if (profitDeltas.length === 0) {
       return false;
     }
 
-    const [loanAssetProfitUsd, gasUsedUsd] = await Promise.all([
-      this.price(loanAsset, loanAssetProfit, this.pricers),
-      this.price(this.wNative, gas.used * gas.price, this.pricers),
+    const [profitValuesUsd, gasUsedUsd] = await Promise.all([
+      Promise.all(
+        profitDeltas.map((delta) =>
+          this.price(delta.asset, delta.amount, pricers),
+        ),
+      ),
+      this.price(this.wNative, gas.used * gas.price, pricers),
     ]);
 
-    if (loanAssetProfitUsd === undefined || gasUsedUsd === undefined) {
+    const pricedProfitValuesUsd: number[] = [];
+    for (const value of profitValuesUsd) {
+      if (value === undefined) {
+        console.warn(
+          `${this.logTag}Unable to price profit or gas; proceeding without USD profitability check`,
+        );
+        return true;
+      }
+      pricedProfitValuesUsd.push(value);
+    }
+
+    if (gasUsedUsd === undefined) {
       // Deliberately fail open here: temporary pricing outages should not cause
       // missed liquidations or bad debt accumulation. This can allow some
       // unprofitable liquidations during outages, but that is an intentional
       // liveness-over-efficiency tradeoff.
       console.warn(
-        `${this.logTag}Unable to price profit or gas for ${loanAsset}; proceeding without USD profitability check`,
+        `${this.logTag}Unable to price profit or gas; proceeding without USD profitability check`,
       );
       return true;
     }
 
-    const profitUsd = loanAssetProfitUsd - gasUsedUsd;
+    let profitUsd = 0;
+    for (const value of pricedProfitValuesUsd) {
+      profitUsd += value;
+    }
 
-    return profitUsd > 0;
+    return profitUsd - gasUsedUsd > 0;
   }
 
   private async getActiveUsms() {
-    if (this.usmMode === "never") {
+    if (this.stableRouteMode === "swap_only") {
       return undefined;
     }
 
     try {
-      return (await fetchActiveUsms(this.chainId)).filter(
-        (usm) => usm.type === "permissionless",
-      );
+      return await fetchActiveUsms(this.chainId);
     } catch (error) {
       console.warn(
         `${this.logTag}Failed to refresh active USMs from indexer, continuing without USM routes`,
@@ -470,6 +666,12 @@ export class LiquidationBot {
       );
       return undefined;
     }
+  }
+
+  private directStableRouteMode(): StableRouteMode {
+    return this.stableRouteMode === "public_usm_then_swap"
+      ? "public_usm_then_swap"
+      : "swap_only";
   }
 
   private decreaseSeizableCollateral(

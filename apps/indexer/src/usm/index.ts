@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 import { dusdConfig, usm } from "ponder:schema";
+import { AdvancedPermissionsUSM } from "../../abis/AdvancedPermissionsUsmAbi";
 import { DusdAbi } from "../../abis/DusdAbi";
 import { DusdUsmAbi } from "../../abis/DusdUsmAbi";
 
@@ -45,22 +46,65 @@ ponder.on("Usm:ExposureCapUpdated", async ({ context, event }) => {
     }));
 });
 
+ponder.on("AdvancedPermissionsUsm:AccessConfigUpdated", async ({
+  context,
+  event,
+}) => {
+  const hasUsm = await context.db.find(usm, {
+    chainId: context.chain.id,
+    address: event.log.address,
+  });
+  if (!hasUsm) {
+    return;
+  }
+  await context.db
+    .update(usm, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    })
+    .set(() => ({
+      type: event.args.sellAccess === 1 ? "permissionless" : "permissioned",
+      implementation: "advanced_permissions",
+    }));
+});
+
 ponder.on("UsmRegistry:UsmAdded", async ({ context, event }) => {
+  let implementation: "standard" | "advanced_permissions" = "standard";
+  let type: "permissioned" | "permissionless";
+
+  try {
+    const sellAccess = await context.client.readContract({
+      abi: AdvancedPermissionsUSM,
+      functionName: "getSellAccess",
+      args: [],
+      address: event.args.usm,
+    });
+    implementation = "advanced_permissions";
+    type = sellAccess === 1 ? "permissionless" : "permissioned";
+  } catch {
+    const accessMode = await context.client.readContract({
+      abi: DusdUsmAbi,
+      functionName: "getAccessMode",
+      args: [],
+      address: event.args.usm,
+    });
+    type = accessMode === 0 ? "permissionless" : "permissioned";
+  }
+
   const stableToken = await context.client.readContract({
-    abi: DusdUsmAbi,
+    abi:
+      implementation === "advanced_permissions"
+        ? AdvancedPermissionsUSM
+        : DusdUsmAbi,
     functionName: "STABLE_TOKEN",
     address: event.args.usm,
   });
   const underlyingAsset = await context.client.readContract({
-    abi: DusdUsmAbi,
+    abi:
+      implementation === "advanced_permissions"
+        ? AdvancedPermissionsUSM
+        : DusdUsmAbi,
     functionName: "UNDERLYING_ASSET",
-    address: event.args.usm,
-  });
-
-  const type = await context.client.readContract({
-    abi: DusdUsmAbi,
-    functionName: "getAccessMode",
-    args: [],
     address: event.args.usm,
   });
 
@@ -117,7 +161,8 @@ ponder.on("UsmRegistry:UsmAdded", async ({ context, event }) => {
     address: event.args.usm,
     stableToken: stableToken,
     underlyingAsset: underlyingAsset,
-    type: type === 0 ? "permissionless" : "permissioned",
+    type,
+    implementation,
     underlyingExposureCap: exposureCap,
     dusdConfig: event.args.usm,
   });

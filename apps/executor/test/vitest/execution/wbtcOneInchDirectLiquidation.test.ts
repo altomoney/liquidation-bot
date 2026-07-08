@@ -117,9 +117,10 @@ describe.sequential("WBTC liquidation fork test (1inch direct, no USM)", () => {
         wNative: config.wNative,
         executorAddress: encoder.address as Address,
         usmSellAdapterAddress,
+        liquidationPeripheryAddress: config.options.liquidationPeripheryAddress,
         treasuryAddress: liquidator,
         liquidityVenues,
-        usmMode: "never",
+        stableRouteMode: "swap_only",
         isPriorityLiquidator: false,
       });
 

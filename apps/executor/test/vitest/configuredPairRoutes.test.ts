@@ -12,7 +12,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { readContract } from "viem/actions";
 import { mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
-import type { UsmMode } from "../../config";
+import type { StableRouteMode } from "../../config";
 import type { IndexerActiveUsmsResponse } from "../../src/utils/types";
 import { ADDRESSES } from "../constants";
 
@@ -26,6 +26,8 @@ for (const envFile of [".env.local", ".env"]) {
 const { chainConfigs } = await import("../../config/config");
 const { createLiquidityVenue } = await import("../../src/liquidity-venues");
 const { createPricer } = await import("../../src/pricers");
+const { AdvancedPermissionsUSM } =
+  await import("../../src/abis/advanced-permissions-usm");
 const { usmAbi } = await import("../../src/abis/usm");
 const { planBestConversionRoute } =
   await import("../../src/utils/conversionRouting");
@@ -66,9 +68,9 @@ if (!mainnetConfig) {
   throw new Error("Mainnet config is not defined");
 }
 
-const TEST_USM_MODE = (process.env.ROUTE_TEST_USM_MODE ??
-  mainnetConfig.options.useUsm ??
-  "never") as UsmMode;
+const TEST_STABLE_ROUTE_MODE = (process.env.ROUTE_TEST_STABLE_ROUTE_MODE ??
+  mainnetConfig.options.stableRouteMode ??
+  "swap_only") as StableRouteMode;
 
 const venues = mainnetConfig.options.liquidityVenues.map((liquidityVenueName) =>
   createLiquidityVenue(liquidityVenueName),
@@ -159,10 +161,29 @@ async function fetchActiveUsms(): Promise<
 
   const activeUsms = await Promise.all(
     usmAddresses.map(async (usmAddress) => {
+      let implementation: "standard" | "advanced_permissions" = "standard";
+      let type: "permissioned" | "permissionless";
+
+      try {
+        const sellAccess = await readContract(client, {
+          address: usmAddress,
+          abi: AdvancedPermissionsUSM,
+          functionName: "getSellAccess",
+        });
+        implementation = "advanced_permissions";
+        type = sellAccess === 1 ? "permissionless" : "permissioned";
+      } catch {
+        const accessMode = await readContract(client, {
+          address: usmAddress,
+          abi: usmAbi,
+          functionName: "getAccessMode",
+        });
+        type = accessMode === 0 ? "permissionless" : "permissioned";
+      }
+
       const [
         stableToken,
         underlyingAsset,
-        accessMode,
         underlyingExposureCap,
         availableUnderlyingExposure,
         canSwap,
@@ -176,11 +197,6 @@ async function fetchActiveUsms(): Promise<
           address: usmAddress,
           abi: usmAbi,
           functionName: "UNDERLYING_ASSET",
-        }),
-        readContract(client, {
-          address: usmAddress,
-          abi: usmAbi,
-          functionName: "getAccessMode",
         }),
         readContract(client, {
           address: usmAddress,
@@ -228,9 +244,8 @@ async function fetchActiveUsms(): Promise<
         underlyingAsset: getAddress(underlyingAsset),
         underlyingExposureCap,
         currentExposure: underlyingExposureCap - availableUnderlyingExposure,
-        type: (accessMode === 0 ? "permissionless" : "permissioned") as
-          | "permissionless"
-          | "permissioned",
+        type,
+        implementation,
         dusdConfig: {
           chainId: mainnet.id,
           minterAddress: getAddress(usmAddress),
@@ -245,12 +260,11 @@ async function fetchActiveUsms(): Promise<
     }),
   );
 
-  return activeUsms.filter(
-    (usm) => usm.isActive && usm.type === "permissionless",
-  );
+  return activeUsms.filter((usm) => usm.isActive && !usm.swapsFrozen);
 }
 
-const activeUsms = TEST_USM_MODE !== "never" ? await fetchActiveUsms() : [];
+const activeUsms =
+  TEST_STABLE_ROUTE_MODE !== "swap_only" ? await fetchActiveUsms() : [];
 
 describe("executor configured pair routes", () => {
   it("prints the route for one configured pair at $1k, $100k, and $1m", async () => {
@@ -262,7 +276,7 @@ describe("executor configured pair routes", () => {
     expect(pricers.length).toBeGreaterThan(0);
 
     console.log(
-      `[configured-pair-routes] pair ${collateralSymbol} (${COLLATERAL_TOKEN}) -> ${loanSymbol} (${LOAN_TOKEN}) | usmMode=${TEST_USM_MODE}`,
+      `[configured-pair-routes] pair ${collateralSymbol} (${COLLATERAL_TOKEN}) -> ${loanSymbol} (${LOAN_TOKEN}) | stableRouteMode=${TEST_STABLE_ROUTE_MODE}`,
     );
 
     for (const usdNotional of TARGET_USD_NOTIONALS) {
@@ -276,7 +290,7 @@ describe("executor configured pair routes", () => {
         client,
         liquidityVenues: venues,
         activeUsms,
-        usmMode: TEST_USM_MODE,
+        stableRouteMode: TEST_STABLE_ROUTE_MODE,
         usmSellAdapterAddress: mainnetConfig.options.usmSellAdapterAddress,
         surplusRecipient: account.address,
         toConvert: {

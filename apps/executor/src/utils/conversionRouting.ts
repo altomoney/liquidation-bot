@@ -1,7 +1,7 @@
 import type { Account, Address, Chain, Transport, WalletClient } from "viem";
-import { isAddressEqual } from "viem";
+import { isAddressEqual, maxUint256 } from "viem";
 
-import type { UsmMode } from "@/config";
+import type { StableRouteMode } from "@/config";
 import type { LiquidityVenue } from "@/liquidity-venues/types";
 import { UsmVenue } from "@/liquidity-venues/usm";
 import { LiquidationEncoder } from "./LiquidationEncoder";
@@ -26,7 +26,17 @@ interface PlanBestConversionRouteParams {
   liquidityVenues: LiquidityVenue[];
   toConvert: ToConvert;
   activeUsms?: ActiveUsm[];
-  usmMode?: UsmMode;
+  stableRouteMode?: StableRouteMode;
+  surplusRecipient?: Address;
+}
+
+interface PlanPeripheryUsmRouteParams {
+  executorAddress: Address;
+  liquidationPeripheryAddress: Address;
+  client: WalletClient<Transport, Chain, Account>;
+  liquidityVenues: LiquidityVenue[];
+  toConvert: ToConvert;
+  activeUsms?: ActiveUsm[];
   surplusRecipient?: Address;
 }
 
@@ -161,6 +171,16 @@ async function executeVenuePass({
   const path: string[] = [];
   let toConvert = initialToConvert;
 
+  if (isAddressEqual(toConvert.src, toConvert.dst)) {
+    return {
+      success: true,
+      toConvert,
+      path,
+      errors,
+      calls: encoder.flush(),
+    };
+  }
+
   for (const venue of liquidityVenues) {
     try {
       if (!(await venue.supportsRoute(encoder, toConvert.src, toConvert.dst))) {
@@ -215,6 +235,102 @@ async function executeVenuePass({
   };
 }
 
+export async function planPeripheryUsmRoute({
+  executorAddress,
+  liquidationPeripheryAddress,
+  client,
+  liquidityVenues,
+  toConvert,
+  activeUsms,
+  surplusRecipient,
+}: PlanPeripheryUsmRouteParams): Promise<
+  ConversionRouteResult & { usm?: ActiveUsm }
+> {
+  const logTag = `[planPeriphery ${toConvert.src.slice(0, 8)}→${toConvert.dst.slice(0, 8)}]`;
+  const candidateUsms = activeUsms?.length
+    ? new UsmVenue(activeUsms).getPeripheryCandidateUsms(toConvert.dst)
+    : [];
+  const errors: string[] = [];
+
+  if (candidateUsms.length === 0) {
+    return {
+      success: false,
+      toConvert,
+      path: [],
+      errors: ["No advanced-permissions USM candidates for liquidation periphery"],
+      calls: [],
+    };
+  }
+
+  for (const [i, usm] of candidateUsms.entries()) {
+    try {
+      console.log(
+        `${logTag} USM[${i}] ${usm.address.slice(0, 10)} → underlying ${usm.underlyingAsset.slice(0, 10)}: callback venue pass...`,
+      );
+
+      const callbackRoute = await executeVenuePass({
+        encoder: new LiquidationEncoder(executorAddress, client),
+        liquidityVenues,
+        toConvert: {
+          ...toConvert,
+          dst: usm.underlyingAsset,
+        },
+      });
+
+      if (!callbackRoute.success) {
+        const msg = `USM ${usm.address}: ${callbackRoute.errors.join(" | ") || "no callback route to underlying asset"}`;
+        console.log(`${logTag} USM[${i}] callback venue pass failed: ${msg}`);
+        errors.push(msg);
+        continue;
+      }
+
+      const callbackEncoder = new LiquidationEncoder(executorAddress, client);
+      callbackEncoder.appendEncodedCalls(callbackRoute.calls);
+      callbackEncoder.erc20Approve(
+        usm.underlyingAsset,
+        liquidationPeripheryAddress,
+        maxUint256,
+      );
+
+      if (
+        surplusRecipient &&
+        !isAddressEqual(toConvert.src, usm.underlyingAsset)
+      ) {
+        callbackEncoder.erc20Skim(toConvert.src, surplusRecipient);
+      }
+
+      console.log(
+        `${logTag} USM[${i}] callback route OK via [${callbackRoute.path.join(" → ")}]`,
+      );
+
+      return {
+        success: true,
+        toConvert: {
+          src: toConvert.dst,
+          dst: toConvert.dst,
+          srcAmount: 0n,
+        },
+        path: [...callbackRoute.path, "LiquidationPeriphery"],
+        errors: callbackRoute.errors,
+        calls: callbackEncoder.flush(),
+        usm,
+      };
+    } catch (error) {
+      const msg = `USM ${usm.address}: ${error instanceof Error ? error.message : String(error)}`;
+      console.log(`${logTag} USM[${i}] error: ${msg}`);
+      errors.push(msg);
+    }
+  }
+
+  return {
+    success: false,
+    toConvert,
+    path: [],
+    errors,
+    calls: [],
+  };
+}
+
 export async function planBestConversionRoute({
   executorAddress,
   usmSellAdapterAddress,
@@ -222,21 +338,21 @@ export async function planBestConversionRoute({
   liquidityVenues,
   toConvert,
   activeUsms,
-  usmMode = "never",
+  stableRouteMode = "swap_only",
   surplusRecipient,
 }: PlanBestConversionRouteParams): Promise<ConversionRouteResult> {
   const logTag = `[planRoute ${toConvert.src.slice(0, 8)}→${toConvert.dst.slice(0, 8)}]`;
   const canTryUsm =
-    usmMode !== "never" &&
+    stableRouteMode === "public_usm_then_swap" &&
     activeUsms?.length &&
     !isAddressEqual(toConvert.src, toConvert.dst);
   const candidateUsms = canTryUsm
     ? new UsmVenue(activeUsms).getCandidateUsms(toConvert.dst)
     : [];
 
-  if (usmMode === "always" && candidateUsms.length > 0) {
+  if (candidateUsms.length > 0) {
     console.log(
-      `${logTag} USM mode=always, trying ${candidateUsms.length} USM candidate(s) before direct`,
+      `${logTag} public USM mode, trying ${candidateUsms.length} USM candidate(s) before direct`,
     );
     const usmAttempt = await tryUsmFallbackRoutes({
       executorAddress,
@@ -250,12 +366,12 @@ export async function planBestConversionRoute({
     });
 
     if (usmAttempt.result) {
-      console.log(`${logTag} USM mode=always → using USM fallback`);
+      console.log(`${logTag} using public USM route`);
       return usmAttempt.result;
     }
 
     console.log(
-      `${logTag} USM mode=always had no successful fallback, trying direct`,
+      `${logTag} public USM route failed, trying direct`,
     );
   }
 
@@ -269,54 +385,11 @@ export async function planBestConversionRoute({
     `${logTag} direct pass ${directResult.success ? "OK" : "FAIL"} via [${directResult.path.join(" → ")}]`,
   );
 
-  if (usmMode === "never" || candidateUsms.length === 0) {
-    if (usmMode !== "never" && canTryUsm && candidateUsms.length === 0) {
-      console.log(`${logTag} no candidate USMs for dst, keeping direct`);
+  if (candidateUsms.length === 0) {
+    if (canTryUsm) {
+      console.log(`${logTag} no public USM candidates for dst, keeping direct`);
     }
     return directResult;
-  }
-
-  const directOutput = getOutputAmount(directResult);
-  console.log(
-    `${logTag} direct output=${directOutput?.toString() ?? "N/A"}, trying ${candidateUsms.length} USM candidate(s)`,
-  );
-  const usmAttempt = await tryUsmFallbackRoutes({
-    executorAddress,
-    usmSellAdapterAddress,
-    client,
-    liquidityVenues,
-    toConvert,
-    candidateUsms,
-    surplusRecipient,
-    logTag,
-  });
-
-  if (usmAttempt.result) {
-    if (!directResult.success) {
-      console.log(`${logTag} direct failed → using USM fallback`);
-      return usmAttempt.result;
-    }
-
-    const fallbackOutput = getOutputAmount(usmAttempt.result);
-    if (
-      directOutput !== undefined &&
-      fallbackOutput !== undefined &&
-      fallbackOutput > directOutput
-    ) {
-      console.log(
-        `${logTag} USM wins: ${fallbackOutput} > direct ${directOutput}`,
-      );
-      return usmAttempt.result;
-    }
-
-    console.log(
-      `${logTag} keeping direct route (usm=${fallbackOutput?.toString() ?? "N/A"}, direct=${directOutput?.toString() ?? "N/A"})`,
-    );
-    return directResult;
-  }
-
-  if (!directResult.success && usmAttempt.errors.length > 0) {
-    directResult.errors.push(...usmAttempt.errors);
   }
 
   console.log(`${logTag} keeping direct route`);

@@ -2,6 +2,7 @@ import { createConfig, factory } from "ponder";
 
 import { parseAbiItem } from "viem";
 import { AdaptiveCurveIrmAbi } from "./abis/AdaptiveCurveIrmAbi";
+import { AdvancedPermissionsUSM } from "./abis/AdvancedPermissionsUsmAbi";
 import { AltoBorrowMarketAbi } from "./abis/AltoBorrowMarketAbi";
 import { AltoMintMarketAbi } from "./abis/AltoMintMarketAbi";
 import { DlbDcfPriorityLiquidationEngineAbi } from "./abis/DlbDcfPriorityLiquidationEngineAbi";
@@ -44,6 +45,17 @@ export default createConfig({
         // Address of the factory contract.
         address: ENV.USM_REGISTRY_ADDRESS,
         // Event from the factory contract ABI which contains the child address.
+        event: parseAbiItem("event UsmAdded(address indexed usm)"),
+        parameter: "usm",
+      }),
+      startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
+    },
+    AdvancedPermissionsUsm: {
+      chain: ENV.CHAIN_ID_STRING,
+      abi: AdvancedPermissionsUSM,
+      address: factory({
+        address: ENV.USM_REGISTRY_ADDRESS,
         event: parseAbiItem("event UsmAdded(address indexed usm)"),
         parameter: "usm",
       }),
