@@ -36,7 +36,9 @@ export interface Options {
   pricers?: PricerName[];
   treasuryAddress?: Address;
   liquidationBufferBps?: number;
+  minSeizableCollateralUsd?: number;
   blockInterval?: number;
+  averageBlockTimeSeconds?: number;
   watchBlocksRetryDelayMs?: number;
   slippagePercentage?: number;
   // NOT IMPLEMENTED YET

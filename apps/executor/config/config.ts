@@ -27,7 +27,9 @@ export const chainConfigs: Record<number, Config> = {
     wNative: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // weth
     options: {
       liquidationBufferBps: 50,
+      minSeizableCollateralUsd: 10,
       blockInterval: 2,
+      averageBlockTimeSeconds: 12,
       slippagePercentage: DEFAULT_SLIPPAGE_PERCENTAGE,
       isPriorityLiquidator: false,
       stableRouteMode: "periphery_usm_then_swap",
