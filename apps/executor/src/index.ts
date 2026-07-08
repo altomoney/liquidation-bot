@@ -59,16 +59,26 @@ export const launchBot = async (config: ChainConfig) => {
 
   const bot = new LiquidationBot(inputs);
 
-  const blockInterval = config.blockInterval ?? 1;
+  const blockInterval = Math.max(config.blockInterval ?? 1, 1);
+  const averageBlockTimeSeconds = config.averageBlockTimeSeconds ?? 12;
+  const waitSeconds = blockInterval * averageBlockTimeSeconds;
+  const blockLabel = blockInterval === 1 ? "block" : "blocks";
   let count = 0;
 
   const startWatching = () => {
     watchBlocks(client, {
       onBlock: () => {
         if (count % blockInterval === 0) {
-          bot.run().catch((e) => {
-            console.error(`${logTag} uncaught error in bot.run():`, e);
-          });
+          bot
+            .run()
+            .catch((e) => {
+              console.error(`${logTag} uncaught error in bot.run():`, e);
+            })
+            .finally(() => {
+              console.log(
+                `${logTag}Waiting ~${waitSeconds}s (${blockInterval} ${blockLabel}) until next run`,
+              );
+            });
         }
         count++;
       },

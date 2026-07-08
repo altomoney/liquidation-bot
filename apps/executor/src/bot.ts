@@ -45,6 +45,7 @@ import {
   calculatePositionLtv,
   DEFAULT_LIQUIDATION_BUFFER_BPS,
   formatOraclePrice,
+  ORACLE_PRICE_PRECISION,
   WAD,
   wMulDown,
 } from "./utils/maths.js";
@@ -171,6 +172,34 @@ export class LiquidationBot {
         console.log(
           `${this.logTag}Skipping ${position.user} on ${market.address} (cached as unprofitable)`,
         );
+        return;
+      }
+    }
+
+    const minSeizableCollateralUsd =
+      chainConfigs[this.chainId]?.options.minSeizableCollateralUsd;
+    if (
+      !badDebtPosition &&
+      minSeizableCollateralUsd !== undefined &&
+      minSeizableCollateralUsd > 0
+    ) {
+      const seizableCollateralUsd =
+        this.seizableCollateralValueUsdBaseUnits(position, market);
+      const minSeizableCollateralUsdBaseUnits = parseUnits(
+        minSeizableCollateralUsd.toString(),
+        18,
+      );
+
+      if (seizableCollateralUsd < minSeizableCollateralUsdBaseUnits) {
+        console.log(
+          `${this.logTag}Skipping ${position.user} on ${market.address} (dust: ${this.formatUsdValue(
+            seizableCollateralUsd,
+          )} < ${this.formatUsdValue(minSeizableCollateralUsdBaseUnits)})`,
+        );
+        this.unprofitableCache.set(cacheKey, {
+          collateral: position.collateral,
+          timestamp: Date.now() / 1000,
+        });
         return;
       }
     }
@@ -686,6 +715,23 @@ export class LiquidationBot {
       seizableCollateral,
       WAD - parseUnits(liquidationBufferBps.toString(), 14),
     );
+  }
+
+  private seizableCollateralValueUsdBaseUnits(
+    position: LiquidatablePosition,
+    market: IMarket,
+  ) {
+    return (
+      (position.seizableCollateral * market.price) / ORACLE_PRICE_PRECISION
+    );
+  }
+
+  private formatUsdValue(valueBaseUnits: bigint) {
+    const value = Number(formatUnits(valueBaseUnits, 18));
+    return `$${value.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   }
 
   private checkCooldown(marketId: Hex, account: Address) {
