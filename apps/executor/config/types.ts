@@ -17,7 +17,10 @@ export type PricerName =
   | "uniswapV3"
   | "stablecoin";
 
-export type UsmMode = "always" | "never" | "if_better";
+export type StableRouteMode =
+  | "periphery_usm_then_swap"
+  | "public_usm_then_swap"
+  | "swap_only";
 
 export interface Config {
   chain: Chain;
@@ -27,8 +30,9 @@ export interface Config {
 
 export interface Options {
   liquidityVenues: LiquidityVenueName[];
-  useUsm?: UsmMode;
+  stableRouteMode?: StableRouteMode;
   usmSellAdapterAddress: Address;
+  liquidationPeripheryAddress: Address;
   pricers?: PricerName[];
   treasuryAddress?: Address;
   liquidationBufferBps?: number;

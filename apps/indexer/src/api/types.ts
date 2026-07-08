@@ -53,6 +53,7 @@ type StaticUsmDb = {
   underlyingExposureCap: bigint;
   currentExposure: bigint;
   type: "permissioned" | "permissionless";
+  implementation: "standard" | "advanced_permissions";
   dusdConfig: `0x${string}`;
   isActive: boolean;
   swapsFrozen: boolean;

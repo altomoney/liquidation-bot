@@ -23,7 +23,19 @@ export class UsmVenue {
     return this.activeUsms.filter(
       (usm) =>
         isAddressEqual(usm.stableToken, stableToken) &&
+        usm.implementation === "standard" &&
         usm.type === "permissionless" &&
+        usm.isActive &&
+        !usm.swapsFrozen &&
+        usm.dusdConfig.minterStatus,
+    );
+  }
+
+  getPeripheryCandidateUsms(stableToken: Address) {
+    return this.activeUsms.filter(
+      (usm) =>
+        isAddressEqual(usm.stableToken, stableToken) &&
+        usm.implementation === "advanced_permissions" &&
         usm.isActive &&
         !usm.swapsFrozen &&
         usm.dusdConfig.minterStatus,

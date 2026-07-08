@@ -17,8 +17,9 @@ export const chainConfigs: Record<number, Config> = {
       liquidationBufferBps: 50,
       blockInterval: 2,
       isPriorityLiquidator: false,
-      useUsm: "never",
+      stableRouteMode: "swap_only",
       usmSellAdapterAddress: "0x0000000000000000000000000000000000000000",
+      liquidationPeripheryAddress: "0x0000000000000000000000000000000000000000",
     },
   },
   [mainnet.id]: {
@@ -29,8 +30,9 @@ export const chainConfigs: Record<number, Config> = {
       blockInterval: 2,
       slippagePercentage: DEFAULT_SLIPPAGE_PERCENTAGE,
       isPriorityLiquidator: false,
-      useUsm: "always",
+      stableRouteMode: "periphery_usm_then_swap",
       usmSellAdapterAddress: "0xaAC86f77Eb51Fa1D565b743c43deCE2CEF90AF24",
+      liquidationPeripheryAddress: "0xa9DDC8833A7eEcbcFd48F6cBa17c521099683615",
       liquidityVenues: [
         "pendlePT",
         "midas",

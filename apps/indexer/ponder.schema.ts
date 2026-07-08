@@ -169,6 +169,11 @@ export const usmType = onchainEnum("usmType", [
   "permissionless",
 ]);
 
+export const usmImplementation = onchainEnum("usmImplementation", [
+  "standard",
+  "advanced_permissions",
+]);
+
 export const usm = onchainTable(
   "usm",
   (t) => ({
@@ -181,6 +186,7 @@ export const usm = onchainTable(
     currentExposure: t.bigint().notNull().default(0n),
 
     type: usmType().notNull(),
+    implementation: usmImplementation().notNull().default("standard"),
 
     dusdConfig: t.hex().notNull(),
     isActive: t.boolean().notNull().default(true),

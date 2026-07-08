@@ -29,4 +29,4 @@ export {
   DEFAULT_SLIPPAGE_PERCENTAGE,
 } from "./config";
 export { chainConfigs, type ChainConfig };
-export type { UsmMode } from "./types";
+export type { StableRouteMode } from "./types";
