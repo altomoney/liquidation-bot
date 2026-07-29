@@ -25,7 +25,7 @@ import {
   getBlockNumber,
   getGasPrice,
   readContract,
-  simulateCalls,
+  simulateBlocks,
   waitForTransactionReceipt,
   writeContract,
 } from "viem/actions";
@@ -373,18 +373,42 @@ export class LiquidationBot {
       args: [Address];
     }[];
 
-    const [{ results }, gasPrice] = await Promise.all([
-      simulateCalls(this.client, {
-        account: this.client.account.address,
-        calls: [
-          ...balanceOfCalls,
-          { to: encoder.address, ...functionData },
-          ...balanceOfCalls,
+    const simulationAccount = this.client.account.address;
+    const [simulatedBlocks, gasPrice] = await Promise.all([
+      // simulateCalls appends an empty sentinel transaction that Anvil rejects
+      // as an EIP-1559 contract creation without `to`. simulateBlocks preserves
+      // the same sequential execution without adding that invalid call.
+      simulateBlocks(this.client, {
+        blocks: [
+          {
+            calls: [
+              ...balanceOfCalls.map((call) => ({
+                ...call,
+                from: simulationAccount,
+              })),
+              {
+                to: encoder.address,
+                ...functionData,
+                from: simulationAccount,
+              },
+              ...balanceOfCalls.map((call) => ({
+                ...call,
+                from: simulationAccount,
+              })),
+            ],
+          },
         ],
       }),
       getGasPrice(this.client),
     ]);
 
+    const simulationBlock = simulatedBlocks[0];
+    if (!simulationBlock) {
+      console.log(`${this.logTag}Simulation failed: no block result`);
+      return "simulation_failed";
+    }
+
+    const results = simulationBlock.calls;
     const executionResult = results[profitAssets.length];
 
     if (executionResult?.status !== "success") {
