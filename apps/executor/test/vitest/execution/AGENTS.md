@@ -1,6 +1,6 @@
 # Adding a Liquidation Test for a New Market
 
-This guide describes how to create a pinned fork liquidation test for a new Alto lending market. Each test pins an Odos (or 1inch) quote at a specific block, forks mainnet at that block, sets up a borrower position, slashes the oracle to make it liquidatable, and runs the bot to verify execution.
+This guide describes how to create a pinned fork liquidation test for a new Alto lending market. Each test pins a 1inch quote at a specific block, forks mainnet at that block, sets up a borrower position, slashes the oracle to make it liquidatable, and runs the bot to verify execution.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ ROUTE_TEST_LOAN_TOKEN=0x63d74d22E689C715a04F2C13962b1f77F443d35b \
 pnpm vitest run test/vitest/configuredPairRoutes.test.ts --reporter=verbose
 ```
 
-The output shows which venues the planner picks (e.g., `Odos -> UsmVenue`). Note the venues used.
+The output shows which venues the planner picks (e.g., `1inch -> UsmVenue`). Note the venues used.
 
 ## Step 3: Determine collateral amount and decimals
 
@@ -45,76 +45,65 @@ Read the collateral token's `decimals()` (selector `0x313ce567`). Choose a colla
 | sUSDe     | 18       | `10_000n * 10n ** 18n` (10k)      |
 | syrupUSDC | 6        | `10_000n * 10n ** 6n`  (10k)      |
 
-## Step 4: Fetch and pin the Odos fixture
+## Step 4: Fetch and pin the 1inch fixture
 
-The swap amount must include the **liquidation buffer** (50 bps). The market's liquidation engine deducts a `protocolSeizedCollateralFee` from the seized collateral before transferring it to the executor. The buffer ensures the Odos swap amount is less than what the executor actually receives. Multiply the collateral amount by 0.995:
+The swap amount must include the **liquidation buffer** (50 bps). The market's liquidation engine deducts a `protocolSeizedCollateralFee` from the seized collateral before transferring it to the executor. The buffer ensures the 1inch swap amount is less than what the executor actually receives. Multiply the collateral amount by 0.995:
 
 ```
 bufferedAmount = collateralAmount * 995 / 1000
 ```
 
-Query the Odos quote API with the buffered amount, swapping collateral -> USDC:
+Query the 1inch swap API with the buffered amount, swapping collateral -> USDC. Use the deployed test executor as `from` and its owner as `origin`:
 
 ```bash
-curl -s -X POST "https://api.odos.xyz/sor/quote/v3" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "chainId": 1,
-    "inputTokens": [{"tokenAddress": "<COLLATERAL_ADDRESS>", "amount": "<BUFFERED_AMOUNT>"}],
-    "outputTokens": [{"tokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "proportion": 1}],
-    "userAddr": "0x5bCC3154698bBC205ABF09351A52DD2d1A39F608",
-    "slippageLimitPercent": 0.01,
-    "compact": true
-  }'
+curl -sS --get "https://api.1inch.dev/swap/v6.1/1/swap" \
+  -H "Authorization: Bearer $ONE_INCH_SWAP_API_KEY" \
+  --data-urlencode "src=<COLLATERAL_ADDRESS>" \
+  --data-urlencode "dst=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" \
+  --data-urlencode "amount=<BUFFERED_AMOUNT>" \
+  --data-urlencode "from=<EXECUTOR_ADDRESS>" \
+  --data-urlencode "origin=<EXECUTOR_OWNER_ADDRESS>" \
+  --data-urlencode "slippage=1" \
+  --data-urlencode "includeTokensInfo=false" \
+  --data-urlencode "includeProtocols=false" \
+  --data-urlencode "includeGas=false" \
+  --data-urlencode "allowPartialFill=false" \
+  --data-urlencode "disableEstimate=true" \
+  --data-urlencode "usePermit2=false" \
+  --data-urlencode "excludedProtocols=EKUBO,EKUBO_V3,ONE_INCH_LIMIT_ORDER,ONE_INCH_LIMIT_ORDER_V2,ONE_INCH_LIMIT_ORDER_V3,ONE_INCH_LIMIT_ORDER_V4,PMM11,PMM15,ZEROX_LIMIT_ORDER"
 ```
 
-Record `outAmounts`, `pathId`, and `blockNumber` from the response.
-
-Then assemble:
+Record `dstAmount` and `tx` from the response, then immediately record the mainnet block number:
 
 ```bash
-curl -s -X POST "https://api.odos.xyz/sor/assemble" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "userAddr": "0x5bCC3154698bBC205ABF09351A52DD2d1A39F608",
-    "pathId": "<PATH_ID>",
-    "receiver": "0x5bCC3154698bBC205ABF09351A52DD2d1A39F608",
-    "simulate": false
-  }'
+cast block-number --rpc-url "$RPC_URL_1"
 ```
 
-The executor address `0x5bCC3154698bBC205ABF09351A52DD2d1A39F608` is the deterministic CREATE address for Anvil's first account deploying its first contract.
+The fixture calldata must send swap output back to the executor. If the test setup's executor address changes, fetch a new quote rather than reusing calldata built for the old address.
 
 ## Step 5: Create the fixture file
 
-Create `apps/executor/test/fixtures/odos<Token>Usdc.ts`:
+Create `apps/executor/test/fixtures/oneInch<Token>Usdc.ts`:
 
 ```typescript
-export const <TOKEN>_ODOS_FORK_BLOCK_NUMBER = <BLOCK_NUMBER>n;
+export const <TOKEN>_ONE_INCH_FORK_BLOCK_NUMBER = <BLOCK_NUMBER>n;
 
-export const odos<Token>UsdcFixture = {
-  quote: {
-    outAmounts: ["<OUT_AMOUNT>"],
-    pathId: "<PATH_ID>",
-    blockNumber: <BLOCK_NUMBER>,
-  },
-  assembled: {
-    blockNumber: <BLOCK_NUMBER>,
-    transaction: {
-      gas: <GAS>,
-      gasPrice: <GAS_PRICE>,
-      value: "0",
+export const oneInch<Token>UsdcFixture = {
+  srcAmount: "<BUFFERED_AMOUNT>",
+  dstAmount: "<DST_AMOUNT>",
+  swap: {
+    dstAmount: "<DST_AMOUNT>",
+    tx: {
+      from: "<EXECUTOR_ADDRESS>",
       to: "<ROUTER_ADDRESS>",
-      from: "0x5bCC3154698bBC205ABF09351A52DD2d1A39F608",
       data: "<CALLDATA>",
-      nonce: 0,
-      chainId: 1,
+      value: "0",
     },
   },
 } as const;
 ```
 
-Naming convention: uppercase `TOKEN` for the block constant (e.g. `WBTC_ODOS_FORK_BLOCK_NUMBER`), camelCase `token` for the fixture object (e.g. `odosWbtcUsdcFixture`).
+Naming convention: uppercase `TOKEN` for the block constant (e.g. `WBTC_ONE_INCH_FORK_BLOCK_NUMBER`), camelCase `token` for the fixture object (e.g. `oneInchWbtcUsdcFixture`).
 
 See existing fixtures in `apps/executor/test/fixtures/` for reference.
 
@@ -135,14 +124,14 @@ Use the existing tests as a template. The structure is always the same — only 
 
 **Read these existing tests for the exact template:**
 
-- `wbtcLiquidation.test.ts` — borrow market, strict assertions
-- `susdeLiquidation.test.ts` — mint market, relaxed assertions (sUSDe has dust from ERC4626 vault mechanics)
-- `syrupusdcLiquidation.test.ts` — borrow market, strict assertions
-- `rethLiquidation.test.ts` — mint market, relaxed assertions
-- `wstethLiquidation.test.ts` — mint market, relaxed assertions
-- `tbtcLiquidation.test.ts` — mint market, relaxed assertions
-- `cbbtcLiquidation.test.ts` — borrow market, strict assertions
-- `paxgLiquidation.test.ts` — borrow market, strict assertions
+- `wbtcOneInchLiquidation.test.ts` — borrow market, strict assertions
+- `susdeOneInchLiquidation.test.ts` — mint market, relaxed assertions (sUSDe has dust from ERC4626 vault mechanics)
+- `syrupusdcOneInchLiquidation.test.ts` — borrow market, strict assertions
+- `rethOneInchLiquidation.test.ts` — mint market, relaxed assertions
+- `wstethOneInchLiquidation.test.ts` — mint market, relaxed assertions
+- `tbtcOneInchLiquidation.test.ts` — mint market, relaxed assertions
+- `cbbtcOneInchLiquidation.test.ts` — borrow market, strict assertions
+- `paxgOneInchLiquidation.test.ts` — borrow market, strict assertions
 
 ### Assertion rules
 
@@ -164,21 +153,17 @@ expect(finalPosition.borrowShares).toBeLessThan(
 
 ### Nock setup
 
-The `beforeEach` block mocks Odos (or 1inch) API calls with the pinned fixture:
+The `beforeEach` block mocks the 1inch API call with the pinned fixture:
 
 ```typescript
 beforeEach(() => {
   nock.cleanAll();
-  nock("https://api.odos.xyz")
-    .post("/sor/quote/v3")
-    .reply(200, fixture.quote);
-  nock("https://api.odos.xyz")
-    .post("/sor/assemble")
-    .reply(200, fixture.assembled);
+  nock("https://api.1inch.dev")
+    .get("/swap/v6.1/1/swap")
+    .query(true)
+    .reply(200, fixture.swap);
 });
 ```
-
-If the route uses **1inch** instead of Odos, adjust the nock URLs accordingly.
 
 ## Step 7: Run and verify
 

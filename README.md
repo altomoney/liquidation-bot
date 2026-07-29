@@ -66,11 +66,10 @@ cp apps/executor/.env.example apps/executor/.env.local
 | `SKIP_CHECK_FOR_PROFIT`     | No       | Set to `"true"` to liquidate regardless of profitability            |
 | `DEBUG_LIQUIDATION`         | No       | Set to `"1"` to log `debug_traceCall` output for failed simulations |
 | `ONE_INCH_SWAP_API_KEY`     | No\*     | API key for the 1inch liquidity venue                               |
-| `ODOS_API_KEY`              | No\*     | API key for Odos (public endpoint works without it)                 |
 
 All per-chain variables use the suffix `_<chainId>` (e.g. `_1` for mainnet).
 
-> **\*** Setting at least one of `ONE_INCH_SWAP_API_KEY` or `ODOS_API_KEY` is highly recommended. These are the primary smart-order-router venues that find optimal swap paths across DEX liquidity. Without them the bot falls back to direct on-chain venues (Uniswap, ERC4626 unwrap, etc.), which often have worse pricing or no path at all for less liquid collateral tokens.
+> **\*** Setting `ONE_INCH_SWAP_API_KEY` is highly recommended. 1inch is the primary smart-order-router venue for finding optimal swap paths across DEX liquidity. Without it the bot falls back to direct on-chain venues (Uniswap, ERC4626 unwrap, etc.), which often have worse pricing or no path at all for less liquid collateral tokens.
 
 ### 3. Deploy the Executor Contract
 
@@ -113,7 +112,7 @@ The bot will poll the indexer every `blockInterval` blocks (default: 2), detect 
 
 The executor converts seized collateral to the loan token (DUSD) via a two-step route:
 
-1. **Collateral → USM underlying** using a liquidity venue (Odos, 1inch, Uniswap, etc.)
+1. **Collateral → USM underlying** using a liquidity venue (1inch, Uniswap, etc.)
 2. **USM underlying → DUSD** using a USM (Unified Stablecoin Module)
 
 The bot automatically selects the best available USM based on the on-chain registry. Each USM accepts a specific underlying stablecoin (e.g. USDC) and mints DUSD from it.
@@ -131,7 +130,7 @@ The executor's behavior is configured in `apps/executor/config/config.ts`:
 | `liquidationBufferBps`  | Buffer (in basis points) to reduce swap amount, accounting for liquidation fees. Default: 50 |
 | `blockInterval`         | Check for liquidatable positions every N blocks. Default: 2                                  |
 | `watchBlocksRetryDelayMs` | Delay before restarting the block watcher after an RPC/watch error. Default: 5000          |
-| `slippagePercentage`    | Slippage tolerance passed to routed venues like Odos and 1inch. Default: `1`                  |
+| `slippagePercentage`    | Slippage tolerance passed to routed venues like 1inch. Default: `1`                           |
 | `treasuryAddress`       | Address to receive profits. Defaults to the bot's EOA                                        |
 
 ### USM Sell Adapter (`usmSellAdapterAddress`)
@@ -148,7 +147,7 @@ The USM (Unified Stablecoin Module) mints DUSD from an underlying stablecoin. Th
 
 ### Available Liquidity Venues
 
-`pendlePT`, `midas`, `1inch`, `odos`, `erc20Wrapper`, `erc4626`, `uniswapV3`, `uniswapV4`
+`pendlePT`, `midas`, `1inch`, `erc20Wrapper`, `erc4626`, `uniswapV3`, `uniswapV4`
 
 ### Available Pricers
 
@@ -166,7 +165,7 @@ If tokens remain on the executor contract (for example, leftover dust or assets 
 - `SKIP_CHECK_FOR_PROFIT=false` does **not** guarantee every liquidation is profit-screened. By default, the bot is configured to realize bad debt positions even when the normal profitability check would reject them.
 - Active USMs are refreshed from the indexer during routing rather than cached only at startup, so exposure caps, frozen status, and mint ceilings stay up to date.
 - If USD pricing is temporarily unavailable, the bot intentionally fails open and may still execute a liquidation rather than skipping it. This favors liveness over strict cost-efficiency during pricing outages.
-- If routed swaps fail in production, the first things to verify are RPC quality, API-key-backed liquidity venues (`ONE_INCH_SWAP_API_KEY`, `ODOS_API_KEY`), and whether your configured `slippagePercentage` is too tight for the collateral you're targeting.
+- If routed swaps fail in production, the first things to verify are RPC quality, the 1inch API key (`ONE_INCH_SWAP_API_KEY`), and whether your configured `slippagePercentage` is too tight for the collateral you're targeting.
 - The separate `skim` flow is mainly a cleanup/recovery tool for leftover executor balances, not the normal profit path.
 
 ## Production Deployment

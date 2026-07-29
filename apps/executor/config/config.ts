@@ -39,7 +39,6 @@ export const chainConfigs: Record<number, Config> = {
         "pendlePT",
         "midas",
         "1inch",
-        "odos",
         "erc20Wrapper",
         "erc4626",
         "uniswapV3",

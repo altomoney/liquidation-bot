@@ -10,7 +10,6 @@ if (!process.env.PONDER_SERVICE_URL) {
 }
 
 const oneInchSwapApiKey = process.env.ONE_INCH_SWAP_API_KEY;
-const odosApiKey = process.env.ODOS_API_KEY;
 const flashbotsPrivateKey = process.env.FLASHBOTS_PRIVATE_KEY;
 const skipCheckForProfit = process.env.SKIP_CHECK_FOR_PROFIT === "true";
 
@@ -44,7 +43,6 @@ for (const chainId of Object.keys(chainConfigs)) {
 export const ENV = {
   PONDER_SERVICE_URL: ponderServiceUrl,
   ONE_INCH_SWAP_API_KEY: oneInchSwapApiKey,
-  ODOS_API_KEY: odosApiKey,
   FLASHBOTS_PRIVATE_KEY: flashbotsPrivateKey,
   USE_FLASHBOTS:
     flashbotsPrivateKey !== undefined && flashbotsPrivateKey !== "",
