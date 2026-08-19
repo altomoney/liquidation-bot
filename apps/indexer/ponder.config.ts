@@ -12,9 +12,6 @@ import { FixedRateIrmAbi } from "./abis/FixedRateIrmAbi";
 import { MarketRegistryAbi } from "./abis/MarketRegistryAbi";
 import { UsmRegistryAbi } from "./abis/UsmRegistryAbi";
 import { ENV } from "./src/utils/env";
-import { getMarketAddresses } from "./src/utils/getMarketAddresses";
-
-const { allMarkets } = await getMarketAddresses();
 
 export default createConfig({
   chains: {
@@ -99,9 +96,7 @@ export default createConfig({
       abi: FixedRateIrmAbi,
       chain: ENV.CHAIN_ID_STRING,
       address: factory({
-        // Address of the factory contract.
-        address: allMarkets,
-        // Event from the factory contract ABI which contains the child address.
+        // Discover IRMs from SetIrm events emitted by any market.
         event: parseAbiItem(
           "event SetIrm(address indexed oldAddr, address indexed newAddr)",
         ),
@@ -114,9 +109,7 @@ export default createConfig({
       abi: AdaptiveCurveIrmAbi,
       chain: ENV.CHAIN_ID_STRING,
       address: factory({
-        // Address of the factory contract.
-        address: allMarkets,
-        // Event from the factory contract ABI which contains the child address.
+        // Discover IRMs from SetIrm events emitted by any market.
         event: parseAbiItem(
           "event SetIrm(address indexed oldAddr, address indexed newAddr)",
         ),
@@ -129,9 +122,7 @@ export default createConfig({
       abi: DlbDcfPriorityLiquidationEngineAbi,
       chain: ENV.CHAIN_ID_STRING,
       address: factory({
-        // Address of the factory contract.
-        address: allMarkets,
-        // Event from the factory contract ABI which contains the child address.
+        // Discover engines from SetLiquidationEngine events emitted by any market.
         event: parseAbiItem(
           "event SetLiquidationEngine(address indexed oldLiquidationEngine, address indexed newLiquidationEngine)",
         ),
