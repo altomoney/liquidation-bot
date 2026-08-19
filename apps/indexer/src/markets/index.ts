@@ -8,6 +8,7 @@ import {
   governanceLiquidation,
   interestFeeAccrued,
   liquidation,
+  pauseMarket,
   removeCollateral,
   removeSupply,
   repay,
@@ -40,6 +41,14 @@ ponder.on("MarketRegistry:MintMarketRemoved", async ({ context, event }) => {
 });
 
 // --- Market events ---
+
+ponder.on("AltoBorrowMarket:Paused", async ({ event, context }) => {
+  await pauseMarket({ context, event });
+});
+
+ponder.on("AltoMintMarket:Paused", async ({ event, context }) => {
+  await pauseMarket({ context, event });
+});
 
 ponder.on("AltoBorrowMarket:AccrueInterest", async ({ event, context }) => {
   await accrueInterest({ context, event });
