@@ -121,7 +121,7 @@ export const deactivateMarket: Parameters<
   await context.db
     .update(market, {
       chainId: context.chain.id,
-      address: event.log.address,
+      address: event.args.market,
     })
     .set((row) => ({ isActive: false }));
 };
