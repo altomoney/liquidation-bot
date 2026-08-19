@@ -14,7 +14,7 @@
     "snapshot:verify": "bun ./scripts/snapshot-api.ts verify"
   },
   "dependencies": {
-    "ponder": "0.16.3",
+    "ponder": "0.17.6",
     "hono": "4.12.6",
     "viem": "2.47.1",
     "@altomoney/sdk": "0.1.5"
@@ -22,10 +22,10 @@
   "devDependencies": {
     "@types/node": "24.10.1",
     "eslint": "8.57.0",
-    "eslint-config-ponder": "0.15.2",
+    "eslint-config-ponder": "0.17.6",
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=18.14"
+    "node": ">=22"
   }
 }
