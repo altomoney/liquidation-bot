@@ -25,11 +25,11 @@ import {
 // --- Registry events ---
 
 ponder.on("MarketRegistry:BorrowMarketAdded", async ({ context, event }) => {
-  await setupMarket("AltoBorrowMarket")({ context, event });
+  await setupMarket({ context, event });
 });
 
 ponder.on("MarketRegistry:MintMarketAdded", async ({ context, event }) => {
-  await setupMarket("AltoMintMarket")({ context, event });
+  await setupMarket({ context, event });
 });
 
 ponder.on("MarketRegistry:BorrowMarketRemoved", async ({ context, event }) => {

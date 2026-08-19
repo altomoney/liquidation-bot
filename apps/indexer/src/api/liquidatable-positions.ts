@@ -102,6 +102,13 @@ export async function getLiquidatablePositions({
   }[] = [];
 
   for (const dbMarket of marketRows) {
+    if (dbMarket.liquidationEngine === null) {
+      warnings.push(
+        `${dbMarket.address} has no configured liquidation engine and was skipped.`,
+      );
+      continue;
+    }
+
     const dbPositions = positions.filter(
       (position) => position.marketId === dbMarket.address,
     );
