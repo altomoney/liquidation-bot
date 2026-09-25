@@ -1,4 +1,5 @@
 import { ponder } from "ponder:registry";
+import type { Address } from "viem";
 import {
   accrueInterest,
   addCollateral,
@@ -20,169 +21,64 @@ import {
   setOracle,
   setMaxLtv,
   setupMarket,
+  shouldIndexMintMarketEvent,
 } from "./markets";
 
-// --- Registry events ---
+type MintMarketEventArgs = {
+  event: { log: { address: Address } };
+  context: Parameters<typeof shouldIndexMintMarketEvent>[1];
+};
 
-ponder.on("MarketRegistry:BorrowMarketAdded", async ({ context, event }) => {
-  await setupMarket({ context, event });
-});
+const forIndexedMintMarket = <Args extends MintMarketEventArgs>(
+  handler: (args: Args) => Promise<void> | void,
+) => async (args: Args) => {
+  if (await shouldIndexMintMarketEvent(args.event.log.address, args.context)) {
+    await handler(args);
+  }
+};
 
-ponder.on("MarketRegistry:MintMarketAdded", async ({ context, event }) => {
-  await setupMarket({ context, event });
-});
-
-ponder.on("MarketRegistry:BorrowMarketRemoved", async ({ context, event }) => {
-  await deactivateMarket({ context, event });
-});
-
+// Registry events
+ponder.on("MarketRegistry:BorrowMarketAdded", setupMarket);
+ponder.on("MarketRegistry:MintMarketAdded", setupMarket);
+ponder.on("MarketRegistry:BorrowMarketRemoved", deactivateMarket);
 ponder.on("MarketRegistry:MintMarketRemoved", async ({ context, event }) => {
-  await deactivateMarket({ context, event });
-});
-
-// --- Market events ---
-
-ponder.on("AltoBorrowMarket:Paused", async ({ event, context }) => {
-  await pauseMarket({ context, event });
-});
-
-ponder.on("AltoMintMarket:Paused", async ({ event, context }) => {
-  await pauseMarket({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:AccrueInterest", async ({ event, context }) => {
-  await accrueInterest({ context, event });
-});
-
-ponder.on("AltoMintMarket:AccrueInterest", async ({ event, context }) => {
-  await accrueInterest({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:AddSupply", async ({ event, context }) => {
-  await addSupply({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:RemoveSupply", async ({ event, context }) => {
-  await removeSupply({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:AddCollateral", async ({ event, context }) => {
-  await addCollateral({ context, event });
-});
-
-ponder.on("AltoMintMarket:AddCollateral", async ({ event, context }) => {
-  await addCollateral({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:RemoveCollateral", async ({ event, context }) => {
-  await removeCollateral({ context, event });
-});
-
-ponder.on("AltoMintMarket:RemoveCollateral", async ({ event, context }) => {
-  await removeCollateral({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:Borrow", async ({ event, context }) => {
-  await borrow({ context, event });
-});
-
-ponder.on("AltoMintMarket:Borrow", async ({ event, context }) => {
-  await borrow({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:Repay", async ({ event, context }) => {
-  await repay({ context, event });
-});
-
-ponder.on("AltoMintMarket:Repay", async ({ event, context }) => {
-  await repay({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:Liquidation", async ({ event, context }) => {
-  await liquidation({ context, event });
-});
-
-ponder.on("AltoMintMarket:Liquidation", async ({ event, context }) => {
-  await liquidation({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:SetIrm", async ({ event, context }) => {
-  await setIrm({ context, event });
-});
-
-ponder.on("AltoMintMarket:SetIrm", async ({ event, context }) => {
-  await setIrm({ context, event });
-});
-
-ponder.on(
-  "AltoBorrowMarket:SetLiquidationEngine",
-  async ({ event, context }) => {
-    await setLiquidationEngine({ context, event });
+  if (await shouldIndexMintMarketEvent(event.args.market, context)) {
+    await deactivateMarket({ context, event });
   }
-);
-
-ponder.on("AltoMintMarket:SetLiquidationEngine", async ({ event, context }) => {
-  await setLiquidationEngine({ context, event });
 });
 
-ponder.on("AltoBorrowMarket:SetOracle", async ({ event, context }) => {
-  await setOracle({ context, event });
-});
+// Borrow markets
+ponder.on("AltoBorrowMarket:Paused", pauseMarket);
+ponder.on("AltoBorrowMarket:AccrueInterest", accrueInterest);
+ponder.on("AltoBorrowMarket:AddSupply", addSupply);
+ponder.on("AltoBorrowMarket:RemoveSupply", removeSupply);
+ponder.on("AltoBorrowMarket:AddCollateral", addCollateral);
+ponder.on("AltoBorrowMarket:RemoveCollateral", removeCollateral);
+ponder.on("AltoBorrowMarket:Borrow", borrow);
+ponder.on("AltoBorrowMarket:Repay", repay);
+ponder.on("AltoBorrowMarket:Liquidation", liquidation);
+ponder.on("AltoBorrowMarket:SetIrm", setIrm);
+ponder.on("AltoBorrowMarket:SetLiquidationEngine", setLiquidationEngine);
+ponder.on("AltoBorrowMarket:SetOracle", setOracle);
+ponder.on("AltoBorrowMarket:SetMaxLtv", setMaxLtv);
+ponder.on("AltoBorrowMarket:GovernanceLiquidation", governanceLiquidation);
+ponder.on("AltoBorrowMarket:InterestFeeAccrued", interestFeeAccrued);
+ponder.on("AltoBorrowMarket:SetInterestFee", setInterestFee);
+ponder.on("AltoBorrowMarket:SetFeeRecipient", setFeeRecipient);
 
-ponder.on("AltoMintMarket:SetOracle", async ({ event, context }) => {
-  await setOracle({ context, event });
-});
-
-ponder.on("AltoBorrowMarket:SetMaxLtv", async ({ event, context }) => {
-  await setMaxLtv({ context, event });
-});
-
-ponder.on("AltoMintMarket:SetMaxLtv", async ({ event, context }) => {
-  await setMaxLtv({ context, event });
-});
-
-ponder.on("AltoMintMarket:SetDebtCeiling", async ({ event, context }) => {
-  await setDebtCeiling({ context, event });
-});
-
-ponder.on(
-  "AltoBorrowMarket:GovernanceLiquidation",
-  async ({ event, context }) => {
-    await governanceLiquidation({ context, event });
-  }
-);
-
-ponder.on(
-  "AltoMintMarket:GovernanceLiquidation",
-  async ({ event, context }) => {
-    await governanceLiquidation({ context, event });
-  }
-);
-
-ponder.on(
-  "AltoBorrowMarket:InterestFeeAccrued",
-  async ({ event, context }) => {
-    await interestFeeAccrued({ context, event });
-  }
-);
-
-ponder.on(
-  "AltoBorrowMarket:SetInterestFee",
-  async ({ event, context }) => {
-    await setInterestFee({ context, event });
-  }
-);
-
-ponder.on(
-  "AltoBorrowMarket:SetFeeRecipient",
-  async ({ event, context }) => {
-    await setFeeRecipient({ context, event });
-  }
-);
-
-ponder.on(
-  "AltoMintMarket:SetFeeRecipient",
-  async ({ event, context }) => {
-    await setFeeRecipient({ context, event });
-  }
-);
+// Mint markets also discover unsupported market types through the registry.
+// The wrapper excludes those events before they reach the shared handlers.
+ponder.on("AltoMintMarket:Paused", forIndexedMintMarket(pauseMarket));
+ponder.on("AltoMintMarket:AccrueInterest", forIndexedMintMarket(accrueInterest));
+ponder.on("AltoMintMarket:AddCollateral", forIndexedMintMarket(addCollateral));
+ponder.on("AltoMintMarket:RemoveCollateral", forIndexedMintMarket(removeCollateral));
+ponder.on("AltoMintMarket:Borrow", forIndexedMintMarket(borrow));
+ponder.on("AltoMintMarket:Repay", forIndexedMintMarket(repay));
+ponder.on("AltoMintMarket:Liquidation", forIndexedMintMarket(liquidation));
+ponder.on("AltoMintMarket:SetIrm", forIndexedMintMarket(setIrm));
+ponder.on("AltoMintMarket:SetLiquidationEngine", forIndexedMintMarket(setLiquidationEngine));
+ponder.on("AltoMintMarket:SetOracle", forIndexedMintMarket(setOracle));
+ponder.on("AltoMintMarket:SetMaxLtv", forIndexedMintMarket(setMaxLtv));
+ponder.on("AltoMintMarket:SetDebtCeiling", forIndexedMintMarket(setDebtCeiling));
+ponder.on("AltoMintMarket:GovernanceLiquidation", forIndexedMintMarket(governanceLiquidation));
+ponder.on("AltoMintMarket:SetFeeRecipient", forIndexedMintMarket(setFeeRecipient));
