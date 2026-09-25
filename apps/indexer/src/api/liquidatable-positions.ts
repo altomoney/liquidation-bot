@@ -31,6 +31,7 @@ export async function getLiquidatablePositions({
         eq(row.chainId, chainId),
         eq(row.isActive, true),
         eq(row.paused, false),
+        inArray(row.type, ["borrow", "mint"]),
       ),
     with: {
       // ! Note: following is omitted because it created imprecise results when fetching positions (couple of integer digits)

@@ -30,6 +30,8 @@ type MarketContext = Parameters<
 >[0]["context"];
 
 const pauseType = keccak256(toHex("PAUSE_TYPE"));
+const isSupportedMarketType = (marketType: number): boolean =>
+  marketType === 0 || marketType === 1;
 
 type MarketSnapshot = {
   loanToken: Address;
@@ -49,12 +51,16 @@ type MarketSnapshot = {
 const readMarketSnapshot = async (
   address: Address,
   context: MarketContext
-): Promise<MarketSnapshot> => {
+): Promise<MarketSnapshot | null> => {
   const marketTypeIndex = await context.client.readContract({
     abi: AltoBorrowMarketAbi,
     functionName: "MARKET_TYPE",
     address,
   });
+  // Only borrow and mint markets can be liquidated by this bot.
+  if (!isSupportedMarketType(marketTypeIndex)) {
+    return null;
+  }
   const resolvedMarketType = marketTypeToString(marketTypeIndex);
 
   const [
@@ -151,6 +157,9 @@ export const setupMarket: Parameters<
 >[1] = async ({ context, event }) => {
   const address = event.args.market;
   const snapshot = await readMarketSnapshot(address, context);
+  if (snapshot === null) {
+    return;
+  }
 
   await context.db
     .insert(market)
@@ -196,6 +205,31 @@ export const setupMarket: Parameters<
     address,
     context
   );
+};
+
+// The mint factory also discovers unsupported market types through the same
+// registry event. Check untracked addresses on-chain so missing supported
+// markets still fail loudly instead of silently disappearing from the index.
+export const shouldIndexMintMarketEvent = async (
+  address: Address,
+  context: MarketContext
+): Promise<boolean> => {
+  const indexedMarket = await context.db.find(market, {
+    chainId: context.chain.id,
+    address,
+  });
+  if (indexedMarket) {
+    return indexedMarket.type === "borrow" || indexedMarket.type === "mint";
+  }
+
+  const marketTypeIndex = await context.client.readContract({
+    abi: AltoBorrowMarketAbi,
+    functionName: "MARKET_TYPE",
+    address,
+  });
+  if (!isSupportedMarketType(marketTypeIndex)) return false;
+
+  throw new Error(`Missing indexed market ${address} (type ${marketTypeIndex})`);
 };
 
 export const deactivateMarket: Parameters<

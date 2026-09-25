@@ -123,6 +123,25 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
+    name: "authorizedLiquidationPeriphery",
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "borrow",
     inputs: [
       {
@@ -274,6 +293,11 @@ export const AltoBorrowMarketAbi = [
         type: "address",
         internalType: "address",
       },
+      {
+        name: "skipAccrueInterest",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     outputs: [
       {
@@ -320,6 +344,11 @@ export const AltoBorrowMarketAbi = [
               },
               {
                 name: "owner",
+                type: "address",
+                internalType: "address",
+              },
+              {
+                name: "emergencyAdmin",
                 type: "address",
                 internalType: "address",
               },
@@ -856,6 +885,24 @@ export const AltoBorrowMarketAbi = [
   },
   {
     type: "function",
+    name: "setAuthorizedLiquidationPeriphery",
+    inputs: [
+      {
+        name: "periphery",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "value",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "setBorrowOpeningFee",
     inputs: [
       {
@@ -888,6 +935,11 @@ export const AltoBorrowMarketAbi = [
         name: "_newInterestFee",
         type: "uint256",
         internalType: "uint256",
+      },
+      {
+        name: "_skipAccrueInterest",
+        type: "bool",
+        internalType: "bool",
       },
     ],
     outputs: [],
@@ -1600,6 +1652,25 @@ export const AltoBorrowMarketAbi = [
     inputs: [
       {
         name: "callback",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "isAuthorized",
+        type: "bool",
+        indexed: false,
+        internalType: "bool",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SetAuthorizedLiquidationPeriphery",
+    inputs: [
+      {
+        name: "periphery",
         type: "address",
         indexed: true,
         internalType: "address",

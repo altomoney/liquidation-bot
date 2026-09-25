@@ -123,6 +123,38 @@ export const AltoMintMarketAbi = [
   },
   {
     type: "function",
+    name: "authorizedLiquidationPeriphery",
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "badDebtAssets",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint128",
+        internalType: "uint128",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "borrow",
     inputs: [
       {
@@ -306,6 +338,11 @@ export const AltoMintMarketAbi = [
         type: "address",
         internalType: "address",
       },
+      {
+        name: "skipAccrueInterest",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     outputs: [
       {
@@ -352,6 +389,11 @@ export const AltoMintMarketAbi = [
               },
               {
                 name: "owner",
+                type: "address",
+                internalType: "address",
+              },
+              {
+                name: "emergencyAdmin",
                 type: "address",
                 internalType: "address",
               },
@@ -870,6 +912,24 @@ export const AltoMintMarketAbi = [
   },
   {
     type: "function",
+    name: "setAuthorizedLiquidationPeriphery",
+    inputs: [
+      {
+        name: "periphery",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "value",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "setBorrowOpeningFee",
     inputs: [
       {
@@ -1147,6 +1207,19 @@ export const AltoMintMarketAbi = [
       },
       {
         name: "shares",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "BadDebtAccrued",
+    inputs: [
+      {
+        name: "badDebtAmount",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1576,6 +1649,25 @@ export const AltoMintMarketAbi = [
     inputs: [
       {
         name: "callback",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "isAuthorized",
+        type: "bool",
+        indexed: false,
+        internalType: "bool",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "SetAuthorizedLiquidationPeriphery",
+    inputs: [
+      {
+        name: "periphery",
         type: "address",
         indexed: true,
         internalType: "address",
