@@ -1,5 +1,5 @@
 import { chainConfigs } from "@/config/config";
-import { Address, Hex } from "viem";
+import { Address, Hex, isAddress } from "viem";
 
 const ponderServiceUrl =
   process.env.PONDER_SERVICE_URL ?? "http://localhost:42069";
@@ -15,7 +15,12 @@ const skipCheckForProfit = process.env.SKIP_CHECK_FOR_PROFIT === "true";
 
 const CHAIN_CONFIGS: Record<
   string,
-  { rpcUrl: string; privateKey: Hex; executorAddress: Address }
+  {
+    rpcUrl: string;
+    privateKey: Hex;
+    executorAddress: Address;
+    treasuryAddress?: Address;
+  }
 > = {};
 
 for (const chainId of Object.keys(chainConfigs)) {
@@ -32,11 +37,17 @@ for (const chainId of Object.keys(chainConfigs)) {
   if (!executorAddress) {
     throw new Error(`EXECUTOR_ADDRESS_${chainId} is not set`);
   }
+  const treasuryAddress =
+    process.env[`TREASURY_ADDRESS_${chainId}`] || undefined;
+  if (treasuryAddress !== undefined && !isAddress(treasuryAddress)) {
+    throw new Error(`TREASURY_ADDRESS_${chainId} is not a valid address`);
+  }
 
   CHAIN_CONFIGS[chainId] = {
     rpcUrl,
     privateKey: privateKey as Hex,
     executorAddress: executorAddress as Address,
+    treasuryAddress,
   };
 }
 

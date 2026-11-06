@@ -61,6 +61,7 @@ cp apps/executor/.env.example apps/executor/.env.local
 | `RPC_URL_1`                 | Yes      | RPC URL for the executor (can be the same as the indexer's)         |
 | `EXECUTOR_ADDRESS_1`        | Yes      | Your deployed executor contract address                             |
 | `LIQUIDATION_PRIVATE_KEY_1` | Yes      | Private key of the EOA that owns the executor                       |
+| `TREASURY_ADDRESS_1`        | No       | Address to receive liquidation profits. Defaults to the bot's EOA   |
 | `PONDER_SERVICE_URL`        | No       | Indexer API URL. Defaults to `http://localhost:42069`               |
 | `FLASHBOTS_PRIVATE_KEY`     | No       | When set, transactions are sent via Flashbots                       |
 | `SKIP_CHECK_FOR_PROFIT`     | No       | Set to `"true"` to liquidate regardless of profitability            |
@@ -131,7 +132,6 @@ The executor's behavior is configured in `apps/executor/config/config.ts`:
 | `blockInterval`         | Check for liquidatable positions every N blocks. Default: 2                                  |
 | `watchBlocksRetryDelayMs` | Delay before restarting the block watcher after an RPC/watch error. Default: 5000          |
 | `slippagePercentage`    | Slippage tolerance passed to routed venues like 1inch. Default: `1`                           |
-| `treasuryAddress`       | Address to receive profits. Defaults to the bot's EOA                                        |
 
 ### USM Sell Adapter (`usmSellAdapterAddress`)
 
@@ -155,9 +155,9 @@ The USM (Unified Stablecoin Module) mints DUSD from an underlying stablecoin. Th
 
 ## Claiming Profits
 
-Liquidation profits are normally swept automatically to `treasuryAddress` during each liquidation via the executor's `erc20Skim` call.
+Liquidation profits are normally swept automatically to `TREASURY_ADDRESS_<chainId>`, or to the bot's EOA when it is unset, during each liquidation via the executor's `erc20Skim` call.
 
-If tokens remain on the executor contract (for example, leftover dust or assets from an interrupted/manual flow), you can still withdraw them with the separate `skim` script or by calling the executor directly.
+If tokens remain on the executor contract (for example, leftover dust or assets from an interrupted/manual flow), you can still withdraw them with the separate `skim` script or by calling the executor directly. Unless you pass `--recipient`, `skim` uses the same recipient.
 
 ## Operator Notes
 

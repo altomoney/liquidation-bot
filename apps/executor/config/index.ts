@@ -11,13 +11,15 @@ export function chainConfig(chainId: number): ChainConfig {
   if (!ENV.CHAIN_CONFIGS[chainId]) {
     throw new Error(`No chain config found for chainId ${chainId}`);
   }
-  const { rpcUrl, privateKey, executorAddress } = ENV.CHAIN_CONFIGS[chainId];
+  const { rpcUrl, privateKey, executorAddress, treasuryAddress } =
+    ENV.CHAIN_CONFIGS[chainId];
   return {
     // Hoist all parameters from `options` up 1 level, i.e. flatten the config as much as possible.
     ...(({ options, ...c }) => ({ ...options, ...c }))(config),
     chainId,
     rpcUrl,
     executorAddress,
+    treasuryAddress,
     liquidationPrivateKey: privateKey,
   };
 }

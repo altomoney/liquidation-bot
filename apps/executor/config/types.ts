@@ -33,7 +33,6 @@ export interface Options {
   usmSellAdapterAddress: Address;
   liquidationPeripheryAddress: Address;
   pricers?: PricerName[];
-  treasuryAddress?: Address;
   liquidationBufferBps?: number;
   minSeizableCollateralUsd?: number;
   blockInterval?: number;
@@ -49,5 +48,6 @@ export type ChainConfig = Omit<Config, "options"> &
     chainId: number;
     rpcUrl: string;
     executorAddress: Address;
+    treasuryAddress?: Address;
     liquidationPrivateKey: Hex;
   };
