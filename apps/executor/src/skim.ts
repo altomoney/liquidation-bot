@@ -40,7 +40,8 @@ async function run() {
     throw new Error(`No chain config found for chainId ${chainId}`);
   }
 
-  const { rpcUrl, privateKey, executorAddress } = ENV.CHAIN_CONFIGS[chainId];
+  const { rpcUrl, privateKey, executorAddress, treasuryAddress } =
+    ENV.CHAIN_CONFIGS[chainId];
 
   const chainConfig = chainConfigs[chainId];
   if (!chainConfig) {
@@ -53,7 +54,7 @@ async function run() {
     account: privateKeyToAccount(privateKey as Hex),
   });
 
-  const recipient = argv.recipient ?? client.account.address;
+  const recipient = argv.recipient ?? treasuryAddress ?? client.account.address;
 
   const encoder = new ExecutorEncoder(executorAddress as Address, client);
 
