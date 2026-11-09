@@ -4,13 +4,17 @@ import {
   FixedRateIrm,
   Market,
   MarketType,
+  PegResponsiveExponentialIrm,
   type LiquidationConfiguration,
 } from "@altomoney/sdk";
 
 import type { IrmDb, LiquidationEngineDb, MarketDb, PositionDb } from "./dbTypes";
 import { replaceBigIntStringsToBigInts } from "./index";
 
-type SupportedSdkIrm = AdaptiveCurveIrm | FixedRateIrm;
+type SupportedSdkIrm =
+  | AdaptiveCurveIrm
+  | FixedRateIrm
+  | PegResponsiveExponentialIrm;
 
 function toSdkMarketType(type: MarketDb["type"]) {
   return type === "borrow" ? MarketType.Borrow : MarketType.Mint;
@@ -24,6 +28,19 @@ export function toSdkIrm(dbIrm: IrmDb | null | undefined): SupportedSdkIrm | und
   if (dbIrm.type === "fixed") {
     return new FixedRateIrm(
       replaceBigIntStringsToBigInts(dbIrm.state as FixedRateIrm["state"]),
+    );
+  }
+
+  if (dbIrm.type === "pegResponsive") {
+    // No peg observation is needed: interest up to a timestamp accrues at the
+    // stored rate, and the observation only sets the rate for the next interval.
+    return new PegResponsiveExponentialIrm(
+      replaceBigIntStringsToBigInts(
+        dbIrm.config as PegResponsiveExponentialIrm["config"],
+      ),
+      replaceBigIntStringsToBigInts(
+        dbIrm.state as PegResponsiveExponentialIrm["state"],
+      ),
     );
   }
 
@@ -57,10 +74,7 @@ export function toSdkMarket(params: {
     totalSupplyShares: dbMarket.totalSupplyShares,
     totalBorrowAssets: dbMarket.totalBorrowAssets,
     totalBorrowShares: dbMarket.totalBorrowShares,
-    lastUpdate:
-      irm instanceof FixedRateIrm || irm instanceof AdaptiveCurveIrm
-        ? irm.state.lastUpdate
-        : 0n,
+    lastUpdate: irm?.state.lastUpdate ?? 0n,
     collateralPrice: price,
     interestRateModel: irm,
     interestFee: dbMarket.interestFee,

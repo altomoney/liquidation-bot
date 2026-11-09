@@ -13,7 +13,11 @@ export const marketType = onchainEnum("marketType", [
   "dao_mint",
 ]);
 
-export const irmType = onchainEnum("irmType", ["fixed", "adaptive"]);
+export const irmType = onchainEnum("irmType", [
+  "fixed",
+  "adaptive",
+  "pegResponsive",
+]);
 
 export const market = onchainTable(
   "market",

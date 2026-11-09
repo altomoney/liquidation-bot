@@ -1,3 +1,4 @@
+import { PegResponsiveExponentialIrm } from "@altomoney/sdk";
 import { ponder } from "ponder:registry";
 import { irm } from "ponder:schema";
 import { replaceBigInts } from "../utils";
@@ -65,3 +66,51 @@ ponder.on("FixedRateIrm:IRStateUpdated", async ({ context, event }) => {
       }),
     }));
 });
+
+ponder.on(
+  "PegResponsiveExponentialIrm:IRStateUpdated",
+  async ({ context, event }) => {
+    // event.log.address is the IRM contract address
+    const irmExists = await context.db.find(irm, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    });
+    if (!irmExists) {
+      return;
+    }
+    await context.db
+      .update(irm, {
+        chainId: context.chain.id,
+        address: event.log.address,
+      })
+      .set((row) => ({
+        state: replaceBigInts(
+          PegResponsiveExponentialIrm.normalizeState(event.args.newIRState),
+        ),
+      }));
+  },
+);
+
+ponder.on(
+  "PegResponsiveExponentialIrm:SetIrmConfig",
+  async ({ context, event }) => {
+    // event.log.address is the IRM contract address
+    const irmExists = await context.db.find(irm, {
+      chainId: context.chain.id,
+      address: event.log.address,
+    });
+    if (!irmExists) {
+      return;
+    }
+    await context.db
+      .update(irm, {
+        chainId: context.chain.id,
+        address: event.log.address,
+      })
+      .set((row) => ({
+        config: replaceBigInts(
+          PegResponsiveExponentialIrm.normalizeConfig(event.args.newConfig),
+        ),
+      }));
+  },
+);
