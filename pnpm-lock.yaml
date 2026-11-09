@@ -66,8 +66,8 @@ importers:
   apps/indexer:
     dependencies:
       '@altomoney/sdk':
-        specifier: 0.1.5
-        version: 0.1.5
+        specifier: 0.2.0
+        version: 0.2.0
       hono:
         specifier: 4.12.6
         version: 4.12.6
@@ -96,8 +96,8 @@ packages:
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
-  '@altomoney/sdk@0.1.5':
-    resolution: {integrity: sha512-4h3COKQQ8FfNgljJ4qXbru4fJyI1ZuIMhj1aTQYej43IBP95LRpDqBD79Wwe54tNOUofPx4hqK3mtlIyiKSK/w==}
+  '@altomoney/sdk@0.2.0':
+    resolution: {integrity: sha512-YttbX1YNVUqSmPewpTWJINDAG9LGaf9xVmyHQWJgbRT7C7gZyi4aBPMZHqlnmulkJJfI9OpSTgLy+uS/naG+XA==}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -3544,7 +3544,7 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
 
-  '@altomoney/sdk@0.1.5': {}
+  '@altomoney/sdk@0.2.0': {}
 
   '@babel/code-frame@7.27.1':
     dependencies:

@@ -32,7 +32,7 @@ type StaticIrmDb = {
   chainId: number;
   marketAddress: Hex;
   address: Hex;
-  type: "fixed" | "adaptive";
+  type: "fixed" | "adaptive" | "pegResponsive";
   config: unknown;
   state: unknown;
 };

@@ -9,6 +9,7 @@ import { DlbDcfPriorityLiquidationEngineAbi } from "./abis/DlbDcfPriorityLiquida
 import { DusdAbi } from "./abis/DusdAbi";
 import { DusdUsmAbi } from "./abis/DusdUsmAbi";
 import { FixedRateIrmAbi } from "./abis/FixedRateIrmAbi";
+import { PegResponsiveExponentialIrmAbi } from "./abis/PegResponsiveExponentialIrmAbi";
 import { MarketRegistryAbi } from "./abis/MarketRegistryAbi";
 import { UsmRegistryAbi } from "./abis/UsmRegistryAbi";
 import { ENV } from "./src/utils/env";
@@ -107,6 +108,19 @@ export default createConfig({
     },
     AdaptiveCurveIrm: {
       abi: AdaptiveCurveIrmAbi,
+      chain: ENV.CHAIN_ID_STRING,
+      address: factory({
+        // Discover IRMs from SetIrm events emitted by any market.
+        event: parseAbiItem(
+          "event SetIrm(address indexed oldAddr, address indexed newAddr)",
+        ),
+        parameter: "newAddr",
+      }),
+      startBlock: ENV.START_BLOCK,
+      endBlock: ENV.DEV_END_BLOCK,
+    },
+    PegResponsiveExponentialIrm: {
+      abi: PegResponsiveExponentialIrmAbi,
       chain: ENV.CHAIN_ID_STRING,
       address: factory({
         // Discover IRMs from SetIrm events emitted by any market.

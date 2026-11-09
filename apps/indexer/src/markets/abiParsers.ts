@@ -1,6 +1,7 @@
 import {
   AdaptiveCurveIrm,
   FixedRateIrm,
+  PegResponsiveExponentialIrm,
   type LiquidationConfiguration,
 } from "@altomoney/sdk";
 
@@ -47,6 +48,40 @@ export function parseFixedRateIrmState(rawState: unknown) {
   });
 }
 
+export function parsePegResponsiveIrmConfig(rawConfig: unknown) {
+  if (typeof rawConfig !== "object" || rawConfig === null) {
+    throw new Error("Invalid IRM config");
+  }
+  if (!Array.isArray(rawConfig) || rawConfig.length !== 8) {
+    throw new Error("Invalid IRM config");
+  }
+  return PegResponsiveExponentialIrm.normalizeConfig({
+    recoveryPrice: rawConfig[0],
+    stressPrice: rawConfig[1],
+    baseRate: rawConfig[2],
+    stressRate: rawConfig[3],
+    maxRate: rawConfig[4],
+    doublingDistance: rawConfig[5],
+    recoveryDelay: rawConfig[6],
+    maxOracleAge: rawConfig[7],
+  });
+}
+
+export function parsePegResponsiveIrmState(rawState: unknown) {
+  if (typeof rawState !== "object" || rawState === null) {
+    throw new Error("Invalid IRM state");
+  }
+  if (!Array.isArray(rawState) || rawState.length !== 4) {
+    throw new Error("Invalid IRM state");
+  }
+  return PegResponsiveExponentialIrm.normalizeState({
+    borrowRate: rawState[0],
+    lastUpdate: rawState[1],
+    recoveryStartedAt: rawState[2],
+    stressMode: rawState[3],
+  });
+}
+
 export function parseLiquidationConfiguration(
   rawConfig: unknown,
 ): LiquidationConfiguration {
@@ -89,6 +124,8 @@ export function irmTypeToString(irmTypeId: number) {
     return "fixed";
   } else if (irmTypeId === 1) {
     return "adaptive";
+  } else if (irmTypeId === 2) {
+    return "pegResponsive";
   } else {
     throw new Error(`Invalid IRM type: ${irmTypeId}`);
   }

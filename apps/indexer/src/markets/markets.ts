@@ -11,6 +11,7 @@ import { AdaptiveCurveIrmAbi } from "../../abis/AdaptiveCurveIrmAbi";
 import { AltoBorrowMarketAbi } from "../../abis/AltoBorrowMarketAbi";
 import { DlbDcfPriorityLiquidationEngineAbi } from "../../abis/DlbDcfPriorityLiquidationEngineAbi";
 import { FixedRateIrmAbi } from "../../abis/FixedRateIrmAbi";
+import { PegResponsiveExponentialIrmAbi } from "../../abis/PegResponsiveExponentialIrmAbi";
 import { IAltoLiquidationEngineAbi } from "../../abis/IAltoLiquidationEngineAbi";
 import { IrmAbi } from "../../abis/IrmAbi";
 import { replaceBigInts } from "../utils";
@@ -19,6 +20,8 @@ import {
   parseAdaptiveCurveIrmConfig,
   parseAdaptiveCurveIrmState,
   parseFixedRateIrmState,
+  parsePegResponsiveIrmConfig,
+  parsePegResponsiveIrmState,
   parseLiquidationConfiguration,
   irmTypeToString,
   liquidationEngineTypeToString,
@@ -540,6 +543,38 @@ const updateNewIrm = async (
         marketAddress: marketAddress,
         state: replaceBigInts(parseAdaptiveCurveIrmState(irmState)),
         config: replaceBigInts(parseAdaptiveCurveIrmConfig(irmConfig)),
+      }));
+    return;
+  }
+
+  if (irmType === "pegResponsive") {
+    const [irmConfig, irmState] = await Promise.all([
+      context.client.readContract({
+        abi: PegResponsiveExponentialIrmAbi,
+        functionName: "irmConfig",
+        address: irmAddress,
+      }),
+      context.client.readContract({
+        abi: PegResponsiveExponentialIrmAbi,
+        functionName: "irState",
+        address: irmAddress,
+      }),
+    ]);
+
+    await context.db
+      .insert(irm)
+      .values({
+        chainId: context.chain.id,
+        marketAddress: marketAddress,
+        address: irmAddress,
+        type: irmType,
+        config: replaceBigInts(parsePegResponsiveIrmConfig(irmConfig)),
+        state: replaceBigInts(parsePegResponsiveIrmState(irmState)),
+      })
+      .onConflictDoUpdate((row) => ({
+        marketAddress: marketAddress,
+        state: replaceBigInts(parsePegResponsiveIrmState(irmState)),
+        config: replaceBigInts(parsePegResponsiveIrmConfig(irmConfig)),
       }));
     return;
   }
